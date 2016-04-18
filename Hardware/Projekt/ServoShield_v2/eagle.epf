@@ -36,6 +36,7 @@ UsedLibrary="C:/EAGLE-7.5.0/lbr/ase.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/atmel.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/austriamicrosystems.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/avago.lbr"
+UsedLibrary="C:/EAGLE-7.5.0/lbr/avr-7.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/axis.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/battery.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/belton-engineering.lbr"
@@ -311,6 +312,7 @@ UsedLibrary="C:/EAGLE-7.5.0/lbr/switch.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/telcom.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/telecontrolli.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/telefunken.lbr"
+UsedLibrary="C:/EAGLE-7.5.0/lbr/test.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/testpad.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/texas-sn55-sn75.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/texas.lbr"
@@ -346,10 +348,11 @@ UsedLibrary="C:/EAGLE-7.5.0/lbr/xilinx-xc9.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/xilinx-xcv.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/zetex.lbr"
 UsedLibrary="C:/EAGLE-7.5.0/lbr/zilog.lbr"
+UsedLibrary="C:/EAGLE-7.5.0/lbr/pinhead_NEW.lbr"
 
 [Win_1]
 Type="Control Panel"
-Loc="0 0 1919 1016"
+Loc="0 0 1919 1007"
 State=2
 Number=0
 
