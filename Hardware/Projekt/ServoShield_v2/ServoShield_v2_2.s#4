@@ -16279,9 +16279,6 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
 <part name="Q1" library="crystal" deviceset="CRYSTAL" device="CTS406" value="8MHz"/>
-<part name="P+8" library="supply1" deviceset="VCC" device=""/>
-<part name="C4" library="resistor" deviceset="C-EU" device="C0805" value="100nF"/>
-<part name="GND21" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -16350,18 +16347,18 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <instance part="R12" gate="G$1" x="187.96" y="142.24" rot="R90"/>
 <instance part="R13" gate="G$1" x="190.5" y="142.24" rot="R90"/>
 <instance part="R14" gate="G$1" x="193.04" y="142.24" rot="R90"/>
-<instance part="R15" gate="G$1" x="205.74" y="142.24" rot="R90"/>
+<instance part="R15" gate="G$1" x="200.66" y="142.24" rot="R90"/>
 <instance part="R16" gate="G$1" x="203.2" y="142.24" rot="R90"/>
-<instance part="R17" gate="G$1" x="200.66" y="142.24" rot="R90"/>
-<instance part="R18" gate="G$1" x="218.44" y="142.24" rot="R90"/>
+<instance part="R17" gate="G$1" x="205.74" y="142.24" rot="R90"/>
+<instance part="R18" gate="G$1" x="213.36" y="142.24" rot="R90"/>
 <instance part="R19" gate="G$1" x="215.9" y="142.24" rot="R90"/>
-<instance part="R20" gate="G$1" x="213.36" y="142.24" rot="R90"/>
-<instance part="R21" gate="G$1" x="231.14" y="142.24" rot="R90"/>
+<instance part="R20" gate="G$1" x="218.44" y="142.24" rot="R90"/>
+<instance part="R21" gate="G$1" x="226.06" y="142.24" rot="R90"/>
 <instance part="R22" gate="G$1" x="228.6" y="142.24" rot="R90"/>
-<instance part="R23" gate="G$1" x="226.06" y="142.24" rot="R90"/>
-<instance part="R24" gate="G$1" x="243.84" y="142.24" rot="R90"/>
+<instance part="R23" gate="G$1" x="231.14" y="142.24" rot="R90"/>
+<instance part="R24" gate="G$1" x="238.76" y="142.24" rot="R90"/>
 <instance part="R25" gate="G$1" x="241.3" y="142.24" rot="R90"/>
-<instance part="R26" gate="G$1" x="238.76" y="142.24" rot="R90"/>
+<instance part="R26" gate="G$1" x="243.84" y="142.24" rot="R90"/>
 <instance part="LED2" gate="G$1" x="25.4" y="22.86" rot="R90"/>
 <instance part="R27" gate="G$1" x="15.24" y="22.86"/>
 <instance part="GND10" gate="1" x="38.1" y="22.86" rot="R90"/>
@@ -16380,9 +16377,6 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <instance part="GND20" gate="1" x="251.46" y="55.88" rot="R90"/>
 <instance part="GND16" gate="1" x="251.46" y="91.44" rot="R90"/>
 <instance part="Q1" gate="G$1" x="22.86" y="149.86" rot="R90"/>
-<instance part="P+8" gate="VCC" x="43.18" y="142.24" rot="R90"/>
-<instance part="C4" gate="G$1" x="40.64" y="144.78" rot="R270"/>
-<instance part="GND21" gate="1" x="30.48" y="144.78" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -16629,11 +16623,6 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <wire x1="241.3" y1="91.44" x2="248.92" y2="91.44" width="0.1524" layer="91"/>
 <pinref part="GND16" gate="1" pin="GND"/>
 </segment>
-<segment>
-<pinref part="GND21" gate="1" pin="GND"/>
-<pinref part="C4" gate="G$1" pin="2"/>
-<wire x1="33.02" y1="144.78" x2="35.56" y2="144.78" width="0.1524" layer="91"/>
-</segment>
 </net>
 <net name="N$2" class="0">
 <segment>
@@ -16750,11 +16739,6 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <pinref part="USB_RASP" gate="A" pin="4"/>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
 <wire x1="43.18" y1="104.14" x2="35.56" y2="104.14" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="IC1" gate="G$1" pin="AVCC"/>
-<pinref part="P+8" gate="VCC" pin="VCC"/>
-<wire x1="48.26" y1="142.24" x2="45.72" y2="142.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="+5V/1" class="0">
@@ -17009,8 +16993,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_13" class="0">
 <segment>
 <pinref part="R15" gate="G$1" pin="1"/>
-<wire x1="205.74" y1="137.16" x2="205.74" y2="132.08" width="0.1524" layer="91"/>
-<label x="205.74" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="200.66" y1="137.16" x2="200.66" y2="132.08" width="0.1524" layer="91"/>
+<label x="200.66" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT6/ADC6)PA6"/>
@@ -17033,8 +17017,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_15" class="0">
 <segment>
 <pinref part="R17" gate="G$1" pin="1"/>
-<wire x1="200.66" y1="137.16" x2="200.66" y2="132.08" width="0.1524" layer="91"/>
-<label x="200.66" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="205.74" y1="137.16" x2="205.74" y2="132.08" width="0.1524" layer="91"/>
+<label x="205.74" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT4/ADC4)PA4"/>
@@ -17045,8 +17029,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_16" class="0">
 <segment>
 <pinref part="R18" gate="G$1" pin="1"/>
-<wire x1="218.44" y1="137.16" x2="218.44" y2="132.08" width="0.1524" layer="91"/>
-<label x="218.44" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="213.36" y1="137.16" x2="213.36" y2="132.08" width="0.1524" layer="91"/>
+<label x="213.36" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT3/ADC3)PA3"/>
@@ -17069,8 +17053,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_18" class="0">
 <segment>
 <pinref part="R20" gate="G$1" pin="1"/>
-<wire x1="213.36" y1="137.16" x2="213.36" y2="132.08" width="0.1524" layer="91"/>
-<label x="213.36" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="218.44" y1="137.16" x2="218.44" y2="132.08" width="0.1524" layer="91"/>
+<label x="218.44" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT1/ADC1)PA1"/>
@@ -17081,8 +17065,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_19" class="0">
 <segment>
 <pinref part="R21" gate="G$1" pin="1"/>
-<wire x1="231.14" y1="137.16" x2="231.14" y2="132.08" width="0.1524" layer="91"/>
-<label x="231.14" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="226.06" y1="137.16" x2="226.06" y2="132.08" width="0.1524" layer="91"/>
+<label x="226.06" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT0/ADC0)PA0"/>
@@ -17105,8 +17089,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_21" class="0">
 <segment>
 <pinref part="R23" gate="G$1" pin="1"/>
-<wire x1="226.06" y1="137.16" x2="226.06" y2="132.08" width="0.1524" layer="91"/>
-<label x="226.06" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="231.14" y1="137.16" x2="231.14" y2="132.08" width="0.1524" layer="91"/>
+<label x="231.14" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT9/CLKO/T1)PB1"/>
@@ -17117,8 +17101,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_22" class="0">
 <segment>
 <pinref part="R24" gate="G$1" pin="1"/>
-<wire x1="243.84" y1="137.16" x2="243.84" y2="132.08" width="0.1524" layer="91"/>
-<label x="243.84" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="238.76" y1="137.16" x2="238.76" y2="132.08" width="0.1524" layer="91"/>
+<label x="238.76" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT10/INT2/AIN0)PB2"/>
@@ -17141,8 +17125,8 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <net name="SERVO_24" class="0">
 <segment>
 <pinref part="R26" gate="G$1" pin="1"/>
-<wire x1="238.76" y1="137.16" x2="238.76" y2="132.08" width="0.1524" layer="91"/>
-<label x="238.76" y="124.46" size="1.778" layer="95" rot="R90"/>
+<wire x1="243.84" y1="137.16" x2="243.84" y2="132.08" width="0.1524" layer="91"/>
+<label x="243.84" y="124.46" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="(PCINT12/OC0B/!SS!)PB4"/>
@@ -17283,11 +17267,32 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <wire x1="193.04" y1="147.32" x2="193.04" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="N$15" class="0">
+<segment>
+<pinref part="R15" gate="G$1" pin="2"/>
+<pinref part="SERVO_S5" gate="A" pin="1"/>
+<wire x1="200.66" y1="147.32" x2="200.66" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
 <net name="N$16" class="0">
 <segment>
 <pinref part="R16" gate="G$1" pin="2"/>
 <pinref part="SERVO_S5" gate="A" pin="2"/>
 <wire x1="203.2" y1="147.32" x2="203.2" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$17" class="0">
+<segment>
+<pinref part="R17" gate="G$1" pin="2"/>
+<pinref part="SERVO_S5" gate="A" pin="3"/>
+<wire x1="205.74" y1="147.32" x2="205.74" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$18" class="0">
+<segment>
+<pinref part="R18" gate="G$1" pin="2"/>
+<pinref part="SERVO_S6" gate="A" pin="1"/>
+<wire x1="213.36" y1="147.32" x2="213.36" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$19" class="0">
@@ -17297,11 +17302,53 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <wire x1="215.9" y1="147.32" x2="215.9" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="N$20" class="0">
+<segment>
+<pinref part="R20" gate="G$1" pin="2"/>
+<pinref part="SERVO_S6" gate="A" pin="3"/>
+<wire x1="218.44" y1="147.32" x2="218.44" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$21" class="0">
+<segment>
+<pinref part="R21" gate="G$1" pin="2"/>
+<pinref part="SERVO_S7" gate="A" pin="1"/>
+<wire x1="226.06" y1="147.32" x2="226.06" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
 <net name="N$22" class="0">
 <segment>
 <pinref part="R22" gate="G$1" pin="2"/>
 <pinref part="SERVO_S7" gate="A" pin="2"/>
 <wire x1="228.6" y1="147.32" x2="228.6" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$23" class="0">
+<segment>
+<pinref part="R23" gate="G$1" pin="2"/>
+<pinref part="SERVO_S7" gate="A" pin="3"/>
+<wire x1="231.14" y1="147.32" x2="231.14" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$24" class="0">
+<segment>
+<pinref part="R24" gate="G$1" pin="2"/>
+<pinref part="SERVO_S8" gate="A" pin="1"/>
+<wire x1="238.76" y1="147.32" x2="238.76" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$25" class="0">
+<segment>
+<pinref part="R25" gate="G$1" pin="2"/>
+<pinref part="SERVO_S8" gate="A" pin="2"/>
+<wire x1="241.3" y1="147.32" x2="241.3" y2="152.4" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$26" class="0">
+<segment>
+<pinref part="R26" gate="G$1" pin="2"/>
+<pinref part="SERVO_S8" gate="A" pin="3"/>
+<wire x1="243.84" y1="147.32" x2="243.84" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$27" class="0">
@@ -17376,76 +17423,6 @@ Source: http://www.atmel.com/dyn/resources/prod_documents/doc2593.pdf</descripti
 <wire x1="43.18" y1="111.76" x2="38.1" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="R6" gate="G$1" pin="2"/>
 <wire x1="38.1" y1="111.76" x2="38.1" y2="114.3" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$24" class="0">
-<segment>
-<pinref part="R26" gate="G$1" pin="2"/>
-<pinref part="SERVO_S8" gate="A" pin="1"/>
-<wire x1="238.76" y1="147.32" x2="238.76" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$25" class="0">
-<segment>
-<pinref part="R25" gate="G$1" pin="2"/>
-<pinref part="SERVO_S8" gate="A" pin="2"/>
-<wire x1="241.3" y1="147.32" x2="241.3" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$26" class="0">
-<segment>
-<pinref part="R24" gate="G$1" pin="2"/>
-<pinref part="SERVO_S8" gate="A" pin="3"/>
-<wire x1="243.84" y1="147.32" x2="243.84" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$15" class="0">
-<segment>
-<pinref part="R17" gate="G$1" pin="2"/>
-<pinref part="SERVO_S5" gate="A" pin="1"/>
-<wire x1="200.66" y1="147.32" x2="200.66" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$17" class="0">
-<segment>
-<pinref part="R15" gate="G$1" pin="2"/>
-<pinref part="SERVO_S5" gate="A" pin="3"/>
-<wire x1="205.74" y1="147.32" x2="205.74" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$18" class="0">
-<segment>
-<pinref part="R20" gate="G$1" pin="2"/>
-<pinref part="SERVO_S6" gate="A" pin="1"/>
-<wire x1="213.36" y1="147.32" x2="213.36" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$20" class="0">
-<segment>
-<pinref part="R18" gate="G$1" pin="2"/>
-<pinref part="SERVO_S6" gate="A" pin="3"/>
-<wire x1="218.44" y1="147.32" x2="218.44" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$21" class="0">
-<segment>
-<pinref part="R23" gate="G$1" pin="2"/>
-<pinref part="SERVO_S7" gate="A" pin="1"/>
-<wire x1="226.06" y1="147.32" x2="226.06" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$23" class="0">
-<segment>
-<pinref part="R21" gate="G$1" pin="2"/>
-<pinref part="SERVO_S7" gate="A" pin="3"/>
-<wire x1="231.14" y1="147.32" x2="231.14" y2="152.4" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$32" class="0">
-<segment>
-<pinref part="C4" gate="G$1" pin="1"/>
-<pinref part="IC1" gate="G$1" pin="AREF"/>
-<wire x1="43.18" y1="144.78" x2="48.26" y2="144.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
