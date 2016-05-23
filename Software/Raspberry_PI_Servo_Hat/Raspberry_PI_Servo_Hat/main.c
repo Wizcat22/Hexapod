@@ -14,7 +14,15 @@
 //DEFINE
 #define SLAVE_ADDRESS 0x42 //TWI Slave address
 #define NUM_SERVOS 24 // 20 is the recommended maximum value (Servos get slower because of longer standby time (>20ms))
-#define SERVO_STD_VAL 94 //STANDARD SERVO POSITION (1,5ms)
+#define SERVO_STD_VAL 187 //STANDARD SERVO POSITION (1,5ms)
+#define SERVO_MIN_VAL 125 //MINUMUM (-45°) SERVO POSITION (1ms)
+#define SERVO_MAX_VAL 250 //MAXIMUM (+45°) SERVO POSITION (2ms)
+#define LED1_ON PORTD|=(1<<PD0) //MACRO: Turn LED1 on
+#define LED2_ON PORTD|=(1<<PD1) //MACRO: Turn LED2 on
+#define LED3_ON PORTD|=(1<<PD2) //MACRO: Turn LED3 on
+#define LED1_OFF PORTD&=~(1<<PD0) //MACRO: Turn LED1 off
+#define LED2_OFF PORTD&=~(1<<PD1) //MACRO: Turn LED2 off
+#define LED3_OFF PORTD&=~(1<<PD2) //MACRO: Turn LED3 off
 //------------------------
 
 //GLOBAL
@@ -26,7 +34,7 @@ unsigned volatile char loop = 0; //loop count
 //init twi/i2c
 void init_twi(void){
 
-	//Set address of i2c slave
+	//Set address of i2c slave and enable general call
 	TWAR |= (SLAVE_ADDRESS<<1) | (1<<TWGCE);
 	TWCR |= (1<<TWEN) | (1<<TWEA);
 	TWCR &= ~((1<<TWSTA) | (1<<TWSTO)) ;
@@ -49,9 +57,9 @@ void init_outputs(void){
 //INIT TIMER
 void init_timer(void){
 
-	//TIMER0 (8bit) , Mode 3 - Fast PWM TOP = 0xFF ,Prescaler = 256 , Time per overflow = 0.004096 sec. = 4.096 ms (16Mhz Clock)
+	//TIMER0 (8bit) , Mode 3 - Fast PWM TOP = 0xFF ,OCRx update at TOP, prescaler = 64 , Time per overflow = 0.002048 sec. = 2.048 ms (at 8Mhz Clock)
 	TCCR0A |= (1<<WGM01) | (1<<WGM00);
-	TCCR0B |= (1<<CS02);
+	TCCR0B |= (1<<CS01) | (1<<CS00);
 
 	//Enable TIMER0 Interrupts (Compare Match A/B and Overflow)
 	TIMSK0 |= (1<<OCIE0A) | (1<<OCIE0B) | (1<<TOIE0);
@@ -139,13 +147,13 @@ ISR(TIMER0_OVF_vect){
 }
 //------------------------
 
-//INIT ALL 
+//INIT ALL
 void init_all(void){
 
-//SET INITIAL SERVO POSITION (1,5ms)
+	//SET INITIAL SERVO POSITION (1,5ms)
 	for (int i=0;i<NUM_SERVOS;i++)
 	{
-			data[i] = SERVO_STD_VAL;		
+		data[i] = SERVO_STD_VAL;
 	}
 
 	init_twi();
@@ -163,7 +171,7 @@ void init_all(void){
 int main(void)
 {
 	init_all();
-	int data_counter = 0;
+	unsigned char data_counter = 0;
 
 
 	//main -> get data (twi)
@@ -173,26 +181,31 @@ int main(void)
 
 		switch(TWSR){
 			case 0x60: //Received own address and write bit, ACK returned
+			LED1_ON;
 			break;
 			case 0x70: //Received general call and write bit, ACK returned
+			LED1_ON;
 			break;
 			case 0x80: //Addressed with own address and data byte received, ACK returned
+			LED2_ON;
 			data[data_counter] = TWDR;
 			data_counter = (data_counter+1)%NUM_SERVOS;
+			LED2_OFF;
 			break;
 			case 0x90: //Addressed with general call and data byte received, ACK returned
+			LED2_ON;
 			data[data_counter] = TWDR;
 			data_counter = (data_counter+1)%NUM_SERVOS;
+			LED2_OFF;
+			break;
+			case 0xA0: //Received STOP condition
+			data_counter = 0;
+			LED1_OFF;
 			break;
 		}
 		
 		//TWCR &= ~(1<<TWINT);
 		TWCR |= (1<<TWINT); //reset von TWINT durch setzen????
-		
-		
-
-
-
 
 	}
 }
