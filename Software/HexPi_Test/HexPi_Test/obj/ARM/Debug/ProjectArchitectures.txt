@@ -1,0 +1,1 @@
+D:\Daten\Documents\Visual Studio 2015\Projects\HexPi_Test\HexPi_Test\HexPi_Test.csproj;arm
