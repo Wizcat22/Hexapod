@@ -172,7 +172,8 @@ int main(void)
 {
 	init_all();
 	unsigned char data_counter = 0;
-
+	unsigned char init_received = 0;
+	unsigned char twi_data = 0;
 
 	//main -> get data (twi)
 	while (1)
@@ -187,19 +188,28 @@ int main(void)
 			LED1_ON;
 			break;
 			case 0x80: //Addressed with own address and data byte received, ACK returned
-			LED2_ON;
-			data[data_counter] = TWDR;
-			data_counter = (data_counter+1)%NUM_SERVOS;
-			LED2_OFF;
-			break;
+			
 			case 0x90: //Addressed with general call and data byte received, ACK returned
 			LED2_ON;
-			data[data_counter] = TWDR;
-			data_counter = (data_counter+1)%NUM_SERVOS;
+			twi_data = TWDR;
+			if (twi_data == 22)
+			{
+				init_received = 0;
+				data_counter = 0;
+			}
+			if(twi_data == 11){
+				init_received = 1;
+				data_counter = 0;
+			}
+			if (init_received && twi_data != 22 && twi_data != 11)
+			{
+				data[data_counter] = twi_data;
+				data_counter = (data_counter+1)%NUM_SERVOS;
+			}
+
 			LED2_OFF;
 			break;
 			case 0xA0: //Received STOP condition
-			data_counter = 0;
 			LED1_OFF;
 			break;
 		}

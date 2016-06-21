@@ -3,31 +3,31 @@ Raspberry_PI_Servo_Hat.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000384  2**0
+  0 .data         00000000  00800100  00800100  00000392  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000310  00000000  00000000  00000074  2**1
+  1 .text         0000031e  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000019  00800100  00800100  00000384  2**0
+  2 .bss          00000019  00800100  00800100  00000392  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000384  2**0
+  3 .comment      00000030  00000000  00000000  00000392  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003b4  2**2
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003c4  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000058  00000000  00000000  000003f0  2**0
+  5 .debug_aranges 00000058  00000000  00000000  00000400  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000001be  00000000  00000000  00000448  2**0
+  6 .debug_info   000001dc  00000000  00000000  00000458  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000000fd  00000000  00000000  00000606  2**0
+  7 .debug_abbrev 000000fd  00000000  00000000  00000634  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000178  00000000  00000000  00000703  2**0
+  8 .debug_line   00000180  00000000  00000000  00000731  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000ec  00000000  00000000  0000087c  2**2
+  9 .debug_frame  000000ec  00000000  00000000  000008b4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000001bf  00000000  00000000  00000968  2**0
+ 10 .debug_str    000001d1  00000000  00000000  000009a0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000181  00000000  00000000  00000b27  2**0
+ 11 .debug_loc    000001df  00000000  00000000  00000b71  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000048  00000000  00000000  00000ca8  2**0
+ 12 .debug_ranges 00000048  00000000  00000000  00000d50  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -96,7 +96,7 @@ Disassembly of section .text:
   a0:	b2 07       	cpc	r27, r18
   a2:	e1 f7       	brne	.-8      	; 0x9c <.do_clear_bss_loop>
   a4:	0e 94 15 01 	call	0x22a	; 0x22a <main>
-  a8:	0c 94 86 01 	jmp	0x30c	; 0x30c <_exit>
+  a8:	0c 94 8d 01 	jmp	0x31a	; 0x31a <_exit>
 
 000000ac <__bad_interrupt>:
   ac:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -259,7 +259,7 @@ ISR(TIMER0_OVF_vect){
  168:	fc 01       	movw	r30, r24
  16a:	e8 5c       	subi	r30, 0xC8	; 200
  16c:	ff 4f       	sbci	r31, 0xFF	; 255
- 16e:	0c 94 6c 01 	jmp	0x2d8	; 0x2d8 <__tablejump2__>
+ 16e:	0c 94 73 01 	jmp	0x2e6	; 0x2e6 <__tablejump2__>
 	{
 		case 0:
 		PORTD |= (1<<PD3); //SERVO 1
@@ -352,7 +352,7 @@ ISR(TIMER0_OVF_vect){
  1be:	01 96       	adiw	r24, 0x01	; 1
  1c0:	6c e0       	ldi	r22, 0x0C	; 12
  1c2:	70 e0       	ldi	r23, 0x00	; 0
- 1c4:	0e 94 58 01 	call	0x2b0	; 0x2b0 <__divmodhi4>
+ 1c4:	0e 94 5f 01 	call	0x2be	; 0x2be <__divmodhi4>
  1c8:	80 93 00 01 	sts	0x0100, r24
 	OCR0A = data[loop];
  1cc:	e0 91 00 01 	lds	r30, 0x0100
@@ -437,197 +437,238 @@ int main(void)
 	init_all();
  22a:	0e 94 02 01 	call	0x204	; 0x204 <init_all>
 	unsigned char data_counter = 0;
- 22e:	80 e0       	ldi	r24, 0x00	; 0
+	unsigned char init_received = 0;
+ 22e:	10 e0       	ldi	r17, 0x00	; 0
 
-
-	//main -> get data (twi)
-	while (1)
-	{
-		while (!(TWCR & (1<<TWINT))){}
- 230:	ec eb       	ldi	r30, 0xBC	; 188
- 232:	f0 e0       	ldi	r31, 0x00	; 0
-
-		switch(TWSR){
- 234:	c9 eb       	ldi	r28, 0xB9	; 185
- 236:	d0 e0       	ldi	r29, 0x00	; 0
-			case 0x70: //Received general call and write bit, ACK returned
-			LED1_ON;
-			break;
-			case 0x80: //Addressed with own address and data byte received, ACK returned
-			LED2_ON;
-			data[data_counter] = TWDR;
- 238:	0b eb       	ldi	r16, 0xBB	; 187
- 23a:	10 e0       	ldi	r17, 0x00	; 0
-			data_counter = (data_counter+1)%NUM_SERVOS;
- 23c:	28 e1       	ldi	r18, 0x18	; 24
- 23e:	30 e0       	ldi	r19, 0x00	; 0
-			data[data_counter] = TWDR;
-			data_counter = (data_counter+1)%NUM_SERVOS;
-			LED2_OFF;
-			break;
-			case 0xA0: //Received STOP condition
-			data_counter = 0;
- 240:	40 e0       	ldi	r20, 0x00	; 0
-
+//MAIN
+int main(void)
+{
+	init_all();
+	unsigned char data_counter = 0;
+ 230:	80 e0       	ldi	r24, 0x00	; 0
+	unsigned char twi_data = 0;
 
 	//main -> get data (twi)
 	while (1)
 	{
 		while (!(TWCR & (1<<TWINT))){}
- 242:	90 81       	ld	r25, Z
- 244:	99 23       	and	r25, r25
- 246:	ec f7       	brge	.-6      	; 0x242 <main+0x18>
+ 232:	ec eb       	ldi	r30, 0xBC	; 188
+ 234:	f0 e0       	ldi	r31, 0x00	; 0
 
 		switch(TWSR){
- 248:	98 81       	ld	r25, Y
- 24a:	90 38       	cpi	r25, 0x80	; 128
- 24c:	79 f0       	breq	.+30     	; 0x26c <main+0x42>
- 24e:	28 f4       	brcc	.+10     	; 0x25a <main+0x30>
- 250:	90 36       	cpi	r25, 0x60	; 96
- 252:	41 f0       	breq	.+16     	; 0x264 <main+0x3a>
- 254:	90 37       	cpi	r25, 0x70	; 112
- 256:	41 f0       	breq	.+16     	; 0x268 <main+0x3e>
- 258:	27 c0       	rjmp	.+78     	; 0x2a8 <main+0x7e>
- 25a:	90 39       	cpi	r25, 0x90	; 144
- 25c:	a9 f0       	breq	.+42     	; 0x288 <main+0x5e>
- 25e:	90 3a       	cpi	r25, 0xA0	; 160
- 260:	09 f1       	breq	.+66     	; 0x2a4 <main+0x7a>
- 262:	22 c0       	rjmp	.+68     	; 0x2a8 <main+0x7e>
-			case 0x60: //Received own address and write bit, ACK returned
-			LED1_ON;
- 264:	58 9a       	sbi	0x0b, 0	; 11
+ 236:	c9 eb       	ldi	r28, 0xB9	; 185
+ 238:	d0 e0       	ldi	r29, 0x00	; 0
 			break;
- 266:	20 c0       	rjmp	.+64     	; 0x2a8 <main+0x7e>
-			case 0x70: //Received general call and write bit, ACK returned
-			LED1_ON;
- 268:	58 9a       	sbi	0x0b, 0	; 11
-			break;
- 26a:	1e c0       	rjmp	.+60     	; 0x2a8 <main+0x7e>
 			case 0x80: //Addressed with own address and data byte received, ACK returned
-			LED2_ON;
- 26c:	59 9a       	sbi	0x0b, 1	; 11
-			data[data_counter] = TWDR;
- 26e:	90 e0       	ldi	r25, 0x00	; 0
- 270:	d8 01       	movw	r26, r16
- 272:	5c 91       	ld	r21, X
- 274:	dc 01       	movw	r26, r24
- 276:	af 5f       	subi	r26, 0xFF	; 255
- 278:	be 4f       	sbci	r27, 0xFE	; 254
- 27a:	5c 93       	st	X, r21
-			data_counter = (data_counter+1)%NUM_SERVOS;
- 27c:	01 96       	adiw	r24, 0x01	; 1
- 27e:	b9 01       	movw	r22, r18
- 280:	0e 94 58 01 	call	0x2b0	; 0x2b0 <__divmodhi4>
-			LED2_OFF;
- 284:	59 98       	cbi	0x0b, 1	; 11
-			break;
- 286:	10 c0       	rjmp	.+32     	; 0x2a8 <main+0x7e>
+			
 			case 0x90: //Addressed with general call and data byte received, ACK returned
 			LED2_ON;
- 288:	59 9a       	sbi	0x0b, 1	; 11
-			data[data_counter] = TWDR;
- 28a:	90 e0       	ldi	r25, 0x00	; 0
- 28c:	d8 01       	movw	r26, r16
- 28e:	5c 91       	ld	r21, X
- 290:	dc 01       	movw	r26, r24
- 292:	af 5f       	subi	r26, 0xFF	; 255
- 294:	be 4f       	sbci	r27, 0xFE	; 254
- 296:	5c 93       	st	X, r21
-			data_counter = (data_counter+1)%NUM_SERVOS;
- 298:	01 96       	adiw	r24, 0x01	; 1
- 29a:	b9 01       	movw	r22, r18
- 29c:	0e 94 58 01 	call	0x2b0	; 0x2b0 <__divmodhi4>
-			LED2_OFF;
- 2a0:	59 98       	cbi	0x0b, 1	; 11
+			twi_data = TWDR;
+ 23a:	2b eb       	ldi	r18, 0xBB	; 187
+ 23c:	30 e0       	ldi	r19, 0x00	; 0
+ 23e:	00 e0       	ldi	r16, 0x00	; 0
+				data_counter = 0;
+			}
+			if (init_received && twi_data != 22 && twi_data != 11)
+			{
+				data[data_counter] = twi_data;
+				data_counter = (data_counter+1)%NUM_SERVOS;
+ 240:	0f 2e       	mov	r0, r31
+ 242:	f8 e1       	ldi	r31, 0x18	; 24
+ 244:	cf 2e       	mov	r12, r31
+ 246:	d1 2c       	mov	r13, r1
+ 248:	f0 2d       	mov	r31, r0
+			{
+				init_received = 0;
+				data_counter = 0;
+			}
+			if(twi_data == 11){
+				init_received = 1;
+ 24a:	ff 24       	eor	r15, r15
+ 24c:	f3 94       	inc	r15
+	unsigned char twi_data = 0;
+
+	//main -> get data (twi)
+	while (1)
+	{
+		while (!(TWCR & (1<<TWINT))){}
+ 24e:	90 81       	ld	r25, Z
+ 250:	99 23       	and	r25, r25
+ 252:	ec f7       	brge	.-6      	; 0x24e <main+0x24>
+
+		switch(TWSR){
+ 254:	98 81       	ld	r25, Y
+ 256:	90 38       	cpi	r25, 0x80	; 128
+ 258:	79 f0       	breq	.+30     	; 0x278 <main+0x4e>
+ 25a:	28 f4       	brcc	.+10     	; 0x266 <main+0x3c>
+ 25c:	90 36       	cpi	r25, 0x60	; 96
+ 25e:	41 f0       	breq	.+16     	; 0x270 <main+0x46>
+ 260:	90 37       	cpi	r25, 0x70	; 112
+ 262:	41 f0       	breq	.+16     	; 0x274 <main+0x4a>
+ 264:	25 c0       	rjmp	.+74     	; 0x2b0 <main+0x86>
+ 266:	90 39       	cpi	r25, 0x90	; 144
+ 268:	39 f0       	breq	.+14     	; 0x278 <main+0x4e>
+ 26a:	90 3a       	cpi	r25, 0xA0	; 160
+ 26c:	01 f1       	breq	.+64     	; 0x2ae <main+0x84>
+ 26e:	20 c0       	rjmp	.+64     	; 0x2b0 <main+0x86>
+			case 0x60: //Received own address and write bit, ACK returned
+			LED1_ON;
+ 270:	58 9a       	sbi	0x0b, 0	; 11
 			break;
- 2a2:	02 c0       	rjmp	.+4      	; 0x2a8 <main+0x7e>
-			case 0xA0: //Received STOP condition
-			data_counter = 0;
-			LED1_OFF;
- 2a4:	58 98       	cbi	0x0b, 0	; 11
-			data[data_counter] = TWDR;
-			data_counter = (data_counter+1)%NUM_SERVOS;
-			LED2_OFF;
+ 272:	1e c0       	rjmp	.+60     	; 0x2b0 <main+0x86>
+			case 0x70: //Received general call and write bit, ACK returned
+			LED1_ON;
+ 274:	58 9a       	sbi	0x0b, 0	; 11
 			break;
+ 276:	1c c0       	rjmp	.+56     	; 0x2b0 <main+0x86>
+			case 0x80: //Addressed with own address and data byte received, ACK returned
+			
+			case 0x90: //Addressed with general call and data byte received, ACK returned
+			LED2_ON;
+ 278:	59 9a       	sbi	0x0b, 1	; 11
+			twi_data = TWDR;
+ 27a:	d9 01       	movw	r26, r18
+ 27c:	9c 91       	ld	r25, X
+			if (twi_data == 22)
+ 27e:	96 31       	cpi	r25, 0x16	; 22
+ 280:	79 f0       	breq	.+30     	; 0x2a0 <main+0x76>
+			{
+				init_received = 0;
+				data_counter = 0;
+			}
+			if(twi_data == 11){
+ 282:	9b 30       	cpi	r25, 0x0B	; 11
+ 284:	c9 f4       	brne	.+50     	; 0x2b8 <main+0x8e>
+ 286:	0f c0       	rjmp	.+30     	; 0x2a6 <main+0x7c>
+				init_received = 1;
+				data_counter = 0;
+			}
+			if (init_received && twi_data != 22 && twi_data != 11)
+			{
+				data[data_counter] = twi_data;
+ 288:	48 2f       	mov	r20, r24
+ 28a:	50 e0       	ldi	r21, 0x00	; 0
+ 28c:	da 01       	movw	r26, r20
+ 28e:	af 5f       	subi	r26, 0xFF	; 255
+ 290:	be 4f       	sbci	r27, 0xFE	; 254
+ 292:	9c 93       	st	X, r25
+				data_counter = (data_counter+1)%NUM_SERVOS;
+ 294:	ca 01       	movw	r24, r20
+ 296:	01 96       	adiw	r24, 0x01	; 1
+ 298:	b6 01       	movw	r22, r12
+ 29a:	0e 94 5f 01 	call	0x2be	; 0x2be <__divmodhi4>
+ 29e:	05 c0       	rjmp	.+10     	; 0x2aa <main+0x80>
+ 2a0:	10 2f       	mov	r17, r16
+			LED2_ON;
+			twi_data = TWDR;
+			if (twi_data == 22)
+			{
+				init_received = 0;
+				data_counter = 0;
+ 2a2:	80 2f       	mov	r24, r16
+ 2a4:	02 c0       	rjmp	.+4      	; 0x2aa <main+0x80>
+			}
+			if(twi_data == 11){
+				init_received = 1;
+ 2a6:	1f 2d       	mov	r17, r15
+				data_counter = 0;
+ 2a8:	80 2f       	mov	r24, r16
+			{
+				data[data_counter] = twi_data;
+				data_counter = (data_counter+1)%NUM_SERVOS;
+			}
+
+			LED2_OFF;
+ 2aa:	59 98       	cbi	0x0b, 1	; 11
+			break;
+ 2ac:	01 c0       	rjmp	.+2      	; 0x2b0 <main+0x86>
 			case 0xA0: //Received STOP condition
-			data_counter = 0;
- 2a6:	84 2f       	mov	r24, r20
 			LED1_OFF;
+ 2ae:	58 98       	cbi	0x0b, 0	; 11
 			break;
 		}
 		
 		//TWCR &= ~(1<<TWINT);
 		TWCR |= (1<<TWINT); //reset von TWINT durch setzen????
- 2a8:	90 81       	ld	r25, Z
- 2aa:	90 68       	ori	r25, 0x80	; 128
- 2ac:	90 83       	st	Z, r25
+ 2b0:	90 81       	ld	r25, Z
+ 2b2:	90 68       	ori	r25, 0x80	; 128
+ 2b4:	90 83       	st	Z, r25
 
 	}
- 2ae:	c9 cf       	rjmp	.-110    	; 0x242 <main+0x18>
+ 2b6:	cb cf       	rjmp	.-106    	; 0x24e <main+0x24>
+			}
+			if(twi_data == 11){
+				init_received = 1;
+				data_counter = 0;
+			}
+			if (init_received && twi_data != 22 && twi_data != 11)
+ 2b8:	11 11       	cpse	r17, r1
+ 2ba:	e6 cf       	rjmp	.-52     	; 0x288 <main+0x5e>
+ 2bc:	f6 cf       	rjmp	.-20     	; 0x2aa <main+0x80>
 
-000002b0 <__divmodhi4>:
- 2b0:	97 fb       	bst	r25, 7
- 2b2:	07 2e       	mov	r0, r23
- 2b4:	16 f4       	brtc	.+4      	; 0x2ba <__divmodhi4+0xa>
- 2b6:	00 94       	com	r0
- 2b8:	07 d0       	rcall	.+14     	; 0x2c8 <__divmodhi4_neg1>
- 2ba:	77 fd       	sbrc	r23, 7
- 2bc:	09 d0       	rcall	.+18     	; 0x2d0 <__divmodhi4_neg2>
- 2be:	0e 94 72 01 	call	0x2e4	; 0x2e4 <__udivmodhi4>
- 2c2:	07 fc       	sbrc	r0, 7
- 2c4:	05 d0       	rcall	.+10     	; 0x2d0 <__divmodhi4_neg2>
- 2c6:	3e f4       	brtc	.+14     	; 0x2d6 <__divmodhi4_exit>
+000002be <__divmodhi4>:
+ 2be:	97 fb       	bst	r25, 7
+ 2c0:	07 2e       	mov	r0, r23
+ 2c2:	16 f4       	brtc	.+4      	; 0x2c8 <__divmodhi4+0xa>
+ 2c4:	00 94       	com	r0
+ 2c6:	07 d0       	rcall	.+14     	; 0x2d6 <__divmodhi4_neg1>
+ 2c8:	77 fd       	sbrc	r23, 7
+ 2ca:	09 d0       	rcall	.+18     	; 0x2de <__divmodhi4_neg2>
+ 2cc:	0e 94 79 01 	call	0x2f2	; 0x2f2 <__udivmodhi4>
+ 2d0:	07 fc       	sbrc	r0, 7
+ 2d2:	05 d0       	rcall	.+10     	; 0x2de <__divmodhi4_neg2>
+ 2d4:	3e f4       	brtc	.+14     	; 0x2e4 <__divmodhi4_exit>
 
-000002c8 <__divmodhi4_neg1>:
- 2c8:	90 95       	com	r25
- 2ca:	81 95       	neg	r24
- 2cc:	9f 4f       	sbci	r25, 0xFF	; 255
- 2ce:	08 95       	ret
+000002d6 <__divmodhi4_neg1>:
+ 2d6:	90 95       	com	r25
+ 2d8:	81 95       	neg	r24
+ 2da:	9f 4f       	sbci	r25, 0xFF	; 255
+ 2dc:	08 95       	ret
 
-000002d0 <__divmodhi4_neg2>:
- 2d0:	70 95       	com	r23
- 2d2:	61 95       	neg	r22
- 2d4:	7f 4f       	sbci	r23, 0xFF	; 255
+000002de <__divmodhi4_neg2>:
+ 2de:	70 95       	com	r23
+ 2e0:	61 95       	neg	r22
+ 2e2:	7f 4f       	sbci	r23, 0xFF	; 255
 
-000002d6 <__divmodhi4_exit>:
- 2d6:	08 95       	ret
+000002e4 <__divmodhi4_exit>:
+ 2e4:	08 95       	ret
 
-000002d8 <__tablejump2__>:
- 2d8:	ee 0f       	add	r30, r30
- 2da:	ff 1f       	adc	r31, r31
- 2dc:	05 90       	lpm	r0, Z+
- 2de:	f4 91       	lpm	r31, Z
- 2e0:	e0 2d       	mov	r30, r0
- 2e2:	09 94       	ijmp
+000002e6 <__tablejump2__>:
+ 2e6:	ee 0f       	add	r30, r30
+ 2e8:	ff 1f       	adc	r31, r31
+ 2ea:	05 90       	lpm	r0, Z+
+ 2ec:	f4 91       	lpm	r31, Z
+ 2ee:	e0 2d       	mov	r30, r0
+ 2f0:	09 94       	ijmp
 
-000002e4 <__udivmodhi4>:
- 2e4:	aa 1b       	sub	r26, r26
- 2e6:	bb 1b       	sub	r27, r27
- 2e8:	51 e1       	ldi	r21, 0x11	; 17
- 2ea:	07 c0       	rjmp	.+14     	; 0x2fa <__udivmodhi4_ep>
+000002f2 <__udivmodhi4>:
+ 2f2:	aa 1b       	sub	r26, r26
+ 2f4:	bb 1b       	sub	r27, r27
+ 2f6:	51 e1       	ldi	r21, 0x11	; 17
+ 2f8:	07 c0       	rjmp	.+14     	; 0x308 <__udivmodhi4_ep>
 
-000002ec <__udivmodhi4_loop>:
- 2ec:	aa 1f       	adc	r26, r26
- 2ee:	bb 1f       	adc	r27, r27
- 2f0:	a6 17       	cp	r26, r22
- 2f2:	b7 07       	cpc	r27, r23
- 2f4:	10 f0       	brcs	.+4      	; 0x2fa <__udivmodhi4_ep>
- 2f6:	a6 1b       	sub	r26, r22
- 2f8:	b7 0b       	sbc	r27, r23
+000002fa <__udivmodhi4_loop>:
+ 2fa:	aa 1f       	adc	r26, r26
+ 2fc:	bb 1f       	adc	r27, r27
+ 2fe:	a6 17       	cp	r26, r22
+ 300:	b7 07       	cpc	r27, r23
+ 302:	10 f0       	brcs	.+4      	; 0x308 <__udivmodhi4_ep>
+ 304:	a6 1b       	sub	r26, r22
+ 306:	b7 0b       	sbc	r27, r23
 
-000002fa <__udivmodhi4_ep>:
- 2fa:	88 1f       	adc	r24, r24
- 2fc:	99 1f       	adc	r25, r25
- 2fe:	5a 95       	dec	r21
- 300:	a9 f7       	brne	.-22     	; 0x2ec <__udivmodhi4_loop>
- 302:	80 95       	com	r24
- 304:	90 95       	com	r25
- 306:	bc 01       	movw	r22, r24
- 308:	cd 01       	movw	r24, r26
- 30a:	08 95       	ret
+00000308 <__udivmodhi4_ep>:
+ 308:	88 1f       	adc	r24, r24
+ 30a:	99 1f       	adc	r25, r25
+ 30c:	5a 95       	dec	r21
+ 30e:	a9 f7       	brne	.-22     	; 0x2fa <__udivmodhi4_loop>
+ 310:	80 95       	com	r24
+ 312:	90 95       	com	r25
+ 314:	bc 01       	movw	r22, r24
+ 316:	cd 01       	movw	r24, r26
+ 318:	08 95       	ret
 
-0000030c <_exit>:
- 30c:	f8 94       	cli
+0000031a <_exit>:
+ 31a:	f8 94       	cli
 
-0000030e <__stop_program>:
- 30e:	ff cf       	rjmp	.-2      	; 0x30e <__stop_program>
+0000031c <__stop_program>:
+ 31c:	ff cf       	rjmp	.-2      	; 0x31c <__stop_program>
