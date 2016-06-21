@@ -19,6 +19,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Windows.Devices.I2c;
 using Windows.Devices.Enumeration;
+using System.Windows;
 
 // Die Vorlage "Leere Seite" ist unter http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409 dokumentiert.
 
@@ -59,14 +60,16 @@ namespace HexPi_Test
 
 
                     GamepadReading gamepadStatus = input.GetCurrentReading();
-                    double[,] a = { { gamepadStatus.LeftThumbstickX },
-                                    { gamepadStatus.LeftThumbstickY},
-                                    { gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger}};
-                    Matrix<double> inputData = M.DenseOfArray(a);
 
-                    Matrix<double> positionData = CalculateLegPosition(inputData);
+                    Vector<double> inputData = V.Dense(3);
 
-                    Matrix<double> angleData = CalculateMotorAngle(positionData);
+                    inputData[0] = gamepadStatus.LeftThumbstickY * 30;
+                    inputData[1] = gamepadStatus.LeftThumbstickX * 30;
+                    inputData[2] = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger) * 30;
+
+                    Vector<double> positionData = CalculateLegPosition(inputData);
+
+                    Vector<double> angleData = CalculateMotorAngle(positionData);
 
                     Byte[] b = ConvertData(angleData);
 
@@ -83,41 +86,77 @@ namespace HexPi_Test
                 Debug.WriteLine("A: " + b[0] + " B: " + b[1] + " C: " + b[2]);
                 i2c.Write(b);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.WriteLine(e.Source);
             }
 
         }
 
-        private Matrix<double> CalculateMotorAngle(Matrix<double> data)
+        private Vector<double> CalculateMotorAngle(Vector<double> data)
         {
-            Matrix<double> angleData;
-            double[,] a = { { 45 * data[0,0] },
-                            { 45 * data[1,0]},
-                            { 45 * data[2,0]}};
-            angleData = M.DenseOfArray(a);
-            return angleData;
+            double zOffset = 95;
+            double A1 = 30;
+            double A2 = 60;
+            double A3 = 95;
+            double x = data[0];
+            double y = data[1];
+            double z = data[2];
+            Vector<double> motorAngle = V.Dense(3);
+
+            //ALPHA
+            motorAngle[0] = Math.Atan2(x, A1+A2+y);
+
+            //BETA
+            double L1 = zOffset - z;
+            double L2 = A2 + y;
+            double b = Math.Sqrt(L1 * L1 + L2 * L2);
+
+            motorAngle[1] = Math.Acos(L1 / b);
+            motorAngle[1] = motorAngle[1] + Math.Acos((A2 * A2 - A3 * A3 + b * b) / (2 * A2 * b));
+
+            //GAMMA
+            motorAngle[2] = Math.Acos((A3 * A3 - b * b + A2 * A2) / (2 * A3 * A2));
+
+            //RAD TO DEG
+            motorAngle[0] = motorAngle[0] * 180 / Math.PI;
+            motorAngle[1] = (motorAngle[1] * 180 / Math.PI -90) * 1;
+            motorAngle[2] = (motorAngle[2] * 180 / Math.PI -90) * -1;
+
+            Debug.WriteLine("DEBUG: "+motorAngle[0] + " :: " + motorAngle[1] + " :: " + motorAngle[2]);
+            return motorAngle;
 
         }
 
-        private Byte[] ConvertData(Matrix<double> angleData)
+        private Byte[] ConvertData(Vector<double> angleData)
         {
-            Byte a = (byte)(1.38888888888 * angleData[0, 0] + 187.5);
-            Byte b = (byte)(1.38888888888 * angleData[1, 0] + 187.5);
-            Byte c = (byte)(1.38888888888 * angleData[2, 0] + 187.5);
-            Byte[] bytes = { a, b, c };
+            Byte a = (byte)(1.38888888888 * angleData[0] + 187.5);
+            Byte b = (byte)(1.38888888888 * angleData[1] + 187.5);
+            Byte c = (byte)(1.38888888888 * angleData[2] + 187.5);
+            Byte[] bytes = {11, a, b, c ,22};
             return bytes;
         }
 
-        private Matrix<double> CalculateLegPosition(Matrix<double> data)
+        //TODO: IMPLEMENT WALKING GIAT FUNCTIONS
+        private Vector<double> CalculateLegPosition(Vector<double> data)
         {
+            //double t;
+            //double x_max = 30;
+            //double y_max = 30;
+            //double z_max = 30;
+
+            //if(t >= 5 && t<=10)
+            //{
+            //    t = 
+            //}
+
+
             return data;
         }
 
         private async void init_i2c()
         {
-            var settings = new I2cConnectionSettings(0x00); // Arduino address
+            var settings = new I2cConnectionSettings(0x0); // Arduino address
 
 
             settings.BusSpeed = I2cBusSpeed.StandardMode;
