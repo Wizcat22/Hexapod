@@ -22,23 +22,31 @@ namespace HexPi
 
         double threshold = 0.2;
 
-        LeftLeg LegL1 = new LeftLeg();
-        LeftLeg LegL2 = new LeftLeg();
-        LeftLeg LegL3 = new LeftLeg();
-        RightLeg LegR1 = new RightLeg();
-        RightLeg LegR2 = new RightLeg();
-        RightLeg LegR3 = new RightLeg();
+        //LeftLeg LegL1 = new LeftLeg();
+        //LeftLeg LegL2 = new LeftLeg();
+        //LeftLeg LegL3 = new LeftLeg();
+        //RightLeg LegR1 = new RightLeg();
+        //RightLeg LegR2 = new RightLeg();
+        //RightLeg LegR3 = new RightLeg();
 
         byte[] data = new byte[26];
-
+        ILeg[] legs = new ILeg[6];
 
 
         public void init()
         {
             init_Gamepad();
             init_i2c();
+            //start byte 
             data[0] = 11;
+            //end byte
             data[25] = 22;
+
+            for (byte i = 0; i < legs.Length; i++)
+            {
+                legs[i] = ((i % 2) == 0) ? (ILeg)new LeftLeg() : (ILeg)new RightLeg();
+            }
+
             inputTask = Task.Factory.StartNew(() => HandleInputs());
         }
 
@@ -51,71 +59,105 @@ namespace HexPi
 
 
                     GamepadReading gamepadStatus = input.GetCurrentReading();
-
                     x = gamepadStatus.LeftThumbstickY;
                     y = gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
 
-                    
-                    if (x >= threshold || y>= threshold)
+
+                    if (x >= threshold || y >= threshold)
                     {
-                        if (x > y && x>=threshold)
+                        if (x > y && x >= threshold)
                         {
-                            LegL1.calcPositions(1, x);
-                            LegL2.calcPositions(1, x);
-                            LegL3.calcPositions(1, x);
-                            LegR1.calcPositions(1, x);
-                            LegR2.calcPositions(1, x);
-                            LegR3.calcPositions(1, x);
+                            foreach (ILeg l in legs)
+                            {
+                                l.calcPositions(1, x);
+                            }
+
+                            //LegL1.calcPositions(1, x);
+                            //LegL2.calcPositions(1, x);
+                            //LegL3.calcPositions(1, x);
+                            //LegR1.calcPositions(1, x);
+                            //LegR2.calcPositions(1, x);
+                            //LegR3.calcPositions(1, x);
                         }
-                        else if (y>x && y >= threshold)
+                        else if (y > x && y >= threshold)
                         {
-                            LegL1.calcPositions(2, y);
-                            LegL2.calcPositions(2, y);
-                            LegL3.calcPositions(2, y);
-                            LegR1.calcPositions(2, y);
-                            LegR2.calcPositions(2, y);
-                            LegR3.calcPositions(2, y);
+                            foreach (ILeg l in legs)
+                            {
+                                l.calcPositions(2, y);
+                            }
+
+                            //LegL1.calcPositions(2, y);
+                            //LegL2.calcPositions(2, y);
+                            //LegL3.calcPositions(2, y);
+                            //LegR1.calcPositions(2, y);
+                            //LegR2.calcPositions(2, y);
+                            //LegR3.calcPositions(2, y);
                         }
 
                     }
 
-                    LegL1.InverseKinematics();
-                    LegL2.InverseKinematics();
-                    LegL3.InverseKinematics();
-                    LegR1.InverseKinematics();
-                    LegR2.InverseKinematics();
-                    LegR3.InverseKinematics();
-                    LegL1.calcData();
-                    LegL2.calcData();
-                    LegL3.calcData();
-                    LegR1.calcData();
-                    LegR2.calcData();
-                    LegR3.calcData();
+                    foreach (ILeg l in legs)
+                    {
+                        l.inverseKinematics();
+                        l.calcData();
+                    }
 
-                    data[1] = LegR1.getMotorData(0);
-                    data[2] = LegR1.getMotorData(1);
-                    data[3] = LegR1.getMotorData(2);
+                    //LegL1.InverseKinematics();
+                    //LegL2.InverseKinematics();
+                    //LegL3.InverseKinematics();
+                    //LegR1.InverseKinematics();
+                    //LegR2.InverseKinematics();
+                    //LegR3.InverseKinematics();
+                    //LegL1.calcData();
+                    //LegL2.calcData();
+                    //LegL3.calcData();
+                    //LegR1.calcData();
+                    //LegR2.calcData();
+                    //LegR3.calcData();
 
-                    data[4] = LegR2.getMotorData(0);
-                    data[5] = LegR2.getMotorData(1);
-                    data[6] = LegR2.getMotorData(2);
 
-                    data[7] = LegR3.getMotorData(0);
-                    data[8] = LegR3.getMotorData(1);
-                    data[9] = LegR3.getMotorData(2);
 
-                    data[16] = LegL1.getMotorData(0);
-                    data[17] = LegL1.getMotorData(1);
-                    data[18] = LegL1.getMotorData(2);
+                    for (byte i = 0; i < legs.Length; i++)
+                    {
+                        if(i<3)
+                        {
+                            data[1 + (i * 3)] = legs[i].getMotorData(0);
+                            data[2 + (i * 3)] = legs[i].getMotorData(1);
+                            data[3 + (i * 3)] = legs[i].getMotorData(2);
+                        }
+                        else
+                        {
+                            data[7 + (i * 3)] = legs[i].getMotorData(0);
+                            data[8 + (i * 3)] = legs[i].getMotorData(1);
+                            data[9 + (i * 3)] = legs[i].getMotorData(2);
+                        }
+                        
+                    }
 
-                    data[19] = LegL2.getMotorData(0);
-                    data[20] = LegL2.getMotorData(1);
-                    data[21] = LegL2.getMotorData(2);
+                    //data[1] = LegR1.getMotorData(0);
+                    //data[2] = LegR1.getMotorData(1);
+                    //data[3] = LegR1.getMotorData(2);
 
-                    data[22] = LegL3.getMotorData(0);
-                    data[23] = LegL3.getMotorData(1);
-                    data[24] = LegL3.getMotorData(2);
+                    //data[4] = LegR2.getMotorData(0);
+                    //data[5] = LegR2.getMotorData(1);
+                    //data[6] = LegR2.getMotorData(2);
+
+                    //data[7] = LegR3.getMotorData(0);
+                    //data[8] = LegR3.getMotorData(1);
+                    //data[9] = LegR3.getMotorData(2);
+
+                    //data[16] = LegL1.getMotorData(0);
+                    //data[17] = LegL1.getMotorData(1);
+                    //data[18] = LegL1.getMotorData(2);
+
+                    //data[19] = LegL2.getMotorData(0);
+                    //data[20] = LegL2.getMotorData(1);
+                    //data[21] = LegL2.getMotorData(2);
+
+                    //data[22] = LegL3.getMotorData(0);
+                    //data[23] = LegL3.getMotorData(1);
+                    //data[24] = LegL3.getMotorData(2);
 
                     SendData(data);
 
