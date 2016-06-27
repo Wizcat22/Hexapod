@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 using Windows.Gaming.Input;
+using System.Threading;
 
 namespace HexPi
 {
@@ -20,18 +21,36 @@ namespace HexPi
         double y = 0;
         double z = 0;
 
-        double threshold = 0.2;
-
-        //LeftLeg LegL1 = new LeftLeg();
-        //LeftLeg LegL2 = new LeftLeg();
-        //LeftLeg LegL3 = new LeftLeg();
-        //RightLeg LegR1 = new RightLeg();
-        //RightLeg LegR2 = new RightLeg();
-        //RightLeg LegR3 = new RightLeg();
+        double threshold = 0.25;
+        byte lastDirection = 0;
+        enum directions{CENTER,X,Y,ROTATE};
 
         byte[] data = new byte[26];
         ILeg[] legs = new ILeg[6];
 
+        public double X
+        {
+            get
+            {
+                return Math.Round(x,2);
+            }
+        }
+
+        public double Y
+        {
+            get
+            {
+                return Math.Round(y, 2);
+            }
+        }
+
+        public double Z
+        {
+            get
+            {
+                return Math.Round(z, 2);
+            }
+        }
 
         public void init()
         {
@@ -44,8 +63,19 @@ namespace HexPi
 
             for (byte i = 0; i < legs.Length; i++)
             {
+                
                 legs[i] = ((i % 2) == 0) ? (ILeg)new LeftLeg() : (ILeg)new RightLeg();
+                
             }
+
+            //TEST
+            legs[0].TOffset = 25;
+            legs[3].TOffset = 25;
+            legs[4].TOffset = 25;
+            legs[1].TOffset = 75;
+            legs[2].TOffset = 75;
+            legs[5].TOffset = 75;
+            ///TEST
 
             inputTask = Task.Factory.StartNew(() => HandleInputs());
         }
@@ -54,45 +84,41 @@ namespace HexPi
         {
             while (true)
             {
-                if (input != null && i2cDevice != null)
+                if (input != null)
                 {
 
-
+                    Task.Delay(10).Wait();
                     GamepadReading gamepadStatus = input.GetCurrentReading();
                     x = gamepadStatus.LeftThumbstickY;
                     y = gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
 
 
-                    if (x >= threshold || y >= threshold)
+                    if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold)
                     {
-                        if (x > y && x >= threshold)
+                        if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) >= threshold)
                         {
+                            if(lastDirection != (byte)directions.X && lastDirection != (byte)directions.CENTER)
+                            {
+                                centerLegs();
+                            }
                             foreach (ILeg l in legs)
                             {
-                                l.calcPositions(1, x);
+                                l.calcPositions((byte)directions.X, x);
+                                lastDirection = (byte)directions.X;
                             }
-
-                            //LegL1.calcPositions(1, x);
-                            //LegL2.calcPositions(1, x);
-                            //LegL3.calcPositions(1, x);
-                            //LegR1.calcPositions(1, x);
-                            //LegR2.calcPositions(1, x);
-                            //LegR3.calcPositions(1, x);
                         }
-                        else if (y > x && y >= threshold)
+                        else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) >= threshold)
                         {
+                            if (lastDirection != (byte)directions.Y && lastDirection != (byte)directions.CENTER)
+                            {
+                                centerLegs();
+                            }
                             foreach (ILeg l in legs)
                             {
-                                l.calcPositions(2, y);
+                                l.calcPositions((byte)directions.Y, y);
+                                lastDirection = (byte)directions.Y;
                             }
-
-                            //LegL1.calcPositions(2, y);
-                            //LegL2.calcPositions(2, y);
-                            //LegL3.calcPositions(2, y);
-                            //LegR1.calcPositions(2, y);
-                            //LegR2.calcPositions(2, y);
-                            //LegR3.calcPositions(2, y);
                         }
 
                     }
@@ -103,69 +129,34 @@ namespace HexPi
                         l.calcData();
                     }
 
-                    //LegL1.InverseKinematics();
-                    //LegL2.InverseKinematics();
-                    //LegL3.InverseKinematics();
-                    //LegR1.InverseKinematics();
-                    //LegR2.InverseKinematics();
-                    //LegR3.InverseKinematics();
-                    //LegL1.calcData();
-                    //LegL2.calcData();
-                    //LegL3.calcData();
-                    //LegR1.calcData();
-                    //LegR2.calcData();
-                    //LegR3.calcData();
-
-
-
-                    for (byte i = 0; i < legs.Length; i++)
-                    {
-                        if(i<3)
-                        {
-                            data[1 + (i * 3)] = legs[i].getMotorData(0);
-                            data[2 + (i * 3)] = legs[i].getMotorData(1);
-                            data[3 + (i * 3)] = legs[i].getMotorData(2);
-                        }
-                        else
-                        {
-                            data[7 + (i * 3)] = legs[i].getMotorData(0);
-                            data[8 + (i * 3)] = legs[i].getMotorData(1);
-                            data[9 + (i * 3)] = legs[i].getMotorData(2);
-                        }
-                        
-                    }
-
-                    //data[1] = LegR1.getMotorData(0);
-                    //data[2] = LegR1.getMotorData(1);
-                    //data[3] = LegR1.getMotorData(2);
-
-                    //data[4] = LegR2.getMotorData(0);
-                    //data[5] = LegR2.getMotorData(1);
-                    //data[6] = LegR2.getMotorData(2);
-
-                    //data[7] = LegR3.getMotorData(0);
-                    //data[8] = LegR3.getMotorData(1);
-                    //data[9] = LegR3.getMotorData(2);
-
-                    //data[16] = LegL1.getMotorData(0);
-                    //data[17] = LegL1.getMotorData(1);
-                    //data[18] = LegL1.getMotorData(2);
-
-                    //data[19] = LegL2.getMotorData(0);
-                    //data[20] = LegL2.getMotorData(1);
-                    //data[21] = LegL2.getMotorData(2);
-
-                    //data[22] = LegL3.getMotorData(0);
-                    //data[23] = LegL3.getMotorData(1);
-                    //data[24] = LegL3.getMotorData(2);
-
-                    SendData(data);
+                    setData();
+                    sendData(data);
 
                 }
             }
         }
 
-        public void init_Gamepad()
+        private void setData()
+        {
+            for (byte i = 0; i < legs.Length; i++)
+            {
+                if (i < 3)
+                {
+                    data[1 + (i * 3)] = legs[i].getMotorData(0);
+                    data[2 + (i * 3)] = legs[i].getMotorData(1);
+                    data[3 + (i * 3)] = legs[i].getMotorData(2);
+                }
+                else
+                {
+                    data[7 + (i * 3)] = legs[i].getMotorData(0);
+                    data[8 + (i * 3)] = legs[i].getMotorData(1);
+                    data[9 + (i * 3)] = legs[i].getMotorData(2);
+                }
+
+            }
+        }
+
+        private void init_Gamepad()
         {
             if (Gamepad.Gamepads.Count() > 0)
             {
@@ -202,24 +193,36 @@ namespace HexPi
 
         private async void init_i2c()
         {
-            var settings = new I2cConnectionSettings(0x0); // Arduino address
+            try
+            {
+                var settings = new I2cConnectionSettings(0x0); // Arduino address
 
 
-            settings.BusSpeed = I2cBusSpeed.StandardMode;
+                settings.BusSpeed = I2cBusSpeed.StandardMode;
 
-            string aqs = I2cDevice.GetDeviceSelector("I2C1");
+                string aqs = I2cDevice.GetDeviceSelector("I2C1");
 
-            var dis = await DeviceInformation.FindAllAsync(aqs);
+                var dis = await DeviceInformation.FindAllAsync(aqs);
 
-            i2cDevice = await I2cDevice.FromIdAsync(dis[0].Id, settings);
+                i2cDevice = await I2cDevice.FromIdAsync(dis[0].Id, settings);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error: I2C device not found!");
+            }
+
         }
 
-        private void SendData(byte[] b)
+        private void sendData(byte[] b)
         {
             try
             {
-                //Debug.WriteLine("A: " + b[0] + " B: " + b[1] + " C: " + b[2]);
-                i2cDevice.Write(b);
+                if (i2cDevice != null)
+                {
+                    //Debug.WriteLine("A: " + b[0] + " B: " + b[1] + " C: " + b[2]);
+                    i2cDevice.Write(b);
+                }
+
             }
             catch (Exception e)
             {
@@ -227,5 +230,51 @@ namespace HexPi
             }
 
         }
+
+        private void centerLegs()
+        {
+            int time = 100;
+            foreach (ILeg l in legs)
+            {
+                //Up
+                l.ZPos = l.StepSizeZ;
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                sendData(data);
+                Task.Delay(time).Wait();
+
+                //Center
+                l.calcPositions((byte)directions.CENTER, 0);
+                lastDirection = (byte)directions.CENTER;
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                sendData(data);
+                Task.Delay(time).Wait();
+
+                //Down
+                l.ZPos = 0;
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                sendData(data);
+                Task.Delay(time).Wait();
+
+            }
+        }
+
+        public double getLegPos(byte n, byte xyz)
+        {
+            switch (xyz)
+            {
+                case 0: return Math.Round(legs[n].XPos);
+                case 1: return Math.Round(legs[n].YPos);
+                case 2: return Math.Round(legs[n].ZPos);
+                default: return 0.0;
+            }
+        }
+
+
     }
 }

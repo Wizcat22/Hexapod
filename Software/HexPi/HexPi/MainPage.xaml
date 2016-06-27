@@ -8,6 +8,28 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock x:Name="tBlockName" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Raspberry Pi Hexapod:" VerticalAlignment="Top" FontSize="26.667"/>
+        <TextBlock x:Name="tBlockLeg1X" HorizontalAlignment="Left" Margin="9,224,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg1Y" HorizontalAlignment="Left" Margin="55,224,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg1Z" HorizontalAlignment="Left" Margin="101,224,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg2X" HorizontalAlignment="Left" Margin="258,224,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg2Y" HorizontalAlignment="Left" Margin="304,224,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg2Z" HorizontalAlignment="Left" Margin="350,224,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg3X" HorizontalAlignment="Left" Margin="9,274,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg3Y" HorizontalAlignment="Left" Margin="55,274,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg3Z" HorizontalAlignment="Left" Margin="101,274,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg4X" HorizontalAlignment="Left" Margin="258,274,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg4Y" HorizontalAlignment="Left" Margin="304,274,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg4Z" HorizontalAlignment="Left" Margin="350,274,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg5X" HorizontalAlignment="Left" Margin="9,324,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg5Y" HorizontalAlignment="Left" Margin="55,324,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg5Z" HorizontalAlignment="Left" Margin="101,324,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg6X" HorizontalAlignment="Left" Margin="258,324,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg6Y" HorizontalAlignment="Left" Margin="304,324,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockLeg6Z" HorizontalAlignment="Left" Margin="350,324,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="41"/>
+        <TextBlock x:Name="tBlockBodyX" HorizontalAlignment="Left" Margin="172,249,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="50"/>
+        <TextBlock x:Name="tBlockBodyY" HorizontalAlignment="Left" Margin="172,274,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="50"/>
+        <TextBlock x:Name="tBlockBodyZ" HorizontalAlignment="Left" Margin="172,299,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="50"/>
 
     </Grid>
 </Page>

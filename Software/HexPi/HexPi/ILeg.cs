@@ -19,24 +19,28 @@ namespace HexPi
         protected double beta = 0;
         protected double gamma = 0;
         protected double t = 0;
-        protected double tOffset = 0;
+        private double tOffset = 0;
         protected double period = 100;
-        protected double stepSizeX = 30;
-        protected double stepSizeY = 30;
-        protected double stepSizeZ = 30;
-        protected double xPos = 0;
-        protected double yPos = 0;
-        protected double zPos = 0;
+        private double stepSizeX = 30;
+        private double stepSizeY = 30;
+        private double stepSizeZ = 30;
+        private double xPos = 0;
+        private double yPos = 0;
+        private double zPos = 0;
         protected byte motorData0 = 0;
         protected byte motorData1 = 0;
         protected byte motorData2 = 0;
-
 
         public double XPos
         {
             get
             {
                 return xPos;
+            }
+
+            set
+            {
+                xPos = value;
             }
         }
 
@@ -46,6 +50,11 @@ namespace HexPi
             {
                 return yPos;
             }
+
+            set
+            {
+                yPos = value;
+            }
         }
 
         public double ZPos
@@ -53,6 +62,63 @@ namespace HexPi
             get
             {
                 return zPos;
+            }
+
+            set
+            {
+                zPos = value;
+            }
+        }
+
+        public double StepSizeX
+        {
+            get
+            {
+                return stepSizeX;
+            }
+
+            set
+            {
+                stepSizeX = value;
+            }
+        }
+
+        public double StepSizeY
+        {
+            get
+            {
+                return stepSizeY;
+            }
+
+            set
+            {
+                stepSizeY = value;
+            }
+        }
+
+        public double StepSizeZ
+        {
+            get
+            {
+                return stepSizeZ;
+            }
+
+            set
+            {
+                stepSizeZ = value;
+            }
+        }
+
+        public double TOffset
+        {
+            get
+            {
+                return tOffset;
+            }
+
+            set
+            {
+                tOffset = value;
             }
         }
 
@@ -81,43 +147,49 @@ namespace HexPi
 
         }
 
-        public void calcPositions(int direction, double increment)
+        public void calcPositions(byte direction, double increment)
         {
-            t = (t + increment) % period;
-
-            //Stop motion
-            if (direction == 0)
+            t = ((t + increment) % period + period) % period;
+            
+            switch (direction)
             {
-                t = 0.0;
-                xPos = 0.0;
-                yPos = 0.0;
+                //No motion
+                case 0:
+                    t = tOffset;
+                    xPos = 0.0;
+                    yPos = 0.0;
+                    break;
+                //Motion in X-direction
+                case 1:
+                    yPos = 0.0;
+                    if (t <= period / 2)
+                    {
+                        xPos = 4 * stepSizeX / period * t - stepSizeX;
+                    }
+                    else
+                    {
+                        xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
+                    }
+                    break;
+                //Motion in Y-direction
+                case 2:
+                    xPos = 0.0;
+                    if (t <= period / 2)
+                    {
+                        yPos = 4 * stepSizeY / period * t - stepSizeY;
+                    }
+                    else
+                    {
+                        yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
+                    }
+                    break;
+                //Rotate
+                case 3:
+                    throw new NotImplementedException();
+                    break;
+                default: break;
             }
-            //Motion in x-direction
-            else if (direction == 1)
-            {     
-                yPos = 0.0;
-                if (t <= period / 2)
-                {
-                    xPos = 4 * stepSizeX / period * t - stepSizeX;
-                }
-                else
-                {
-                    xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
-                }
-            }
-            //Motion in y-direction
-            else if (direction == 2)
-            {               
-                xPos = 0.0;
-                if (t <= period / 2)
-                {
-                    yPos = 4 * stepSizeY / period * t - stepSizeY;
-                }
-                else
-                {
-                    yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
-                }
-            }
+
             //Motion in z-direction
             if (t <= period / 2)
             {
@@ -125,11 +197,8 @@ namespace HexPi
             }
             else
             {
-                zPos = -1 * stepSizeZ / (period * period) * (t - (period / 2)) * (t - (period / 2)) + stepSizeZ;
+                zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ;
             }
-
-
-
         }
 
         public byte getMotorData(int n)
@@ -145,6 +214,6 @@ namespace HexPi
         }
 
         public abstract void calcData();
-        
+
     }
 }

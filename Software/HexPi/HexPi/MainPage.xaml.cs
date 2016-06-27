@@ -23,11 +23,52 @@ namespace HexPi
     public sealed partial class MainPage : Page
     {
         Controller control;
+        DispatcherTimer timer;
         public MainPage()
         {
             this.InitializeComponent();
             control = new Controller();
             control.init();
+
+            timer = new DispatcherTimer();
+            timer.Interval = System.TimeSpan.FromMilliseconds(10);
+            timer.Tick += updateData;
+            timer.Start();
+
+
+        }
+
+        private void updateData(object sender, object e)
+        {
+            tBlockLeg1X.Text = "X: " + control.getLegPos(0, 0);
+            tBlockLeg1Y.Text = "Y: " + control.getLegPos(0, 1);
+            tBlockLeg1Z.Text = "Z: " + control.getLegPos(0, 2);
+
+            tBlockLeg2X.Text = "X: " + control.getLegPos(1, 0);
+            tBlockLeg2Y.Text = "Y: " + control.getLegPos(1, 1);
+            tBlockLeg2Z.Text = "Z: " + control.getLegPos(1, 2);
+
+            tBlockLeg3X.Text = "X: " + control.getLegPos(2, 0);
+            tBlockLeg3Y.Text = "Y: " + control.getLegPos(2, 1);
+            tBlockLeg3Z.Text = "Z: " + control.getLegPos(2, 2);
+
+            tBlockLeg4X.Text = "X: " + control.getLegPos(3, 0);
+            tBlockLeg4Y.Text = "Y: " + control.getLegPos(3, 1);
+            tBlockLeg4Z.Text = "Z: " + control.getLegPos(3, 2);
+
+            tBlockLeg5X.Text = "X: " + control.getLegPos(4, 0);
+            tBlockLeg5Y.Text = "Y: " + control.getLegPos(4, 1);
+            tBlockLeg5Z.Text = "Z: " + control.getLegPos(4, 2);
+
+            tBlockLeg6X.Text = "X: " + control.getLegPos(5, 0);
+            tBlockLeg6Y.Text = "Y: " + control.getLegPos(5, 1);
+            tBlockLeg6Z.Text = "Z: " + control.getLegPos(5, 2);
+
+            tBlockBodyX.Text = "X: " + control.X;
+            tBlockBodyY.Text = "Y: " + control.Y;
+            tBlockBodyZ.Text = "Z: " + control.Z;
+
+
         }
     }
 }
