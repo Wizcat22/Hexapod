@@ -20,13 +20,14 @@ namespace HexPi
         double x = 0;
         double y = 0;
         double z = 0;
+        double r = 0;
 
         double threshold = 0.25;
         byte lastDirection = 0;
         enum directions{CENTER,X,Y,ROTATE};
 
         byte[] data = new byte[26];
-        ILeg[] legs = new ILeg[6];
+        ILeg[] legs = { new LeftLeg(), new RightLeg(), new LeftLeg(), new RightLeg(), new LeftLeg(), new RightLeg() };
 
         public double X
         {
@@ -52,6 +53,14 @@ namespace HexPi
             }
         }
 
+        public double R
+        {
+            get
+            {
+                return Math.Round(z, 2);
+            }
+        }
+
         public void init()
         {
             init_Gamepad();
@@ -61,12 +70,12 @@ namespace HexPi
             //end byte
             data[25] = 22;
 
-            for (byte i = 0; i < legs.Length; i++)
-            {
+            //for (byte i = 0; i < legs.Length; i++)
+            //{
                 
-                legs[i] = ((i % 2) == 0) ? (ILeg)new LeftLeg() : (ILeg)new RightLeg();
+            //    legs[i] = ((i % 2) == 0) ? (ILeg)new LeftLeg() : (ILeg)new RightLeg();
                 
-            }
+            //}
 
             //TEST
             legs[0].TOffset = 25;
@@ -92,11 +101,12 @@ namespace HexPi
                     x = gamepadStatus.LeftThumbstickY;
                     y = gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
+                    r = gamepadStatus.RightThumbstickX;
 
 
-                    if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold)
+                    if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(r) >= threshold)
                     {
-                        if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) >= threshold)
+                        if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)
                         {
                             if(lastDirection != (byte)directions.X && lastDirection != (byte)directions.CENTER)
                             {
@@ -104,11 +114,11 @@ namespace HexPi
                             }
                             foreach (ILeg l in legs)
                             {
-                                l.calcPositions((byte)directions.X, x);
+                                l.calcPositionX(x);
                                 lastDirection = (byte)directions.X;
                             }
                         }
-                        else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) >= threshold)
+                        else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold)
                         {
                             if (lastDirection != (byte)directions.Y && lastDirection != (byte)directions.CENTER)
                             {
@@ -116,8 +126,20 @@ namespace HexPi
                             }
                             foreach (ILeg l in legs)
                             {
-                                l.calcPositions((byte)directions.Y, y);
+                                l.calcPositionY(y);
                                 lastDirection = (byte)directions.Y;
+                            }
+                        }
+                        else if (Math.Abs(r) > Math.Abs(x) && Math.Abs(r) > Math.Abs(y) && Math.Abs(r) >= threshold)
+                        {
+                            if (lastDirection != (byte)directions.ROTATE && lastDirection != (byte)directions.CENTER)
+                            {
+                                centerLegs();
+                            }
+                            foreach (ILeg l in legs)
+                            {
+                                l.calcPositionR(r);
+                                lastDirection = (byte)directions.ROTATE;
                             }
                         }
 
@@ -158,9 +180,12 @@ namespace HexPi
 
         private void init_Gamepad()
         {
+            
+            
             if (Gamepad.Gamepads.Count() > 0)
             {
                 input = Gamepad.Gamepads.First();
+                Debug.WriteLine("Gamepad connected!");
             }
             else
             {
@@ -245,7 +270,7 @@ namespace HexPi
                 Task.Delay(time).Wait();
 
                 //Center
-                l.calcPositions((byte)directions.CENTER, 0);
+                l.calcPositionCenter(0);
                 lastDirection = (byte)directions.CENTER;
                 l.inverseKinematics();
                 l.calcData();

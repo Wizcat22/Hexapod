@@ -19,14 +19,14 @@ namespace HexPi
         protected double beta = 0;
         protected double gamma = 0;
         protected double t = 0;
-        private double tOffset = 0;
+        protected double tOffset = 0;
         protected double period = 100;
-        private double stepSizeX = 30;
-        private double stepSizeY = 30;
-        private double stepSizeZ = 30;
-        private double xPos = 0;
-        private double yPos = 0;
-        private double zPos = 0;
+        protected double stepSizeX = 30;
+        protected double stepSizeY = 30;
+        protected double stepSizeZ = 30;
+        protected double xPos = 0;
+        protected double yPos = 0;
+        protected double zPos = 0;
         protected byte motorData0 = 0;
         protected byte motorData1 = 0;
         protected byte motorData2 = 0;
@@ -147,50 +147,37 @@ namespace HexPi
 
         }
 
-        public void calcPositions(byte direction, double increment)
-        {
-            t = ((t + increment) % period + period) % period;
-            
-            switch (direction)
-            {
-                //No motion
-                case 0:
-                    t = tOffset;
-                    xPos = 0.0;
-                    yPos = 0.0;
-                    break;
-                //Motion in X-direction
-                case 1:
-                    yPos = 0.0;
-                    if (t <= period / 2)
-                    {
-                        xPos = 4 * stepSizeX / period * t - stepSizeX;
-                    }
-                    else
-                    {
-                        xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
-                    }
-                    break;
-                //Motion in Y-direction
-                case 2:
-                    xPos = 0.0;
-                    if (t <= period / 2)
-                    {
-                        yPos = 4 * stepSizeY / period * t - stepSizeY;
-                    }
-                    else
-                    {
-                        yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
-                    }
-                    break;
-                //Rotate
-                case 3:
-                    throw new NotImplementedException();
-                    break;
-                default: break;
-            }
+        //public void calcPositions(byte direction, double increment)
+        //{
+        //    t = ((t + increment) % period + period) % period;
 
-            //Motion in z-direction
+        //    switch (direction)
+        //    {
+        //        //No motion
+        //        case 0:
+        //            calcPositionsCenter();
+        //            break;
+        //        //Motion in X-direction
+        //        case 1:
+        //            calcPositionsX();
+        //            break;
+        //        //Motion in Y-direction
+        //        case 2:
+        //            calcPositionsY();
+        //            break;
+        //        //Rotate
+        //        case 3:
+        //            calcPositionsRotation();
+        //            break;
+        //        default: break;
+        //    }
+
+        //    //Motion in z-direction
+        //    calcPositionZ();
+        //}
+
+        protected void calcPositionZ()
+        {
             if (t <= period / 2)
             {
                 zPos = 0;
@@ -200,6 +187,46 @@ namespace HexPi
                 zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ;
             }
         }
+
+        public void calcPositionCenter(double increment)
+        {
+            t = ((t + increment) % period + period) % period;
+            t = tOffset;
+            xPos = 0.0;
+            yPos = 0.0;
+        }
+
+        public void calcPositionX(double increment)
+        {
+            t = ((t + increment) % period + period) % period;
+            yPos = 0.0;
+            if (t <= period / 2)
+            {
+                xPos = 4 * stepSizeX / period * t - stepSizeX;
+            }
+            else
+            {
+                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
+            }
+            calcPositionZ();
+        }
+
+        public void calcPositionY(double increment)
+        {
+            t = ((t + increment) % period + period) % period;
+            xPos = 0.0;
+            if (t <= period / 2)
+            {
+                yPos = 4 * stepSizeY / period * t - stepSizeY;
+            }
+            else
+            {
+                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
+            }
+            calcPositionZ();
+        }
+
+        public abstract void calcPositionR(double increment);
 
         public byte getMotorData(int n)
         {

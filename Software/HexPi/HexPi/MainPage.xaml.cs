@@ -24,6 +24,7 @@ namespace HexPi
     {
         Controller control;
         DispatcherTimer timer;
+        DispatcherTimer timer2;
         public MainPage()
         {
             this.InitializeComponent();
@@ -67,6 +68,7 @@ namespace HexPi
             tBlockBodyX.Text = "X: " + control.X;
             tBlockBodyY.Text = "Y: " + control.Y;
             tBlockBodyZ.Text = "Z: " + control.Z;
+            tBlockBodyR.Text = "R: " + control.R;
 
 
         }

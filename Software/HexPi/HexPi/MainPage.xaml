@@ -30,6 +30,7 @@
         <TextBlock x:Name="tBlockBodyX" HorizontalAlignment="Left" Margin="172,249,0,0" TextWrapping="Wrap" Text="X:   0" VerticalAlignment="Top" Width="50"/>
         <TextBlock x:Name="tBlockBodyY" HorizontalAlignment="Left" Margin="172,274,0,0" TextWrapping="Wrap" Text="Y:   0" VerticalAlignment="Top" Width="50"/>
         <TextBlock x:Name="tBlockBodyZ" HorizontalAlignment="Left" Margin="172,299,0,0" TextWrapping="Wrap" Text="Z:   0" VerticalAlignment="Top" Width="50"/>
+        <TextBlock x:Name="tBlockBodyR" HorizontalAlignment="Left" Margin="172,324,0,0" TextWrapping="Wrap" Text="R:   0" VerticalAlignment="Top" Width="50"/>
 
     </Grid>
 </Page>

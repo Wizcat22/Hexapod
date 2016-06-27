@@ -15,5 +15,19 @@ namespace HexPi
             motorData2 = (byte)(1.38888888888 * gamma + 187.5);
         }
 
+        public override void calcPositionR(double increment)
+        {
+            t = ((t - increment) % period + period) % period;
+            yPos = 0.0;
+            if (t <= period / 2)
+            {
+                xPos = 4 * stepSizeX / period * t - stepSizeX;
+            }
+            else
+            {
+                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
+            }
+            calcPositionZ();
+        }
     }
 }
