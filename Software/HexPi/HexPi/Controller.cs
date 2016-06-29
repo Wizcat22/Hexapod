@@ -160,22 +160,47 @@ namespace HexPi
 
         private void setData()
         {
-            for (byte i = 0; i < legs.Length; i++)
-            {
-                if (i < 3)
-                {
-                    data[1 + (i * 3)] = legs[i].getMotorData(0);
-                    data[2 + (i * 3)] = legs[i].getMotorData(1);
-                    data[3 + (i * 3)] = legs[i].getMotorData(2);
-                }
-                else
-                {
-                    data[7 + (i * 3)] = legs[i].getMotorData(0);
-                    data[8 + (i * 3)] = legs[i].getMotorData(1);
-                    data[9 + (i * 3)] = legs[i].getMotorData(2);
-                }
+            data[1] = legs[0].getMotorData(0);
+            data[2] = legs[0].getMotorData(1);
+            data[3] = legs[0].getMotorData(2);
 
-            }
+            data[4] = legs[2].getMotorData(0);
+            data[5] = legs[2].getMotorData(1);
+            data[6] = legs[2].getMotorData(2);
+
+            data[7] = legs[4].getMotorData(0);
+            data[8] = legs[4].getMotorData(1);
+            data[9] = legs[4].getMotorData(2);
+
+            data[16] = legs[1].getMotorData(0);
+            data[17] = legs[1].getMotorData(1);
+            data[18] = legs[1].getMotorData(2);
+
+            data[19] = legs[3].getMotorData(0);
+            data[20] = legs[3].getMotorData(1);
+            data[21] = legs[3].getMotorData(2);
+
+            data[22] = legs[5].getMotorData(0);
+            data[23] = legs[5].getMotorData(1);
+            data[24] = legs[5].getMotorData(2);
+
+
+            //for (byte i = 0; i < legs.Length; i++)
+            //{
+            //    if (i < 3)
+            //    {
+            //        data[1 + (i * 3)] = legs[i].getMotorData(0);
+            //        data[2 + (i * 3)] = legs[i].getMotorData(1);
+            //        data[3 + (i * 3)] = legs[i].getMotorData(2);
+            //    }
+            //    else
+            //    {
+            //        data[7 + (i * 3)] = legs[i].getMotorData(0);
+            //        data[8 + (i * 3)] = legs[i].getMotorData(1);
+            //        data[9 + (i * 3)] = legs[i].getMotorData(2);
+            //    }
+
+            //}
         }
 
         private void init_Gamepad()
