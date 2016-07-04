@@ -9,6 +9,10 @@ namespace HexPi
     abstract class ILeg
     {
         protected double zOffset = 95;
+        protected double bodyWidth = 20;
+        protected double xoff = 0;
+        protected double yoff = 0;
+        protected double zoff = 0;
         protected double A1 = 30;
         protected double A2 = 60;
         protected double A3 = 95;
@@ -122,39 +126,62 @@ namespace HexPi
             }
         }
 
+        public double Xoff
+        {
+            get
+            {
+                return xoff;
+            }
+
+            set
+            {
+                xoff = value;
+            }
+        }
+
+        public double Yoff
+        {
+            get
+            {
+                return yoff;
+            }
+
+            set
+            {
+                yoff = value;
+            }
+        }
+
+        public double Zoff
+        {
+            get
+            {
+                return zoff;
+            }
+
+            set
+            {
+                zoff = value;
+            }
+        }
+
+        public double BodyWidth
+        {
+            get
+            {
+                return bodyWidth;
+            }
+
+            set
+            {
+                bodyWidth = value;
+            }
+        }
+
         public abstract void inverseKinematics();
+       
+
         
-
-        //public void calcPositions(byte direction, double increment)
-        //{
-        //    t = ((t + increment) % period + period) % period;
-
-        //    switch (direction)
-        //    {
-        //        //No motion
-        //        case 0:
-        //            calcPositionsCenter();
-        //            break;
-        //        //Motion in X-direction
-        //        case 1:
-        //            calcPositionsX();
-        //            break;
-        //        //Motion in Y-direction
-        //        case 2:
-        //            calcPositionsY();
-        //            break;
-        //        //Rotate
-        //        case 3:
-        //            calcPositionsRotation();
-        //            break;
-        //        default: break;
-        //    }
-
-        //    //Motion in z-direction
-        //    calcPositionZ();
-        //}
-
-        protected abstract void calcPositionZ();
         
 
         public void calcPositionCenter(double increment)
@@ -168,14 +195,14 @@ namespace HexPi
         public void calcPositionX(double increment)
         {
             t = ((t + increment) % period + period) % period;
-            yPos = 0.0;
+            yPos = 0.0 + (bodyWidth/2) - Math.Abs(yoff);
             if (t <= period / 2)
             {
-                xPos = 4 * stepSizeX / period * t - stepSizeX;
+                xPos = 4 * stepSizeX / period * t - stepSizeX + xoff;
             }
             else
             {
-                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
+                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX + xoff;
             }
             calcPositionZ();
         }
@@ -183,16 +210,37 @@ namespace HexPi
         public void calcPositionY(double increment)
         {
             t = ((t + increment) % period + period) % period;
-            xPos = 0.0;
+            xPos = 0.0 + xoff;
             if (t <= period / 2)
             {
-                yPos = 4 * stepSizeY / period * t - stepSizeY;
+                yPos = 4 * stepSizeY / period * t - stepSizeY + yoff;
             }
             else
             {
-                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
+                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY + yoff;
             }
             calcPositionZ();
+        }
+
+        protected void calcPositionZ()
+        {
+            if (t <= period / 2)
+            {
+                zPos = 0 + zoff;
+                
+            }
+            else
+            {
+                zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ + zoff;
+            }
+            if (zPos > stepSizeZ)
+            {
+                zPos = stepSizeZ;
+            }
+            else if (zPos < -stepSizeZ)
+            {
+                zPos = -stepSizeZ;
+            }
         }
 
         public abstract void calcPositionR(double increment);
@@ -209,7 +257,12 @@ namespace HexPi
 
         }
 
-        public abstract void calcData();
+        public void calcData()
+        {
+            motorData0 = (byte)(1.38888888888 * alpha + 187.5);
+            motorData1 = (byte)(1.38888888888 * beta + 187.5);
+            motorData2 = (byte)(1.38888888888 * gamma + 187.5);
+        }
 
     }
 }

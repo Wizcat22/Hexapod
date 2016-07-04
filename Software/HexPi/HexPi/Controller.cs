@@ -14,7 +14,10 @@ namespace HexPi
     class Controller
     {
         Gamepad input = null;
-        I2cDevice i2cDevice = null;
+        //I2cDevice i2cDeviceServo = null;
+        //I2cDevice i2cDeviceAccel = null;
+        ServoHat servo = new ServoHat();
+        Accelerometer accel = new Accelerometer();
         Task inputTask = null;
 
         double x = 0;
@@ -24,7 +27,7 @@ namespace HexPi
 
         double threshold = 0.25;
         byte lastDirection = 0;
-        enum directions{CENTER,X,Y,ROTATE};
+        enum directions { CENTER, X, Y, ROTATE };
 
         byte[] data = new byte[26];
         ILeg[] legs = { new LeftLeg(), new RightLeg(), new LeftLeg(), new RightLeg(), new LeftLeg(), new RightLeg() };
@@ -33,7 +36,7 @@ namespace HexPi
         {
             get
             {
-                return Math.Round(x,2);
+                return Math.Round(x, 2);
             }
         }
 
@@ -64,18 +67,15 @@ namespace HexPi
         public void init()
         {
             init_Gamepad();
-            init_i2c();
+            servo.init();
+            accel.init();
+
             //start byte 
             data[0] = 11;
             //end byte
             data[25] = 22;
 
-            //for (byte i = 0; i < legs.Length; i++)
-            //{
-                
-            //    legs[i] = ((i % 2) == 0) ? (ILeg)new LeftLeg() : (ILeg)new RightLeg();
-                
-            //}
+
 
             //TEST
             legs[0].TOffset = 25;
@@ -91,12 +91,48 @@ namespace HexPi
 
         private void HandleInputs()
         {
+
+
             while (true)
             {
                 if (input != null)
                 {
 
                     Task.Delay(10).Wait();
+
+                    accel.read();
+                    legs[1].Zoff = Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[3].Zoff = Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[5].Zoff = Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+
+                    legs[0].Zoff = -Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[2].Zoff = -Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[4].Zoff = -Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2);
+
+                    legs[1].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[3].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[5].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+
+                    legs[0].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[2].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+                    legs[4].Yoff = Math.Cos(accel.angleYZ) * (legs[1].BodyWidth / 2);
+
+                    //legs[1].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+                    //legs[3].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+                    //legs[5].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+
+                    //legs[0].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+                    //legs[2].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+                    //legs[4].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+
+
+                    //Debug.WriteLine("" + accel.angleYZ);
+                    //Debug.WriteLine("" + Math.Sin(accel.angleYZ));
+                    //Debug.WriteLine("" + Math.Sin(accel.angleYZ) * (legs[1].BodyWidth / 2));
+
+
+
+
                     GamepadReading gamepadStatus = input.GetCurrentReading();
                     x = gamepadStatus.LeftThumbstickY;
                     y = gamepadStatus.LeftThumbstickX;
@@ -108,15 +144,11 @@ namespace HexPi
                     {
                         if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)
                         {
-                            if(lastDirection != (byte)directions.X && lastDirection != (byte)directions.CENTER)
+                            if (lastDirection != (byte)directions.X && lastDirection != (byte)directions.CENTER)
                             {
                                 centerLegs();
                             }
-                            foreach (ILeg l in legs)
-                            {
-                                l.calcPositionX(x);
-                                lastDirection = (byte)directions.X;
-                            }
+                            lastDirection = (byte)directions.X;
                         }
                         else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold)
                         {
@@ -124,11 +156,7 @@ namespace HexPi
                             {
                                 centerLegs();
                             }
-                            foreach (ILeg l in legs)
-                            {
-                                l.calcPositionY(y);
-                                lastDirection = (byte)directions.Y;
-                            }
+                            lastDirection = (byte)directions.Y;
                         }
                         else if (Math.Abs(r) > Math.Abs(x) && Math.Abs(r) > Math.Abs(y) && Math.Abs(r) >= threshold)
                         {
@@ -136,23 +164,32 @@ namespace HexPi
                             {
                                 centerLegs();
                             }
-                            foreach (ILeg l in legs)
-                            {
-                                l.calcPositionR(r);
-                                lastDirection = (byte)directions.ROTATE;
-                            }
+                            lastDirection = (byte)directions.ROTATE;
                         }
-
+                    }
+                    else
+                    {
+                        x=0;
+                        y = 0;
+                        r = 0;
                     }
 
                     foreach (ILeg l in legs)
                     {
+                        switch (lastDirection)
+                        {
+                            case (byte)directions.CENTER: break;
+                            case (byte)directions.X: l.calcPositionX(x); break;
+                            case (byte)directions.Y: l.calcPositionY(y); break;
+                            case (byte)directions.ROTATE: l.calcPositionR(r); break;
+                        }
+
                         l.inverseKinematics();
                         l.calcData();
                     }
 
                     setData();
-                    sendData(data);
+                    servo.write(data);
 
                 }
             }
@@ -205,8 +242,8 @@ namespace HexPi
 
         private void init_Gamepad()
         {
-            
-            
+
+
             if (Gamepad.Gamepads.Count() > 0)
             {
                 input = Gamepad.Gamepads.First();
@@ -241,45 +278,7 @@ namespace HexPi
             }
         }
 
-        private async void init_i2c()
-        {
-            try
-            {
-                var settings = new I2cConnectionSettings(0x0); // Arduino address
 
-
-                settings.BusSpeed = I2cBusSpeed.StandardMode;
-
-                string aqs = I2cDevice.GetDeviceSelector("I2C1");
-
-                var dis = await DeviceInformation.FindAllAsync(aqs);
-
-                i2cDevice = await I2cDevice.FromIdAsync(dis[0].Id, settings);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Error: I2C device not found!");
-            }
-
-        }
-
-        private void sendData(byte[] b)
-        {
-            try
-            {
-                if (i2cDevice != null)
-                {
-                    //Debug.WriteLine("A: " + b[0] + " B: " + b[1] + " C: " + b[2]);
-                    i2cDevice.Write(b);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-
-        }
 
         private void centerLegs()
         {
@@ -291,7 +290,7 @@ namespace HexPi
                 l.inverseKinematics();
                 l.calcData();
                 setData();
-                sendData(data);
+                servo.write(data);
                 Task.Delay(time).Wait();
 
                 //Center
@@ -300,7 +299,7 @@ namespace HexPi
                 l.inverseKinematics();
                 l.calcData();
                 setData();
-                sendData(data);
+                servo.write(data);
                 Task.Delay(time).Wait();
 
                 //Down
@@ -308,7 +307,7 @@ namespace HexPi
                 l.inverseKinematics();
                 l.calcData();
                 setData();
-                sendData(data);
+                servo.write(data);
                 Task.Delay(time).Wait();
 
             }

@@ -8,12 +8,7 @@ namespace HexPi
 {
     sealed class RightLeg : ILeg
     {
-        public override void calcData()
-        {
-            motorData0 = (byte)(1.38888888888 * alpha + 187.5);
-            motorData1 = (byte)(1.38888888888 * beta + 187.5);
-            motorData2 = (byte)(1.38888888888 * gamma + 187.5);
-        }
+        
 
         public override void inverseKinematics()
         {
@@ -40,17 +35,17 @@ namespace HexPi
 
         }
 
-        protected override void calcPositionZ()
-        {
-            if (t <= period / 2)
-            {
-                zPos = 0;
-            }
-            else
-            {
-                zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ;
-            }
-        }
+        //protected override void calcPositionZ()
+        //{
+        //    if (t <= period / 2)
+        //    {
+        //        zPos = 0 + zoff;
+        //    }
+        //    else
+        //    {
+        //        zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ + zoff;
+        //    }
+        //}
 
         public override void calcPositionR(double increment)
         {
