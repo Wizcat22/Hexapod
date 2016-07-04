@@ -35,7 +35,7 @@ unsigned volatile char loop = 0; //loop count
 void init_twi(void){
 
 	//Set address of i2c slave and enable general call
-	TWAR |= (SLAVE_ADDRESS<<1) | (1<<TWGCE);
+	TWAR = ((SLAVE_ADDRESS<<1) | (1<<TWGCE));
 	TWCR |= (1<<TWEN) | (1<<TWEA);
 	TWCR &= ~((1<<TWSTA) | (1<<TWSTO)) ;
 

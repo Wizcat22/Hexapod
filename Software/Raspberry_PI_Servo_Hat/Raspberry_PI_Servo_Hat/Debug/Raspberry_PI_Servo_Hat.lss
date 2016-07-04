@@ -3,31 +3,31 @@ Raspberry_PI_Servo_Hat.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000392  2**0
+  0 .data         00000000  00800100  00800100  0000038e  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000031e  00000000  00000000  00000074  2**1
+  1 .text         0000031a  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000019  00800100  00800100  00000392  2**0
+  2 .bss          00000019  00800100  00800100  0000038e  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000392  2**0
+  3 .comment      00000030  00000000  00000000  0000038e  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003c4  2**2
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003c0  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000058  00000000  00000000  00000400  2**0
+  5 .debug_aranges 00000058  00000000  00000000  000003fc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000001dc  00000000  00000000  00000458  2**0
+  6 .debug_info   000001dc  00000000  00000000  00000454  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000000fd  00000000  00000000  00000634  2**0
+  7 .debug_abbrev 000000fd  00000000  00000000  00000630  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000180  00000000  00000000  00000731  2**0
+  8 .debug_line   00000180  00000000  00000000  0000072d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000ec  00000000  00000000  000008b4  2**2
+  9 .debug_frame  000000ec  00000000  00000000  000008b0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000001d1  00000000  00000000  000009a0  2**0
+ 10 .debug_str    000001d1  00000000  00000000  0000099c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000001df  00000000  00000000  00000b71  2**0
+ 11 .debug_loc    000001df  00000000  00000000  00000b6d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000048  00000000  00000000  00000d50  2**0
+ 12 .debug_ranges 00000048  00000000  00000000  00000d4c  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -49,9 +49,9 @@ Disassembly of section .text:
   34:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   38:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   3c:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
-  40:	0c 94 7a 00 	jmp	0xf4	; 0xf4 <__vector_16>
-  44:	0c 94 8d 00 	jmp	0x11a	; 0x11a <__vector_17>
-  48:	0c 94 9f 00 	jmp	0x13e	; 0x13e <__vector_18>
+  40:	0c 94 78 00 	jmp	0xf0	; 0xf0 <__vector_16>
+  44:	0c 94 8b 00 	jmp	0x116	; 0x116 <__vector_17>
+  48:	0c 94 9d 00 	jmp	0x13a	; 0x13a <__vector_18>
   4c:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   50:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   54:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
@@ -61,18 +61,18 @@ Disassembly of section .text:
   64:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   68:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
   6c:	0c 94 56 00 	jmp	0xac	; 0xac <__bad_interrupt>
-  70:	b9 00       	.word	0x00b9	; ????
-  72:	bc 00       	.word	0x00bc	; ????
-  74:	bf 00       	.word	0x00bf	; ????
-  76:	c2 00       	.word	0x00c2	; ????
-  78:	c5 00       	.word	0x00c5	; ????
-  7a:	c8 00       	.word	0x00c8	; ????
-  7c:	cb 00       	.word	0x00cb	; ????
-  7e:	ce 00       	.word	0x00ce	; ????
-  80:	d1 00       	.word	0x00d1	; ????
-  82:	d4 00       	.word	0x00d4	; ????
-  84:	d7 00       	.word	0x00d7	; ????
-  86:	da 00       	.word	0x00da	; ????
+  70:	b7 00       	.word	0x00b7	; ????
+  72:	ba 00       	.word	0x00ba	; ????
+  74:	bd 00       	.word	0x00bd	; ????
+  76:	c0 00       	.word	0x00c0	; ????
+  78:	c3 00       	.word	0x00c3	; ????
+  7a:	c6 00       	.word	0x00c6	; ????
+  7c:	c9 00       	.word	0x00c9	; ????
+  7e:	cc 00       	.word	0x00cc	; ????
+  80:	cf 00       	.word	0x00cf	; ????
+  82:	d2 00       	.word	0x00d2	; ????
+  84:	d5 00       	.word	0x00d5	; ????
+  86:	d8 00       	.word	0x00d8	; ????
 
 00000088 <__ctors_end>:
   88:	11 24       	eor	r1, r1
@@ -95,8 +95,8 @@ Disassembly of section .text:
   9e:	a9 31       	cpi	r26, 0x19	; 25
   a0:	b2 07       	cpc	r27, r18
   a2:	e1 f7       	brne	.-8      	; 0x9c <.do_clear_bss_loop>
-  a4:	0e 94 15 01 	call	0x22a	; 0x22a <main>
-  a8:	0c 94 8d 01 	jmp	0x31a	; 0x31a <_exit>
+  a4:	0e 94 13 01 	call	0x226	; 0x226 <main>
+  a8:	0c 94 8b 01 	jmp	0x316	; 0x316 <_exit>
 
 000000ac <__bad_interrupt>:
   ac:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -107,568 +107,565 @@ Disassembly of section .text:
 void init_twi(void){
 
 	//Set address of i2c slave and enable general call
-	TWAR |= (SLAVE_ADDRESS<<1) | (1<<TWGCE);
-  b0:	ea eb       	ldi	r30, 0xBA	; 186
-  b2:	f0 e0       	ldi	r31, 0x00	; 0
-  b4:	80 81       	ld	r24, Z
-  b6:	85 68       	ori	r24, 0x85	; 133
-  b8:	80 83       	st	Z, r24
+	TWAR = ((SLAVE_ADDRESS<<1) | (1<<TWGCE));
+  b0:	85 e8       	ldi	r24, 0x85	; 133
+  b2:	80 93 ba 00 	sts	0x00BA, r24
 	TWCR |= (1<<TWEN) | (1<<TWEA);
-  ba:	ec eb       	ldi	r30, 0xBC	; 188
-  bc:	f0 e0       	ldi	r31, 0x00	; 0
-  be:	80 81       	ld	r24, Z
-  c0:	84 64       	ori	r24, 0x44	; 68
-  c2:	80 83       	st	Z, r24
+  b6:	ec eb       	ldi	r30, 0xBC	; 188
+  b8:	f0 e0       	ldi	r31, 0x00	; 0
+  ba:	80 81       	ld	r24, Z
+  bc:	84 64       	ori	r24, 0x44	; 68
+  be:	80 83       	st	Z, r24
 	TWCR &= ~((1<<TWSTA) | (1<<TWSTO)) ;
-  c4:	80 81       	ld	r24, Z
-  c6:	8f 7c       	andi	r24, 0xCF	; 207
-  c8:	80 83       	st	Z, r24
-  ca:	08 95       	ret
+  c0:	80 81       	ld	r24, Z
+  c2:	8f 7c       	andi	r24, 0xCF	; 207
+  c4:	80 83       	st	Z, r24
+  c6:	08 95       	ret
 
-000000cc <init_outputs>:
+000000c8 <init_outputs>:
 //------------------------
 
 //INIT OUTPUTS
 void init_outputs(void){
 
 	DDRA = 0xFF; //Servo Outputs: PA0=SERVO_19 - PA7 = SERVO_12
-  cc:	8f ef       	ldi	r24, 0xFF	; 255
-  ce:	81 b9       	out	0x01, r24	; 1
+  c8:	8f ef       	ldi	r24, 0xFF	; 255
+  ca:	81 b9       	out	0x01, r24	; 1
 	DDRB = 0x1F; //Servo Outputs: PB0=SERVO_20 - PB4 = SERVO_24
-  d0:	9f e1       	ldi	r25, 0x1F	; 31
-  d2:	94 b9       	out	0x04, r25	; 4
+  cc:	9f e1       	ldi	r25, 0x1F	; 31
+  ce:	94 b9       	out	0x04, r25	; 4
 	DDRC = 0xFC; //Servo Outputs: PC2=SERVO_6 - PC7 = SERVO_11
-  d4:	9c ef       	ldi	r25, 0xFC	; 252
-  d6:	97 b9       	out	0x07, r25	; 7
+  d0:	9c ef       	ldi	r25, 0xFC	; 252
+  d2:	97 b9       	out	0x07, r25	; 7
 	DDRD = 0xFF; //Servo Outputs: PD3=SERVO_1 - PD7 = SERVO_5 ; LED Outputs: PD0 = LED_1 - PD2 = LED_3
-  d8:	8a b9       	out	0x0a, r24	; 10
-  da:	08 95       	ret
+  d4:	8a b9       	out	0x0a, r24	; 10
+  d6:	08 95       	ret
 
-000000dc <init_timer>:
+000000d8 <init_timer>:
 
 //INIT TIMER
 void init_timer(void){
 
 	//TIMER0 (8bit) , Mode 3 - Fast PWM TOP = 0xFF ,OCRx update at TOP, prescaler = 64 , Time per overflow = 0.002048 sec. = 2.048 ms (at 8Mhz Clock)
 	TCCR0A |= (1<<WGM01) | (1<<WGM00);
-  dc:	84 b5       	in	r24, 0x24	; 36
-  de:	83 60       	ori	r24, 0x03	; 3
-  e0:	84 bd       	out	0x24, r24	; 36
+  d8:	84 b5       	in	r24, 0x24	; 36
+  da:	83 60       	ori	r24, 0x03	; 3
+  dc:	84 bd       	out	0x24, r24	; 36
 	TCCR0B |= (1<<CS01) | (1<<CS00);
-  e2:	85 b5       	in	r24, 0x25	; 37
-  e4:	83 60       	ori	r24, 0x03	; 3
-  e6:	85 bd       	out	0x25, r24	; 37
+  de:	85 b5       	in	r24, 0x25	; 37
+  e0:	83 60       	ori	r24, 0x03	; 3
+  e2:	85 bd       	out	0x25, r24	; 37
 
 	//Enable TIMER0 Interrupts (Compare Match A/B and Overflow)
 	TIMSK0 |= (1<<OCIE0A) | (1<<OCIE0B) | (1<<TOIE0);
-  e8:	ee e6       	ldi	r30, 0x6E	; 110
-  ea:	f0 e0       	ldi	r31, 0x00	; 0
-  ec:	80 81       	ld	r24, Z
-  ee:	87 60       	ori	r24, 0x07	; 7
-  f0:	80 83       	st	Z, r24
-  f2:	08 95       	ret
+  e4:	ee e6       	ldi	r30, 0x6E	; 110
+  e6:	f0 e0       	ldi	r31, 0x00	; 0
+  e8:	80 81       	ld	r24, Z
+  ea:	87 60       	ori	r24, 0x07	; 7
+  ec:	80 83       	st	Z, r24
+  ee:	08 95       	ret
 
-000000f4 <__vector_16>:
+000000f0 <__vector_16>:
 }
 //------------------------
 
 //ISR OC0A -> RESET SERVOS 1 - 12
 ISR(TIMER0_COMPA_vect){
-  f4:	1f 92       	push	r1
+  f0:	1f 92       	push	r1
+  f2:	0f 92       	push	r0
+  f4:	0f b6       	in	r0, 0x3f	; 63
   f6:	0f 92       	push	r0
-  f8:	0f b6       	in	r0, 0x3f	; 63
-  fa:	0f 92       	push	r0
-  fc:	11 24       	eor	r1, r1
-  fe:	8f 93       	push	r24
+  f8:	11 24       	eor	r1, r1
+  fa:	8f 93       	push	r24
 
 	PORTD &= ~(0xF8) ;
- 100:	8b b1       	in	r24, 0x0b	; 11
- 102:	87 70       	andi	r24, 0x07	; 7
- 104:	8b b9       	out	0x0b, r24	; 11
+  fc:	8b b1       	in	r24, 0x0b	; 11
+  fe:	87 70       	andi	r24, 0x07	; 7
+ 100:	8b b9       	out	0x0b, r24	; 11
 	PORTC &= ~(0xFC) ;
- 106:	88 b1       	in	r24, 0x08	; 8
- 108:	83 70       	andi	r24, 0x03	; 3
- 10a:	88 b9       	out	0x08, r24	; 8
+ 102:	88 b1       	in	r24, 0x08	; 8
+ 104:	83 70       	andi	r24, 0x03	; 3
+ 106:	88 b9       	out	0x08, r24	; 8
 	PORTA &= ~(0x80) ;
- 10c:	17 98       	cbi	0x02, 7	; 2
+ 108:	17 98       	cbi	0x02, 7	; 2
 
 }
- 10e:	8f 91       	pop	r24
+ 10a:	8f 91       	pop	r24
+ 10c:	0f 90       	pop	r0
+ 10e:	0f be       	out	0x3f, r0	; 63
  110:	0f 90       	pop	r0
- 112:	0f be       	out	0x3f, r0	; 63
- 114:	0f 90       	pop	r0
- 116:	1f 90       	pop	r1
- 118:	18 95       	reti
+ 112:	1f 90       	pop	r1
+ 114:	18 95       	reti
 
-0000011a <__vector_17>:
+00000116 <__vector_17>:
 //------------------------
 
 //ISR OC0A -> RESET SERVOS 13 - 24
 ISR(TIMER0_COMPB_vect){
- 11a:	1f 92       	push	r1
+ 116:	1f 92       	push	r1
+ 118:	0f 92       	push	r0
+ 11a:	0f b6       	in	r0, 0x3f	; 63
  11c:	0f 92       	push	r0
- 11e:	0f b6       	in	r0, 0x3f	; 63
- 120:	0f 92       	push	r0
- 122:	11 24       	eor	r1, r1
- 124:	8f 93       	push	r24
+ 11e:	11 24       	eor	r1, r1
+ 120:	8f 93       	push	r24
 
 	PORTA &= ~(0x7F) ;
- 126:	82 b1       	in	r24, 0x02	; 2
- 128:	80 78       	andi	r24, 0x80	; 128
- 12a:	82 b9       	out	0x02, r24	; 2
+ 122:	82 b1       	in	r24, 0x02	; 2
+ 124:	80 78       	andi	r24, 0x80	; 128
+ 126:	82 b9       	out	0x02, r24	; 2
 	PORTB &= ~(0x1F) ;
- 12c:	85 b1       	in	r24, 0x05	; 5
- 12e:	80 7e       	andi	r24, 0xE0	; 224
- 130:	85 b9       	out	0x05, r24	; 5
+ 128:	85 b1       	in	r24, 0x05	; 5
+ 12a:	80 7e       	andi	r24, 0xE0	; 224
+ 12c:	85 b9       	out	0x05, r24	; 5
 
 }
- 132:	8f 91       	pop	r24
+ 12e:	8f 91       	pop	r24
+ 130:	0f 90       	pop	r0
+ 132:	0f be       	out	0x3f, r0	; 63
  134:	0f 90       	pop	r0
- 136:	0f be       	out	0x3f, r0	; 63
- 138:	0f 90       	pop	r0
- 13a:	1f 90       	pop	r1
- 13c:	18 95       	reti
+ 136:	1f 90       	pop	r1
+ 138:	18 95       	reti
 
-0000013e <__vector_18>:
+0000013a <__vector_18>:
 //------------------------
 
 //ISR TIOV -> SET SERVO OUTPUTS AND SET CORRESPONDING OC0A/OC0B VALUES
 ISR(TIMER0_OVF_vect){
- 13e:	1f 92       	push	r1
+ 13a:	1f 92       	push	r1
+ 13c:	0f 92       	push	r0
+ 13e:	0f b6       	in	r0, 0x3f	; 63
  140:	0f 92       	push	r0
- 142:	0f b6       	in	r0, 0x3f	; 63
- 144:	0f 92       	push	r0
- 146:	11 24       	eor	r1, r1
- 148:	5f 93       	push	r21
- 14a:	6f 93       	push	r22
- 14c:	7f 93       	push	r23
- 14e:	8f 93       	push	r24
- 150:	9f 93       	push	r25
- 152:	af 93       	push	r26
- 154:	bf 93       	push	r27
- 156:	ef 93       	push	r30
- 158:	ff 93       	push	r31
+ 142:	11 24       	eor	r1, r1
+ 144:	5f 93       	push	r21
+ 146:	6f 93       	push	r22
+ 148:	7f 93       	push	r23
+ 14a:	8f 93       	push	r24
+ 14c:	9f 93       	push	r25
+ 14e:	af 93       	push	r26
+ 150:	bf 93       	push	r27
+ 152:	ef 93       	push	r30
+ 154:	ff 93       	push	r31
 
 	switch (loop)
- 15a:	e0 91 00 01 	lds	r30, 0x0100
- 15e:	8e 2f       	mov	r24, r30
- 160:	90 e0       	ldi	r25, 0x00	; 0
- 162:	8c 30       	cpi	r24, 0x0C	; 12
- 164:	91 05       	cpc	r25, r1
- 166:	40 f5       	brcc	.+80     	; 0x1b8 <__vector_18+0x7a>
- 168:	fc 01       	movw	r30, r24
- 16a:	e8 5c       	subi	r30, 0xC8	; 200
- 16c:	ff 4f       	sbci	r31, 0xFF	; 255
- 16e:	0c 94 73 01 	jmp	0x2e6	; 0x2e6 <__tablejump2__>
+ 156:	e0 91 00 01 	lds	r30, 0x0100
+ 15a:	8e 2f       	mov	r24, r30
+ 15c:	90 e0       	ldi	r25, 0x00	; 0
+ 15e:	8c 30       	cpi	r24, 0x0C	; 12
+ 160:	91 05       	cpc	r25, r1
+ 162:	40 f5       	brcc	.+80     	; 0x1b4 <__vector_18+0x7a>
+ 164:	fc 01       	movw	r30, r24
+ 166:	e8 5c       	subi	r30, 0xC8	; 200
+ 168:	ff 4f       	sbci	r31, 0xFF	; 255
+ 16a:	0c 94 71 01 	jmp	0x2e2	; 0x2e2 <__tablejump2__>
 	{
 		case 0:
 		PORTD |= (1<<PD3); //SERVO 1
- 172:	5b 9a       	sbi	0x0b, 3	; 11
+ 16e:	5b 9a       	sbi	0x0b, 3	; 11
 		PORTA |= (1<<PA6); //SERVO 13
- 174:	16 9a       	sbi	0x02, 6	; 2
+ 170:	16 9a       	sbi	0x02, 6	; 2
 		break;
- 176:	20 c0       	rjmp	.+64     	; 0x1b8 <__vector_18+0x7a>
+ 172:	20 c0       	rjmp	.+64     	; 0x1b4 <__vector_18+0x7a>
 		case 1:
 		PORTD |= (1<<PD4); //SERVO 2
- 178:	5c 9a       	sbi	0x0b, 4	; 11
+ 174:	5c 9a       	sbi	0x0b, 4	; 11
 		PORTA |= (1<<PA5); //SERVO 14
- 17a:	15 9a       	sbi	0x02, 5	; 2
+ 176:	15 9a       	sbi	0x02, 5	; 2
 		break;
- 17c:	1d c0       	rjmp	.+58     	; 0x1b8 <__vector_18+0x7a>
+ 178:	1d c0       	rjmp	.+58     	; 0x1b4 <__vector_18+0x7a>
 		case 2:
 		PORTD |= (1<<PD5); //SERVO 3
- 17e:	5d 9a       	sbi	0x0b, 5	; 11
+ 17a:	5d 9a       	sbi	0x0b, 5	; 11
 		PORTA |= (1<<PA4); //SERVO 15
- 180:	14 9a       	sbi	0x02, 4	; 2
+ 17c:	14 9a       	sbi	0x02, 4	; 2
 		break;
- 182:	1a c0       	rjmp	.+52     	; 0x1b8 <__vector_18+0x7a>
+ 17e:	1a c0       	rjmp	.+52     	; 0x1b4 <__vector_18+0x7a>
 		case 3:
 		PORTD |= (1<<PD6); //SERVO 4
- 184:	5e 9a       	sbi	0x0b, 6	; 11
+ 180:	5e 9a       	sbi	0x0b, 6	; 11
 		PORTA |= (1<<PA3); //SERVO 16
- 186:	13 9a       	sbi	0x02, 3	; 2
+ 182:	13 9a       	sbi	0x02, 3	; 2
 		break;
- 188:	17 c0       	rjmp	.+46     	; 0x1b8 <__vector_18+0x7a>
+ 184:	17 c0       	rjmp	.+46     	; 0x1b4 <__vector_18+0x7a>
 		case 4:
 		PORTD |= (1<<PD7); //SERVO 5
- 18a:	5f 9a       	sbi	0x0b, 7	; 11
+ 186:	5f 9a       	sbi	0x0b, 7	; 11
 		PORTA |= (1<<PA2); //SERVO 17
- 18c:	12 9a       	sbi	0x02, 2	; 2
+ 188:	12 9a       	sbi	0x02, 2	; 2
 		break;
- 18e:	14 c0       	rjmp	.+40     	; 0x1b8 <__vector_18+0x7a>
+ 18a:	14 c0       	rjmp	.+40     	; 0x1b4 <__vector_18+0x7a>
 		case 5:
 		PORTC |= (1<<PC2); //SERVO 6
- 190:	42 9a       	sbi	0x08, 2	; 8
+ 18c:	42 9a       	sbi	0x08, 2	; 8
 		PORTA |= (1<<PA1); //SERVO 18
- 192:	11 9a       	sbi	0x02, 1	; 2
+ 18e:	11 9a       	sbi	0x02, 1	; 2
 		break;
- 194:	11 c0       	rjmp	.+34     	; 0x1b8 <__vector_18+0x7a>
+ 190:	11 c0       	rjmp	.+34     	; 0x1b4 <__vector_18+0x7a>
 		case 6:
 		PORTC |= (1<<PC3); //SERVO 7
- 196:	43 9a       	sbi	0x08, 3	; 8
+ 192:	43 9a       	sbi	0x08, 3	; 8
 		PORTA |= (1<<PA0); //SERVO 19
- 198:	10 9a       	sbi	0x02, 0	; 2
+ 194:	10 9a       	sbi	0x02, 0	; 2
 		break;
- 19a:	0e c0       	rjmp	.+28     	; 0x1b8 <__vector_18+0x7a>
+ 196:	0e c0       	rjmp	.+28     	; 0x1b4 <__vector_18+0x7a>
 		case 7:
 		PORTC |= (1<<PC4); //SERVO 8
- 19c:	44 9a       	sbi	0x08, 4	; 8
+ 198:	44 9a       	sbi	0x08, 4	; 8
 		PORTB |= (1<<PB0); //SERVO 20
- 19e:	28 9a       	sbi	0x05, 0	; 5
+ 19a:	28 9a       	sbi	0x05, 0	; 5
 		break;
- 1a0:	0b c0       	rjmp	.+22     	; 0x1b8 <__vector_18+0x7a>
+ 19c:	0b c0       	rjmp	.+22     	; 0x1b4 <__vector_18+0x7a>
 		case 8:
 		PORTC |= (1<<PC5); //SERVO 9
- 1a2:	45 9a       	sbi	0x08, 5	; 8
+ 19e:	45 9a       	sbi	0x08, 5	; 8
 		PORTB |= (1<<PB1); //SERVO 21
- 1a4:	29 9a       	sbi	0x05, 1	; 5
+ 1a0:	29 9a       	sbi	0x05, 1	; 5
 		break;
- 1a6:	08 c0       	rjmp	.+16     	; 0x1b8 <__vector_18+0x7a>
+ 1a2:	08 c0       	rjmp	.+16     	; 0x1b4 <__vector_18+0x7a>
 		case 9:
 		PORTC |= (1<<PC6); //SERVO 10
- 1a8:	46 9a       	sbi	0x08, 6	; 8
+ 1a4:	46 9a       	sbi	0x08, 6	; 8
 		PORTB |= (1<<PB2); //SERVO 22
- 1aa:	2a 9a       	sbi	0x05, 2	; 5
+ 1a6:	2a 9a       	sbi	0x05, 2	; 5
 		break;
- 1ac:	05 c0       	rjmp	.+10     	; 0x1b8 <__vector_18+0x7a>
+ 1a8:	05 c0       	rjmp	.+10     	; 0x1b4 <__vector_18+0x7a>
 		case 10:
 		PORTC |= (1<<PC7); //SERVO 11
- 1ae:	47 9a       	sbi	0x08, 7	; 8
+ 1aa:	47 9a       	sbi	0x08, 7	; 8
 		PORTB |= (1<<PB3); //SERVO 23
- 1b0:	2b 9a       	sbi	0x05, 3	; 5
+ 1ac:	2b 9a       	sbi	0x05, 3	; 5
 		break;
- 1b2:	02 c0       	rjmp	.+4      	; 0x1b8 <__vector_18+0x7a>
+ 1ae:	02 c0       	rjmp	.+4      	; 0x1b4 <__vector_18+0x7a>
 		case 11:
 		PORTA |= (1<<PA7); //SERVO 12
- 1b4:	17 9a       	sbi	0x02, 7	; 2
+ 1b0:	17 9a       	sbi	0x02, 7	; 2
 		PORTB |= (1<<PB4); //SERVO 24
- 1b6:	2c 9a       	sbi	0x05, 4	; 5
+ 1b2:	2c 9a       	sbi	0x05, 4	; 5
 		break;
 		default: break;
 	}
 	loop = (loop+1)%(NUM_SERVOS/2);
- 1b8:	80 91 00 01 	lds	r24, 0x0100
- 1bc:	90 e0       	ldi	r25, 0x00	; 0
- 1be:	01 96       	adiw	r24, 0x01	; 1
- 1c0:	6c e0       	ldi	r22, 0x0C	; 12
- 1c2:	70 e0       	ldi	r23, 0x00	; 0
- 1c4:	0e 94 5f 01 	call	0x2be	; 0x2be <__divmodhi4>
- 1c8:	80 93 00 01 	sts	0x0100, r24
+ 1b4:	80 91 00 01 	lds	r24, 0x0100
+ 1b8:	90 e0       	ldi	r25, 0x00	; 0
+ 1ba:	01 96       	adiw	r24, 0x01	; 1
+ 1bc:	6c e0       	ldi	r22, 0x0C	; 12
+ 1be:	70 e0       	ldi	r23, 0x00	; 0
+ 1c0:	0e 94 5d 01 	call	0x2ba	; 0x2ba <__divmodhi4>
+ 1c4:	80 93 00 01 	sts	0x0100, r24
 	OCR0A = data[loop];
- 1cc:	e0 91 00 01 	lds	r30, 0x0100
- 1d0:	f0 e0       	ldi	r31, 0x00	; 0
- 1d2:	ef 5f       	subi	r30, 0xFF	; 255
- 1d4:	fe 4f       	sbci	r31, 0xFE	; 254
- 1d6:	80 81       	ld	r24, Z
- 1d8:	87 bd       	out	0x27, r24	; 39
+ 1c8:	e0 91 00 01 	lds	r30, 0x0100
+ 1cc:	f0 e0       	ldi	r31, 0x00	; 0
+ 1ce:	ef 5f       	subi	r30, 0xFF	; 255
+ 1d0:	fe 4f       	sbci	r31, 0xFE	; 254
+ 1d2:	80 81       	ld	r24, Z
+ 1d4:	87 bd       	out	0x27, r24	; 39
 	OCR0B = data[loop+(NUM_SERVOS/2)];
- 1da:	e0 91 00 01 	lds	r30, 0x0100
- 1de:	f0 e0       	ldi	r31, 0x00	; 0
- 1e0:	e3 5f       	subi	r30, 0xF3	; 243
- 1e2:	fe 4f       	sbci	r31, 0xFE	; 254
- 1e4:	80 81       	ld	r24, Z
- 1e6:	88 bd       	out	0x28, r24	; 40
+ 1d6:	e0 91 00 01 	lds	r30, 0x0100
+ 1da:	f0 e0       	ldi	r31, 0x00	; 0
+ 1dc:	e3 5f       	subi	r30, 0xF3	; 243
+ 1de:	fe 4f       	sbci	r31, 0xFE	; 254
+ 1e0:	80 81       	ld	r24, Z
+ 1e2:	88 bd       	out	0x28, r24	; 40
 
 }
- 1e8:	ff 91       	pop	r31
- 1ea:	ef 91       	pop	r30
- 1ec:	bf 91       	pop	r27
- 1ee:	af 91       	pop	r26
- 1f0:	9f 91       	pop	r25
- 1f2:	8f 91       	pop	r24
- 1f4:	7f 91       	pop	r23
- 1f6:	6f 91       	pop	r22
- 1f8:	5f 91       	pop	r21
+ 1e4:	ff 91       	pop	r31
+ 1e6:	ef 91       	pop	r30
+ 1e8:	bf 91       	pop	r27
+ 1ea:	af 91       	pop	r26
+ 1ec:	9f 91       	pop	r25
+ 1ee:	8f 91       	pop	r24
+ 1f0:	7f 91       	pop	r23
+ 1f2:	6f 91       	pop	r22
+ 1f4:	5f 91       	pop	r21
+ 1f6:	0f 90       	pop	r0
+ 1f8:	0f be       	out	0x3f, r0	; 63
  1fa:	0f 90       	pop	r0
- 1fc:	0f be       	out	0x3f, r0	; 63
- 1fe:	0f 90       	pop	r0
- 200:	1f 90       	pop	r1
- 202:	18 95       	reti
+ 1fc:	1f 90       	pop	r1
+ 1fe:	18 95       	reti
 
-00000204 <init_all>:
+00000200 <init_all>:
 
 //INIT ALL
 void init_all(void){
 
 	//SET INITIAL SERVO POSITION (1,5ms)
 	for (int i=0;i<NUM_SERVOS;i++)
- 204:	80 e0       	ldi	r24, 0x00	; 0
- 206:	90 e0       	ldi	r25, 0x00	; 0
+ 200:	80 e0       	ldi	r24, 0x00	; 0
+ 202:	90 e0       	ldi	r25, 0x00	; 0
 	{
 		data[i] = SERVO_STD_VAL;
- 208:	2b eb       	ldi	r18, 0xBB	; 187
- 20a:	fc 01       	movw	r30, r24
- 20c:	ef 5f       	subi	r30, 0xFF	; 255
- 20e:	fe 4f       	sbci	r31, 0xFE	; 254
- 210:	20 83       	st	Z, r18
+ 204:	2b eb       	ldi	r18, 0xBB	; 187
+ 206:	fc 01       	movw	r30, r24
+ 208:	ef 5f       	subi	r30, 0xFF	; 255
+ 20a:	fe 4f       	sbci	r31, 0xFE	; 254
+ 20c:	20 83       	st	Z, r18
 
 //INIT ALL
 void init_all(void){
 
 	//SET INITIAL SERVO POSITION (1,5ms)
 	for (int i=0;i<NUM_SERVOS;i++)
- 212:	01 96       	adiw	r24, 0x01	; 1
- 214:	88 31       	cpi	r24, 0x18	; 24
- 216:	91 05       	cpc	r25, r1
- 218:	c1 f7       	brne	.-16     	; 0x20a <init_all+0x6>
+ 20e:	01 96       	adiw	r24, 0x01	; 1
+ 210:	88 31       	cpi	r24, 0x18	; 24
+ 212:	91 05       	cpc	r25, r1
+ 214:	c1 f7       	brne	.-16     	; 0x206 <init_all+0x6>
 	{
 		data[i] = SERVO_STD_VAL;
 	}
 
 	init_twi();
- 21a:	0e 94 58 00 	call	0xb0	; 0xb0 <init_twi>
+ 216:	0e 94 58 00 	call	0xb0	; 0xb0 <init_twi>
 
 	init_outputs();
- 21e:	0e 94 66 00 	call	0xcc	; 0xcc <init_outputs>
+ 21a:	0e 94 64 00 	call	0xc8	; 0xc8 <init_outputs>
 
 	init_timer();
- 222:	0e 94 6e 00 	call	0xdc	; 0xdc <init_timer>
+ 21e:	0e 94 6c 00 	call	0xd8	; 0xd8 <init_timer>
 
 	sei();
- 226:	78 94       	sei
- 228:	08 95       	ret
+ 222:	78 94       	sei
+ 224:	08 95       	ret
 
-0000022a <main>:
+00000226 <main>:
 //------------------------
 
 //MAIN
 int main(void)
 {
 	init_all();
- 22a:	0e 94 02 01 	call	0x204	; 0x204 <init_all>
+ 226:	0e 94 00 01 	call	0x200	; 0x200 <init_all>
 	unsigned char data_counter = 0;
 	unsigned char init_received = 0;
- 22e:	10 e0       	ldi	r17, 0x00	; 0
+ 22a:	10 e0       	ldi	r17, 0x00	; 0
 
 //MAIN
 int main(void)
 {
 	init_all();
 	unsigned char data_counter = 0;
- 230:	80 e0       	ldi	r24, 0x00	; 0
+ 22c:	80 e0       	ldi	r24, 0x00	; 0
 	unsigned char twi_data = 0;
 
 	//main -> get data (twi)
 	while (1)
 	{
 		while (!(TWCR & (1<<TWINT))){}
- 232:	ec eb       	ldi	r30, 0xBC	; 188
- 234:	f0 e0       	ldi	r31, 0x00	; 0
+ 22e:	ec eb       	ldi	r30, 0xBC	; 188
+ 230:	f0 e0       	ldi	r31, 0x00	; 0
 
 		switch(TWSR){
- 236:	c9 eb       	ldi	r28, 0xB9	; 185
- 238:	d0 e0       	ldi	r29, 0x00	; 0
+ 232:	c9 eb       	ldi	r28, 0xB9	; 185
+ 234:	d0 e0       	ldi	r29, 0x00	; 0
 			break;
 			case 0x80: //Addressed with own address and data byte received, ACK returned
 			
 			case 0x90: //Addressed with general call and data byte received, ACK returned
 			LED2_ON;
 			twi_data = TWDR;
- 23a:	2b eb       	ldi	r18, 0xBB	; 187
- 23c:	30 e0       	ldi	r19, 0x00	; 0
- 23e:	00 e0       	ldi	r16, 0x00	; 0
+ 236:	2b eb       	ldi	r18, 0xBB	; 187
+ 238:	30 e0       	ldi	r19, 0x00	; 0
+ 23a:	00 e0       	ldi	r16, 0x00	; 0
 				data_counter = 0;
 			}
 			if (init_received && twi_data != 22 && twi_data != 11)
 			{
 				data[data_counter] = twi_data;
 				data_counter = (data_counter+1)%NUM_SERVOS;
- 240:	0f 2e       	mov	r0, r31
- 242:	f8 e1       	ldi	r31, 0x18	; 24
- 244:	cf 2e       	mov	r12, r31
- 246:	d1 2c       	mov	r13, r1
- 248:	f0 2d       	mov	r31, r0
+ 23c:	0f 2e       	mov	r0, r31
+ 23e:	f8 e1       	ldi	r31, 0x18	; 24
+ 240:	cf 2e       	mov	r12, r31
+ 242:	d1 2c       	mov	r13, r1
+ 244:	f0 2d       	mov	r31, r0
 			{
 				init_received = 0;
 				data_counter = 0;
 			}
 			if(twi_data == 11){
 				init_received = 1;
- 24a:	ff 24       	eor	r15, r15
- 24c:	f3 94       	inc	r15
+ 246:	ff 24       	eor	r15, r15
+ 248:	f3 94       	inc	r15
 	unsigned char twi_data = 0;
 
 	//main -> get data (twi)
 	while (1)
 	{
 		while (!(TWCR & (1<<TWINT))){}
- 24e:	90 81       	ld	r25, Z
- 250:	99 23       	and	r25, r25
- 252:	ec f7       	brge	.-6      	; 0x24e <main+0x24>
+ 24a:	90 81       	ld	r25, Z
+ 24c:	99 23       	and	r25, r25
+ 24e:	ec f7       	brge	.-6      	; 0x24a <main+0x24>
 
 		switch(TWSR){
- 254:	98 81       	ld	r25, Y
- 256:	90 38       	cpi	r25, 0x80	; 128
- 258:	79 f0       	breq	.+30     	; 0x278 <main+0x4e>
- 25a:	28 f4       	brcc	.+10     	; 0x266 <main+0x3c>
- 25c:	90 36       	cpi	r25, 0x60	; 96
- 25e:	41 f0       	breq	.+16     	; 0x270 <main+0x46>
- 260:	90 37       	cpi	r25, 0x70	; 112
- 262:	41 f0       	breq	.+16     	; 0x274 <main+0x4a>
- 264:	25 c0       	rjmp	.+74     	; 0x2b0 <main+0x86>
- 266:	90 39       	cpi	r25, 0x90	; 144
- 268:	39 f0       	breq	.+14     	; 0x278 <main+0x4e>
- 26a:	90 3a       	cpi	r25, 0xA0	; 160
- 26c:	01 f1       	breq	.+64     	; 0x2ae <main+0x84>
- 26e:	20 c0       	rjmp	.+64     	; 0x2b0 <main+0x86>
+ 250:	98 81       	ld	r25, Y
+ 252:	90 38       	cpi	r25, 0x80	; 128
+ 254:	79 f0       	breq	.+30     	; 0x274 <main+0x4e>
+ 256:	28 f4       	brcc	.+10     	; 0x262 <main+0x3c>
+ 258:	90 36       	cpi	r25, 0x60	; 96
+ 25a:	41 f0       	breq	.+16     	; 0x26c <main+0x46>
+ 25c:	90 37       	cpi	r25, 0x70	; 112
+ 25e:	41 f0       	breq	.+16     	; 0x270 <main+0x4a>
+ 260:	25 c0       	rjmp	.+74     	; 0x2ac <main+0x86>
+ 262:	90 39       	cpi	r25, 0x90	; 144
+ 264:	39 f0       	breq	.+14     	; 0x274 <main+0x4e>
+ 266:	90 3a       	cpi	r25, 0xA0	; 160
+ 268:	01 f1       	breq	.+64     	; 0x2aa <main+0x84>
+ 26a:	20 c0       	rjmp	.+64     	; 0x2ac <main+0x86>
 			case 0x60: //Received own address and write bit, ACK returned
+			LED1_ON;
+ 26c:	58 9a       	sbi	0x0b, 0	; 11
+			break;
+ 26e:	1e c0       	rjmp	.+60     	; 0x2ac <main+0x86>
+			case 0x70: //Received general call and write bit, ACK returned
 			LED1_ON;
  270:	58 9a       	sbi	0x0b, 0	; 11
 			break;
- 272:	1e c0       	rjmp	.+60     	; 0x2b0 <main+0x86>
-			case 0x70: //Received general call and write bit, ACK returned
-			LED1_ON;
- 274:	58 9a       	sbi	0x0b, 0	; 11
-			break;
- 276:	1c c0       	rjmp	.+56     	; 0x2b0 <main+0x86>
+ 272:	1c c0       	rjmp	.+56     	; 0x2ac <main+0x86>
 			case 0x80: //Addressed with own address and data byte received, ACK returned
 			
 			case 0x90: //Addressed with general call and data byte received, ACK returned
 			LED2_ON;
- 278:	59 9a       	sbi	0x0b, 1	; 11
+ 274:	59 9a       	sbi	0x0b, 1	; 11
 			twi_data = TWDR;
- 27a:	d9 01       	movw	r26, r18
- 27c:	9c 91       	ld	r25, X
+ 276:	d9 01       	movw	r26, r18
+ 278:	9c 91       	ld	r25, X
 			if (twi_data == 22)
- 27e:	96 31       	cpi	r25, 0x16	; 22
- 280:	79 f0       	breq	.+30     	; 0x2a0 <main+0x76>
+ 27a:	96 31       	cpi	r25, 0x16	; 22
+ 27c:	79 f0       	breq	.+30     	; 0x29c <main+0x76>
 			{
 				init_received = 0;
 				data_counter = 0;
 			}
 			if(twi_data == 11){
- 282:	9b 30       	cpi	r25, 0x0B	; 11
- 284:	c9 f4       	brne	.+50     	; 0x2b8 <main+0x8e>
- 286:	0f c0       	rjmp	.+30     	; 0x2a6 <main+0x7c>
+ 27e:	9b 30       	cpi	r25, 0x0B	; 11
+ 280:	c9 f4       	brne	.+50     	; 0x2b4 <main+0x8e>
+ 282:	0f c0       	rjmp	.+30     	; 0x2a2 <main+0x7c>
 				init_received = 1;
 				data_counter = 0;
 			}
 			if (init_received && twi_data != 22 && twi_data != 11)
 			{
 				data[data_counter] = twi_data;
- 288:	48 2f       	mov	r20, r24
- 28a:	50 e0       	ldi	r21, 0x00	; 0
- 28c:	da 01       	movw	r26, r20
- 28e:	af 5f       	subi	r26, 0xFF	; 255
- 290:	be 4f       	sbci	r27, 0xFE	; 254
- 292:	9c 93       	st	X, r25
+ 284:	48 2f       	mov	r20, r24
+ 286:	50 e0       	ldi	r21, 0x00	; 0
+ 288:	da 01       	movw	r26, r20
+ 28a:	af 5f       	subi	r26, 0xFF	; 255
+ 28c:	be 4f       	sbci	r27, 0xFE	; 254
+ 28e:	9c 93       	st	X, r25
 				data_counter = (data_counter+1)%NUM_SERVOS;
- 294:	ca 01       	movw	r24, r20
- 296:	01 96       	adiw	r24, 0x01	; 1
- 298:	b6 01       	movw	r22, r12
- 29a:	0e 94 5f 01 	call	0x2be	; 0x2be <__divmodhi4>
- 29e:	05 c0       	rjmp	.+10     	; 0x2aa <main+0x80>
- 2a0:	10 2f       	mov	r17, r16
+ 290:	ca 01       	movw	r24, r20
+ 292:	01 96       	adiw	r24, 0x01	; 1
+ 294:	b6 01       	movw	r22, r12
+ 296:	0e 94 5d 01 	call	0x2ba	; 0x2ba <__divmodhi4>
+ 29a:	05 c0       	rjmp	.+10     	; 0x2a6 <main+0x80>
+ 29c:	10 2f       	mov	r17, r16
 			LED2_ON;
 			twi_data = TWDR;
 			if (twi_data == 22)
 			{
 				init_received = 0;
 				data_counter = 0;
- 2a2:	80 2f       	mov	r24, r16
- 2a4:	02 c0       	rjmp	.+4      	; 0x2aa <main+0x80>
+ 29e:	80 2f       	mov	r24, r16
+ 2a0:	02 c0       	rjmp	.+4      	; 0x2a6 <main+0x80>
 			}
 			if(twi_data == 11){
 				init_received = 1;
- 2a6:	1f 2d       	mov	r17, r15
+ 2a2:	1f 2d       	mov	r17, r15
 				data_counter = 0;
- 2a8:	80 2f       	mov	r24, r16
+ 2a4:	80 2f       	mov	r24, r16
 			{
 				data[data_counter] = twi_data;
 				data_counter = (data_counter+1)%NUM_SERVOS;
 			}
 
 			LED2_OFF;
- 2aa:	59 98       	cbi	0x0b, 1	; 11
+ 2a6:	59 98       	cbi	0x0b, 1	; 11
 			break;
- 2ac:	01 c0       	rjmp	.+2      	; 0x2b0 <main+0x86>
+ 2a8:	01 c0       	rjmp	.+2      	; 0x2ac <main+0x86>
 			case 0xA0: //Received STOP condition
 			LED1_OFF;
- 2ae:	58 98       	cbi	0x0b, 0	; 11
+ 2aa:	58 98       	cbi	0x0b, 0	; 11
 			break;
 		}
 		
 		//TWCR &= ~(1<<TWINT);
 		TWCR |= (1<<TWINT); //reset von TWINT durch setzen????
- 2b0:	90 81       	ld	r25, Z
- 2b2:	90 68       	ori	r25, 0x80	; 128
- 2b4:	90 83       	st	Z, r25
+ 2ac:	90 81       	ld	r25, Z
+ 2ae:	90 68       	ori	r25, 0x80	; 128
+ 2b0:	90 83       	st	Z, r25
 
 	}
- 2b6:	cb cf       	rjmp	.-106    	; 0x24e <main+0x24>
+ 2b2:	cb cf       	rjmp	.-106    	; 0x24a <main+0x24>
 			}
 			if(twi_data == 11){
 				init_received = 1;
 				data_counter = 0;
 			}
 			if (init_received && twi_data != 22 && twi_data != 11)
- 2b8:	11 11       	cpse	r17, r1
- 2ba:	e6 cf       	rjmp	.-52     	; 0x288 <main+0x5e>
- 2bc:	f6 cf       	rjmp	.-20     	; 0x2aa <main+0x80>
+ 2b4:	11 11       	cpse	r17, r1
+ 2b6:	e6 cf       	rjmp	.-52     	; 0x284 <main+0x5e>
+ 2b8:	f6 cf       	rjmp	.-20     	; 0x2a6 <main+0x80>
 
-000002be <__divmodhi4>:
- 2be:	97 fb       	bst	r25, 7
- 2c0:	07 2e       	mov	r0, r23
- 2c2:	16 f4       	brtc	.+4      	; 0x2c8 <__divmodhi4+0xa>
- 2c4:	00 94       	com	r0
- 2c6:	07 d0       	rcall	.+14     	; 0x2d6 <__divmodhi4_neg1>
- 2c8:	77 fd       	sbrc	r23, 7
- 2ca:	09 d0       	rcall	.+18     	; 0x2de <__divmodhi4_neg2>
- 2cc:	0e 94 79 01 	call	0x2f2	; 0x2f2 <__udivmodhi4>
- 2d0:	07 fc       	sbrc	r0, 7
- 2d2:	05 d0       	rcall	.+10     	; 0x2de <__divmodhi4_neg2>
- 2d4:	3e f4       	brtc	.+14     	; 0x2e4 <__divmodhi4_exit>
+000002ba <__divmodhi4>:
+ 2ba:	97 fb       	bst	r25, 7
+ 2bc:	07 2e       	mov	r0, r23
+ 2be:	16 f4       	brtc	.+4      	; 0x2c4 <__divmodhi4+0xa>
+ 2c0:	00 94       	com	r0
+ 2c2:	07 d0       	rcall	.+14     	; 0x2d2 <__divmodhi4_neg1>
+ 2c4:	77 fd       	sbrc	r23, 7
+ 2c6:	09 d0       	rcall	.+18     	; 0x2da <__divmodhi4_neg2>
+ 2c8:	0e 94 77 01 	call	0x2ee	; 0x2ee <__udivmodhi4>
+ 2cc:	07 fc       	sbrc	r0, 7
+ 2ce:	05 d0       	rcall	.+10     	; 0x2da <__divmodhi4_neg2>
+ 2d0:	3e f4       	brtc	.+14     	; 0x2e0 <__divmodhi4_exit>
 
-000002d6 <__divmodhi4_neg1>:
- 2d6:	90 95       	com	r25
- 2d8:	81 95       	neg	r24
- 2da:	9f 4f       	sbci	r25, 0xFF	; 255
- 2dc:	08 95       	ret
+000002d2 <__divmodhi4_neg1>:
+ 2d2:	90 95       	com	r25
+ 2d4:	81 95       	neg	r24
+ 2d6:	9f 4f       	sbci	r25, 0xFF	; 255
+ 2d8:	08 95       	ret
 
-000002de <__divmodhi4_neg2>:
- 2de:	70 95       	com	r23
- 2e0:	61 95       	neg	r22
- 2e2:	7f 4f       	sbci	r23, 0xFF	; 255
+000002da <__divmodhi4_neg2>:
+ 2da:	70 95       	com	r23
+ 2dc:	61 95       	neg	r22
+ 2de:	7f 4f       	sbci	r23, 0xFF	; 255
 
-000002e4 <__divmodhi4_exit>:
- 2e4:	08 95       	ret
+000002e0 <__divmodhi4_exit>:
+ 2e0:	08 95       	ret
 
-000002e6 <__tablejump2__>:
- 2e6:	ee 0f       	add	r30, r30
- 2e8:	ff 1f       	adc	r31, r31
- 2ea:	05 90       	lpm	r0, Z+
- 2ec:	f4 91       	lpm	r31, Z
- 2ee:	e0 2d       	mov	r30, r0
- 2f0:	09 94       	ijmp
+000002e2 <__tablejump2__>:
+ 2e2:	ee 0f       	add	r30, r30
+ 2e4:	ff 1f       	adc	r31, r31
+ 2e6:	05 90       	lpm	r0, Z+
+ 2e8:	f4 91       	lpm	r31, Z
+ 2ea:	e0 2d       	mov	r30, r0
+ 2ec:	09 94       	ijmp
 
-000002f2 <__udivmodhi4>:
- 2f2:	aa 1b       	sub	r26, r26
- 2f4:	bb 1b       	sub	r27, r27
- 2f6:	51 e1       	ldi	r21, 0x11	; 17
- 2f8:	07 c0       	rjmp	.+14     	; 0x308 <__udivmodhi4_ep>
+000002ee <__udivmodhi4>:
+ 2ee:	aa 1b       	sub	r26, r26
+ 2f0:	bb 1b       	sub	r27, r27
+ 2f2:	51 e1       	ldi	r21, 0x11	; 17
+ 2f4:	07 c0       	rjmp	.+14     	; 0x304 <__udivmodhi4_ep>
 
-000002fa <__udivmodhi4_loop>:
- 2fa:	aa 1f       	adc	r26, r26
- 2fc:	bb 1f       	adc	r27, r27
- 2fe:	a6 17       	cp	r26, r22
- 300:	b7 07       	cpc	r27, r23
- 302:	10 f0       	brcs	.+4      	; 0x308 <__udivmodhi4_ep>
- 304:	a6 1b       	sub	r26, r22
- 306:	b7 0b       	sbc	r27, r23
+000002f6 <__udivmodhi4_loop>:
+ 2f6:	aa 1f       	adc	r26, r26
+ 2f8:	bb 1f       	adc	r27, r27
+ 2fa:	a6 17       	cp	r26, r22
+ 2fc:	b7 07       	cpc	r27, r23
+ 2fe:	10 f0       	brcs	.+4      	; 0x304 <__udivmodhi4_ep>
+ 300:	a6 1b       	sub	r26, r22
+ 302:	b7 0b       	sbc	r27, r23
 
-00000308 <__udivmodhi4_ep>:
- 308:	88 1f       	adc	r24, r24
- 30a:	99 1f       	adc	r25, r25
- 30c:	5a 95       	dec	r21
- 30e:	a9 f7       	brne	.-22     	; 0x2fa <__udivmodhi4_loop>
- 310:	80 95       	com	r24
- 312:	90 95       	com	r25
- 314:	bc 01       	movw	r22, r24
- 316:	cd 01       	movw	r24, r26
- 318:	08 95       	ret
+00000304 <__udivmodhi4_ep>:
+ 304:	88 1f       	adc	r24, r24
+ 306:	99 1f       	adc	r25, r25
+ 308:	5a 95       	dec	r21
+ 30a:	a9 f7       	brne	.-22     	; 0x2f6 <__udivmodhi4_loop>
+ 30c:	80 95       	com	r24
+ 30e:	90 95       	com	r25
+ 310:	bc 01       	movw	r22, r24
+ 312:	cd 01       	movw	r24, r26
+ 314:	08 95       	ret
 
-0000031a <_exit>:
- 31a:	f8 94       	cli
+00000316 <_exit>:
+ 316:	f8 94       	cli
 
-0000031c <__stop_program>:
- 31c:	ff cf       	rjmp	.-2      	; 0x31c <__stop_program>
+00000318 <__stop_program>:
+ 318:	ff cf       	rjmp	.-2      	; 0x318 <__stop_program>
