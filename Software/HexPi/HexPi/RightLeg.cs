@@ -8,10 +8,15 @@ namespace HexPi
 {
     sealed class RightLeg : ILeg
     {
-        public RightLeg(int tOffset)
+        //Functions
+        public RightLeg(int tOffset, int aOff, int bOff, int cOff)
         {
             this.tOffset = tOffset;
             t = this.tOffset;
+
+            alphaOff = aOff;
+            betaOff = bOff;
+            gammaOff = cOff;
         }
 
         public override void inverseKinematics()
@@ -31,25 +36,13 @@ namespace HexPi
             gamma = Math.Acos((A3 * A3 - b * b + A2 * A2) / (2 * A3 * A2));
 
             //RAD TO DEG
-            alpha = (alpha * 180 / Math.PI) * -1;
-            beta = (beta * 180 / Math.PI - 90) * 1;
-            gamma = (gamma * 180 / Math.PI - 90) * -1;
+            alpha = (alpha * 180 / Math.PI - alphaOff) * -1;
+            beta = (beta * 180 / Math.PI - betaOff - 90) * 1;
+            gamma = (gamma * 180 / Math.PI - gammaOff - 90) * -1;
 
             //Debug.WriteLine("DEBUG: " + alpha + " :: " + beta + " :: " + gamma);
 
         }
-
-        //protected override void calcPositionZ()
-        //{
-        //    if (t <= period / 2)
-        //    {
-        //        zPos = 0 + zoff;
-        //    }
-        //    else
-        //    {
-        //        zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - period / 2 - period / 4) * (t - period / 2 - period / 4) + stepSizeZ + zoff;
-        //    }
-        //}
 
         public override void calcPositionR(double increment)
         {
@@ -65,5 +58,6 @@ namespace HexPi
             }
             calcPositionZ();
         }
+        //******
     }
 }

@@ -11,8 +11,11 @@ namespace HexPi
 {
     class ServoHat
     {
+        //Objects
         I2cDevice device = null;
+        //******
 
+        //Functions
         public async void init()
         {
             try
@@ -26,7 +29,7 @@ namespace HexPi
             }
             catch
             {
-                Debug.WriteLine("Error: Servo hat init failed!");
+                Debug.WriteLine("Error: Servo init failed!");
             }
         }
 
@@ -36,13 +39,11 @@ namespace HexPi
             {
                 if (device != null)
                 {
-                    device.Write(b);
-                    
+                    device.Write(b);     
                 }
                 else
                 {
                     Debug.WriteLine("Error: Servo write failed!");
-                    //init();
                 }
 
             }
@@ -52,7 +53,7 @@ namespace HexPi
             }
 
         }
-
+        //******
 
     }
 }

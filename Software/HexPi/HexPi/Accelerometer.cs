@@ -12,22 +12,29 @@ namespace HexPi
 
     class Accelerometer
     {
+        //Objects
         I2cDevice device = null;
+        //******
+
+        //Fields
         bool ready = false;
-
-        byte[] writeBuffer = new byte[] { 0x28 };
-        byte[] readBuffer = new byte[6];
-
         private double x = 0.0;
         private double y = 0.0;
         private double z = 0.0;
+        //******
 
+        //Arrays
+        byte[] writeBuffer = new byte[] { 0x28 };
+        byte[] readBuffer = new byte[6];
+        //******
+
+        //Properties
         public double angleXZ
         {
             get
             {
                 double xz = Math.Round(Math.Acos(x / (Math.Sqrt(x * x + z * z))) - Math.PI / 2, 2);
-                if(double.IsNaN(xz) || xz == double.NegativeInfinity || xz == double.PositiveInfinity)
+                if(double.IsNaN(xz) || double.IsInfinity(xz))
                 {
                     return 0;
                 }
@@ -39,15 +46,16 @@ namespace HexPi
             get
             {
                 double yz = Math.Round(Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2, 2);
-                if (double.IsNaN(yz) || yz == double.NegativeInfinity || yz == double.PositiveInfinity)
+                if (double.IsNaN(yz) ||double.IsInfinity(yz))
                 {
                     return 0;
                 }
                 return yz;
             }
         }
+        //******
 
-
+        //Functions
         public async void init()
         {
             try
@@ -72,12 +80,6 @@ namespace HexPi
 
                 if (device != null)
                 {
-                    //if (!ready)
-                    //{
-                    //    device.Write(new byte[] { 0x10, 0x80 });
-                    //    ready = true;
-                    //    Debug.WriteLine("INIT");
-                    //}
                     device.Write(new byte[] { 0x10, 0x80 });
                     device.Write(writeBuffer);
                     device.Read(readBuffer);
@@ -89,7 +91,6 @@ namespace HexPi
                 else
                 {
                     Debug.WriteLine("Error: Accelerometer no device!");
-                    //init();
                 }
 
             }
@@ -98,5 +99,6 @@ namespace HexPi
                 Debug.WriteLine("Error: Accelerometer read failed!");
             }
         }
+        //******
     }
 }
