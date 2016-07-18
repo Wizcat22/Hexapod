@@ -8,7 +8,11 @@ namespace HexPi
 {
     sealed class LeftLeg : ILeg
     {
-        
+        public LeftLeg(int tOffset)
+        {
+            this.tOffset = tOffset;
+            t = this.tOffset;
+        }
 
         public override void inverseKinematics()
         {
@@ -17,7 +21,7 @@ namespace HexPi
 
             //BETA
             L1 = zOffset - zPos;
-            L2 = A2 + yPos;
+            L2 = A2 - yPos;
             b = Math.Sqrt(L1 * L1 + L2 * L2);
 
             beta = Math.Acos(L1 / b);
@@ -27,7 +31,7 @@ namespace HexPi
             gamma = Math.Acos((A3 * A3 - b * b + A2 * A2) / (2 * A3 * A2));
 
             //RAD TO DEG
-            alpha = (alpha * 180 / Math.PI) * -1;
+            alpha = (alpha * 180 / Math.PI) * 1;
             beta = (beta * 180 / Math.PI - 90) * -1;
             gamma = (gamma * 180 / Math.PI - 90) * 1;
 

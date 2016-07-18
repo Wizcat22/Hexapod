@@ -26,15 +26,24 @@ namespace HexPi
         {
             get
             {
-                return Math.Round((180 / Math.PI) * Math.Acos(x / (Math.Sqrt(x * x + z * z))) - 90);
+                double xz = Math.Round(Math.Acos(x / (Math.Sqrt(x * x + z * z))) - Math.PI / 2, 2);
+                if(double.IsNaN(xz) || xz == double.NegativeInfinity || xz == double.PositiveInfinity)
+                {
+                    return 0;
+                }
+                return xz;
             }
         }
         public double angleYZ
         {
             get
             {
-                
-                return Math.Round( Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI/2,2);
+                double yz = Math.Round(Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2, 2);
+                if (double.IsNaN(yz) || yz == double.NegativeInfinity || yz == double.PositiveInfinity)
+                {
+                    return 0;
+                }
+                return yz;
             }
         }
 
@@ -60,26 +69,26 @@ namespace HexPi
         {
             try
             {
-                
+
                 if (device != null)
                 {
-                    if (!ready)
-                    {
-                        device.Write(new byte[] { 0x10, 0x80 });
-                        ready = true;
-                        Debug.WriteLine("Error: INIT");
-                    }
-
+                    //if (!ready)
+                    //{
+                    //    device.Write(new byte[] { 0x10, 0x80 });
+                    //    ready = true;
+                    //    Debug.WriteLine("INIT");
+                    //}
+                    device.Write(new byte[] { 0x10, 0x80 });
                     device.Write(writeBuffer);
                     device.Read(readBuffer);
                     x = Math.Round((Int16)(readBuffer[1] << 8 | readBuffer[0]) / 16383.0, 2);
                     y = Math.Round((Int16)(readBuffer[3] << 8 | readBuffer[2]) / 16383.0, 2);
                     z = Math.Round((Int16)(readBuffer[5] << 8 | readBuffer[4]) / 16383.0, 2);
-                    
+
                 }
                 else
                 {
-                    Debug.WriteLine("Error: Accelerometer read failed!");
+                    Debug.WriteLine("Error: Accelerometer no device!");
                     //init();
                 }
 

@@ -8,14 +8,13 @@ namespace HexPi
 {
     abstract class ILeg
     {
-        protected double zOffset = 95;
-        protected double bodyWidth = 20;
-        protected double xoff = 0;
-        protected double yoff = 0;
-        protected double zoff = 0;
-        protected double A1 = 30;
-        protected double A2 = 60;
-        protected double A3 = 95;
+        protected const double zOffset = 95;
+        protected double xoff = 0.0;
+        protected double yoff = 0.0;
+        protected double zoff = 0.0;
+        protected const double A1 = 30;
+        protected const double A2 = 65;
+        protected const double A3 = 95;
         protected double L1 = 0;
         protected double L2 = 0;
         protected double b = 0;
@@ -80,11 +79,6 @@ namespace HexPi
             {
                 return stepSizeX;
             }
-
-            set
-            {
-                stepSizeX = value;
-            }
         }
 
         public double StepSizeY
@@ -93,11 +87,6 @@ namespace HexPi
             {
                 return stepSizeY;
             }
-
-            set
-            {
-                stepSizeY = value;
-            }
         }
 
         public double StepSizeZ
@@ -105,24 +94,6 @@ namespace HexPi
             get
             {
                 return stepSizeZ;
-            }
-
-            set
-            {
-                stepSizeZ = value;
-            }
-        }
-
-        public double TOffset
-        {
-            get
-            {
-                return tOffset;
-            }
-
-            set
-            {
-                tOffset = value;
             }
         }
 
@@ -162,27 +133,22 @@ namespace HexPi
             set
             {
                 zoff = value;
-            }
-        }
-
-        public double BodyWidth
-        {
-            get
-            {
-                return bodyWidth;
-            }
-
-            set
-            {
-                bodyWidth = value;
+                if (zoff>stepSizeZ-10)
+                {
+                    zoff = stepSizeZ - 10;
+                }
+                else if(zoff < -stepSizeZ+10)
+                {
+                    zoff = -stepSizeZ + 10;
+                }
             }
         }
 
         public abstract void inverseKinematics();
-       
 
-        
-        
+
+
+
 
         public void calcPositionCenter(double increment)
         {
@@ -195,7 +161,7 @@ namespace HexPi
         public void calcPositionX(double increment)
         {
             t = ((t + increment) % period + period) % period;
-            yPos = 0.0 + (bodyWidth/2) - Math.Abs(yoff);
+            yPos = 0.0; //+ (bodyWidth/2) - Math.Abs(yoff);
             if (t <= period / 2)
             {
                 xPos = 4 * stepSizeX / period * t - stepSizeX + xoff;
@@ -210,7 +176,7 @@ namespace HexPi
         public void calcPositionY(double increment)
         {
             t = ((t + increment) % period + period) % period;
-            xPos = 0.0 + xoff;
+            xPos = 0.0; //+ xoff;
             if (t <= period / 2)
             {
                 yPos = 4 * stepSizeY / period * t - stepSizeY + yoff;
@@ -227,7 +193,7 @@ namespace HexPi
             if (t <= period / 2)
             {
                 zPos = 0 + zoff;
-                
+
             }
             else
             {

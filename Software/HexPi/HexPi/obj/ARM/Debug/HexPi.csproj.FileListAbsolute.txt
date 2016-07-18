@@ -194,5 +194,3 @@ d:\alexander miller\documents\visual studio 2015\Projects\HexPi\HexPi\obj\ARM\De
 d:\alexander miller\documents\visual studio 2015\Projects\HexPi\HexPi\obj\ARM\Debug\MultipleQualifiersPerDimensionFound.txt
 d:\alexander miller\documents\visual studio 2015\Projects\HexPi\HexPi\obj\ARM\Debug\ProjectArchitectures.txt
 d:\alexander miller\documents\visual studio 2015\Projects\HexPi\HexPi\obj\ARM\Debug\HexPi.csprojResolveAssemblyReference.cache
-D:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\System.Linq.Expressions.dll
-D:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\System.Net.Http.dll

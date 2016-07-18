@@ -17,7 +17,7 @@ namespace HexPi
         {
             try
             {
-                I2cConnectionSettings settings = new I2cConnectionSettings(0x6B); // Address
+                I2cConnectionSettings settings = new I2cConnectionSettings(0x42); // Address
                 settings.BusSpeed = I2cBusSpeed.StandardMode;
                 settings.SharingMode = I2cSharingMode.Shared;
                 string aqs = I2cDevice.GetDeviceSelector("I2C1");
@@ -36,11 +36,12 @@ namespace HexPi
             {
                 if (device != null)
                 {
-                    //device.Write(b);
+                    device.Write(b);
+                    
                 }
                 else
                 {
-                    //Debug.WriteLine("Error: Servo write failed!");
+                    Debug.WriteLine("Error: Servo write failed!");
                     //init();
                 }
 
