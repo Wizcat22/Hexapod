@@ -88,7 +88,7 @@ namespace HexPi
                 {
                     GamepadReading gamepadStatus = input.GetCurrentReading();
                     x = gamepadStatus.LeftThumbstickY;
-                    y = gamepadStatus.LeftThumbstickX;
+                    y = -gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
                     r = gamepadStatus.RightThumbstickX;
 

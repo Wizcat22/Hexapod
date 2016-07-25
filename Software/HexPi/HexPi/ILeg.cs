@@ -29,12 +29,14 @@ namespace HexPi
         protected byte motorData0 = 0;
         protected byte motorData1 = 0;
         protected byte motorData2 = 0;
+        protected double rotation = 0;
         //******
 
         //Constants
         protected const double stepSizeX = 30;
         protected const double stepSizeY = 30;
         protected const double stepSizeZ = 30;
+        protected const double stepSizeR = 30;
         protected const double period = 100;
         protected const double zOffset = 95;
         protected const double A1 = 30;
@@ -158,7 +160,6 @@ namespace HexPi
         }
         //******
 
-
         //Abstract functions
         public abstract void inverseKinematics();
 
@@ -186,7 +187,7 @@ namespace HexPi
             {
                 xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX + xOff;
             }
-            calcPositionZ();
+            calcPositionZ(false);
         }
 
         public void calcPositionY(double increment)
@@ -201,11 +202,15 @@ namespace HexPi
             {
                 yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY + yOff;
             }
-            calcPositionZ();
+            calcPositionZ(false);
         }
 
-        protected void calcPositionZ()
+        public void calcPositionZ(bool off)
         {
+            if(off)
+            {
+                t = 0.0;
+            }
             if (t <= period / 2)
             {
                 zPos = 0 + zOff;

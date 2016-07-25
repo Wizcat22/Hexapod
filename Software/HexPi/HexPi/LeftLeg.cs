@@ -9,7 +9,7 @@ namespace HexPi
     sealed class LeftLeg : ILeg
     {
         //Functions
-        public LeftLeg(int tOffset, int aOff, int bOff, int cOff)
+        public LeftLeg(int tOffset, int aOff, int bOff, int cOff , double rotation)
         {
             this.tOffset = tOffset;
             t = this.tOffset;
@@ -17,6 +17,8 @@ namespace HexPi
             alphaOff = aOff;
             betaOff = bOff;
             gammaOff = cOff;
+
+            this.rotation = (rotation / 180) * Math.PI;
         }
 
         public override void inverseKinematics()
@@ -46,17 +48,19 @@ namespace HexPi
 
         public override void calcPositionR(double increment)
         {
+            
             t = ((t - increment) % period + period) % period;
-            yPos = 0.0;
             if (t <= period / 2)
             {
-                xPos = 4 * stepSizeX / period * t - stepSizeX;
+                xPos = 4 * ((stepSizeR * Math.Cos(rotation)) / period) * t - (stepSizeR * Math.Cos(rotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(rotation)) / period) * t - (stepSizeR * Math.Sin(rotation));
             }
             else
             {
-                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
+                xPos = -4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(rotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(rotation));
             }
-            calcPositionZ();
+            calcPositionZ(false);
         }
         //******
     }

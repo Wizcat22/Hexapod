@@ -15,13 +15,15 @@ namespace HexPi
 
         //Fields
         byte lastDirection = 0;
-        const double bodyWidth = 20;
-        const double bodyHeigth = 30;
+        const double bodyWidth = 200;
+        const double bodyHeigth = 300;
         //******
 
         //Arrays
         byte[] data = new byte[26];
         int[] gait = { 25, 75, 75, 25, 25, 75 };
+        int[] rotation = { 135, 45, 180, 0, 225, 315 };
+        //int[] gait = { 0,0,0,0,0,0};
         ILeg[] legs = new ILeg[6];
         //******
 
@@ -43,29 +45,26 @@ namespace HexPi
             data[25] = 22;
 
             //init legs
-            for (int i = 0; i < legs.Length; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    legs[i] = new LeftLeg(gait[i],0,0,0);
-                }
-                else
-                {
-                    legs[i] = new RightLeg(gait[i],0,0,0);
-                }
 
-            }
+            legs[0] = new LeftLeg(gait[0], 5, -6, 4, rotation[0]);
+            legs[2] = new LeftLeg(gait[2], 5, -3, 4, rotation[2]);
+            legs[4] = new LeftLeg(gait[4], 0, -4, 10, rotation[4]);
+
+
+            legs[1] = new RightLeg(gait[1], -5, -5, 5, rotation[1]);
+            legs[3] = new RightLeg(gait[3], 0, -2, -5, rotation[3]);
+            legs[5] = new RightLeg(gait[5], 0, 0, -3, rotation[5]);
+
+
+
         }
 
-        public void move(double inc ,byte dir)
+        public void move(double inc, byte dir)
         {
-            accel.read();
-            calcOffsets();
 
-            if(dir != lastDirection && lastDirection != (byte)Controller.directions.CENTER)
+            if (dir != lastDirection)
             {
-                centerLegs();                
-                lastDirection = (byte)Controller.directions.CENTER;
+                centerLegs();
             }
 
             foreach (ILeg l in legs)
@@ -85,6 +84,10 @@ namespace HexPi
                         lastDirection = (byte)Controller.directions.ROTATE;
                         break;
                     case (byte)Controller.directions.CENTER:
+                        accel.read();
+                        calcOffsets();
+                        l.calcPositionZ(true);
+                        lastDirection = (byte)Controller.directions.CENTER;
                         break;
                     default:
                         break;
@@ -102,32 +105,34 @@ namespace HexPi
 
         private void calcOffsets()
         {
+            double mul = 1;
+
             for (int i = 0; i < legs.Length; i++)
             {
                 if (i % 2 == 0)
                 {
-                    legs[i].Zoff -= 0.1 * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
+                    legs[i].Zoff += mul * Math.Sin(accel.angleYZ);
 
                     //legs[i].Yoff = cosyz;
                 }
                 else
                 {
-                    legs[i].Zoff += 0.1 * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
+                    legs[i].Zoff -= mul * Math.Sin(accel.angleYZ);
                     //legs[i].Yoff = cosyz;
                 }
 
             }
 
-            legs[0].Zoff += 0.1 * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + legs[0].XPos);
-            legs[1].Zoff += 0.1 * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + legs[1].XPos);
+            legs[0].Zoff -= mul * Math.Sin(accel.angleXZ);
+            legs[1].Zoff -= mul * Math.Sin(accel.angleXZ);
 
 
-            legs[2].Zoff += 0.1 * Math.Sin(accel.angleXZ) * legs[2].XPos;
-            legs[3].Zoff += 0.1 * Math.Sin(accel.angleXZ) * legs[3].XPos;
+            //legs[2].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[2].XPos / 10);
+            //legs[3].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[3].XPos / 10);
 
 
-            legs[4].Zoff -= 0.1 * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + legs[4].XPos);
-            legs[5].Zoff -= 0.1 * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + legs[5].XPos);
+            legs[4].Zoff += mul * Math.Sin(accel.angleXZ);
+            legs[5].Zoff += mul * Math.Sin(accel.angleXZ);
 
 
 
@@ -140,6 +145,49 @@ namespace HexPi
             //legs[4].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
 
         }
+
+        //private void calcOffsets()
+        //{
+        //    double mul = 0.01;
+
+        //    for (int i = 0; i < legs.Length; i++)
+        //    {
+        //        if (i % 2 == 0)
+        //        {
+        //            legs[i].Zoff += mul * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
+
+        //            //legs[i].Yoff = cosyz;
+        //        }
+        //        else
+        //        {
+        //            legs[i].Zoff -= mul * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
+        //            //legs[i].Yoff = cosyz;
+        //        }
+
+        //    }
+
+        //    legs[0].Zoff -= mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[0].XPos / 10));
+        //    legs[1].Zoff -= mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[1].XPos / 10));
+
+
+        //    legs[2].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[2].XPos / 10);
+        //    legs[3].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[3].XPos / 10);
+
+
+        //    legs[4].Zoff += mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[4].XPos / 10));
+        //    legs[5].Zoff += mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[5].XPos / 10));
+
+
+
+        //    //legs[1].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+        //    //legs[3].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+        //    //legs[5].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+
+        //    //legs[0].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+        //    //legs[2].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+        //    //legs[4].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
+
+        //}
 
         private void setData()
         {
@@ -184,13 +232,32 @@ namespace HexPi
         private void centerLegs()
         {
             int time = 100;
-            double zOld = 0.0;
+            //double zOld = 0.0;
+            foreach (ILeg l in legs)
+            {
+                l.Zoff = 0;
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                servo.write(data);
+                Task.Delay(time).Wait();
+            }
 
             foreach (ILeg l in legs)
             {
-                zOld = l.ZPos;
+                l.ZPos = 0;
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                servo.write(data);
+                Task.Delay(time).Wait();
+            }
+
+            foreach (ILeg l in legs)
+            {
+                //zOld = l.ZPos;
                 //Up
-                l.ZPos += l.StepSizeZ/3;
+                l.ZPos = l.StepSizeZ;
                 l.inverseKinematics();
                 l.calcData();
                 setData();
@@ -206,7 +273,7 @@ namespace HexPi
                 Task.Delay(time).Wait();
 
                 //Down
-                l.ZPos = zOld;
+                l.ZPos = 0;
                 l.inverseKinematics();
                 l.calcData();
                 setData();
