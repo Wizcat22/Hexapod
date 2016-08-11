@@ -11,28 +11,69 @@ using System.Threading;
 
 namespace HexPi
 {
+    /**********************************************************************************************//**
+     * @class   Controller
+     *
+     * @brief   A controller class.
+     *
+     * @author  Alexander Miller
+     * @date    11.08.2016
+     **************************************************************************************************/
+
     class Controller
     {
         //Objects
+        
+        /** @brief   The input. */
         Gamepad input = null;
+
+        /** @brief   The robot. */
         Hexapod robot = new Hexapod();
+
+        /** @brief   The input task. */
         Task inputTask = null;
         //******
 
         //Fields
+        
+        /** @brief   The x coordinate of the input. */
         double x = 0;
+
+        /** @brief   The y coordinate of the input. */
         double y = 0;
+
+        /** @brief   The z coordinate of the input. */
         double z = 0;
+
+        /** @brief   The rotational coordinate of the input. */
         double r = 0;
 
+
+        /** @brief   The threshold for the input. */
         double threshold = 0.25;
         //******
 
         //Enums
+
+        /**********************************************************************************************//**
+         * @enum    directions
+         *
+         * @brief   Values that represent directions.
+         **************************************************************************************************/
+
         public enum directions { CENTER, X, Y, ROTATE };
         //******
 
         //Properties
+
+        /**********************************************************************************************//**
+         * @property    public double X
+         *
+         * @brief   Gets the x coordinate of the input.
+         *
+         * @return  The x coordinate.
+         **************************************************************************************************/
+
         public double X
         {
             get
@@ -40,6 +81,14 @@ namespace HexPi
                 return Math.Round(x, 2);
             }
         }
+
+        /**********************************************************************************************//**
+         * @property    public double Y
+         *
+         * @brief   Gets the y coordinate of the input.
+         *
+         * @return  The y coordinate.
+         **************************************************************************************************/
 
         public double Y
         {
@@ -49,6 +98,14 @@ namespace HexPi
             }
         }
 
+        /**********************************************************************************************//**
+         * @property    public double Z
+         *
+         * @brief   Gets the z coordinate of the input.
+         *
+         * @return  The z coordinate.
+         **************************************************************************************************/
+
         public double Z
         {
             get
@@ -56,6 +113,14 @@ namespace HexPi
                 return Math.Round(z, 2);
             }
         }
+
+        /**********************************************************************************************//**
+         * @property    public double R
+         *
+         * @brief   Gets the rotational coordinate of the input..
+         *
+         * @return  The rotational coordinate.
+         **************************************************************************************************/
 
         public double R
         {
@@ -67,6 +132,16 @@ namespace HexPi
         //******
 
         //Functions
+
+        /**********************************************************************************************//**
+         * @fn  public void init()
+         *
+         * @brief   Initializes this object.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         public void init()
         {
             init_Gamepad();
@@ -75,15 +150,24 @@ namespace HexPi
             inputTask = Task.Factory.StartNew(() => handleInputs());
         }
 
+        /**********************************************************************************************//**
+         * @fn  private void handleInputs()
+         *
+         * @brief   Handles the inputs.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         private void handleInputs()
         {
             while (true)
             {
 
 
-                Task.Delay(10).Wait();
+                Task.Delay(0).Wait();
 
-
+                
                 if (input != null)
                 {
                     GamepadReading gamepadStatus = input.GetCurrentReading();
@@ -101,25 +185,29 @@ namespace HexPi
                     }
                 }
 
-
+                //check if any of the axis is above the threshold
                 if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(r) >= threshold)
                 {
+                    //if the x coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in x-direction
                     if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)
                     {
 
                         robot.move(x, (byte)directions.X);
                     }
+                    //if the y coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in y-direction
                     else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold)
                     {
 
                         robot.move(y, (byte)directions.Y);
                     }
+                    //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
                     else if (Math.Abs(r) > Math.Abs(x) && Math.Abs(r) > Math.Abs(y) && Math.Abs(r) >= threshold)
                     {
 
                         robot.move(r, (byte)directions.ROTATE);
                     }
                 }
+                //do nothing if none of the values is above the threshold
                 else
                 {
                     robot.move(0, (byte)directions.CENTER);
@@ -127,6 +215,15 @@ namespace HexPi
 
             }
         }
+
+        /**********************************************************************************************//**
+         * @fn  private void init_Gamepad()
+         *
+         * @brief   Initializes the gamepad for use as input device.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
 
         private void init_Gamepad()
         {
@@ -148,11 +245,35 @@ namespace HexPi
 
         }
 
+        /**********************************************************************************************//**
+         * @fn  private void gamepadRemovedHandler(object sender, Gamepad e)
+         *
+         * @brief   Handler, called when the gamepad is removed.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   sender  Source of the event.
+         * @param   e       The Gamepad to process.
+         **************************************************************************************************/
+
         private void gamepadRemovedHandler(object sender, Gamepad e)
         {
             input = null;
             Debug.WriteLine("Warning: Gamepad was removed.");
         }
+
+        /**********************************************************************************************//**
+         * @fn  private void gamepadAddedHandler(object sender, Gamepad e)
+         *
+         * @brief   Handler, called when the gamepad is added.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   sender  Source of the event.
+         * @param   e       The Gamepad to process.
+         **************************************************************************************************/
 
         private void gamepadAddedHandler(object sender, Gamepad e)
         {

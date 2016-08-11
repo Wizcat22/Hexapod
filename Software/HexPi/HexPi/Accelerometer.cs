@@ -1,4 +1,10 @@
-﻿using System;
+﻿/**********************************************************************************************//**
+ * @file    accelerometer.cs
+ *
+ * @brief   Implements the accelerometer class.
+ **************************************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,26 +15,54 @@ using Windows.Devices.I2c;
 
 namespace HexPi
 {
+    /**********************************************************************************************//**
+     * @class   Accelerometer
+     *
+     * @brief   An accelerometer.
+     *
+     * @author  Alexander Miller
+     * @date    11.08.2016
+     **************************************************************************************************/
 
     class Accelerometer
     {
         //Objects
+        
+        /** @brief   The device. */
         I2cDevice device = null;
         //******
 
         //Fields
-        bool ready = false;
+
+        /** @brief   The x coordinate. */
         private double x = 0.0;
+
+        /** @brief   The y coordinate. */
         private double y = 0.0;
+
+        /** @brief   The z coordinate. */
         private double z = 0.0;
         //******
 
         //Arrays
+        
+        /** @brief   Buffer for write data. */
         byte[] writeBuffer = new byte[] { 0x28 };
+
+        /** @brief   Buffer for read data. */
         byte[] readBuffer = new byte[6];
         //******
 
         //Properties
+
+        /**********************************************************************************************//**
+         * @property    public double angleXZ
+         *
+         * @brief   Gets the angle of the rotation around the y axis.
+         *
+         * @return  The angle y.
+         **************************************************************************************************/
+
         public double angleXZ
         {
             get
@@ -41,6 +75,15 @@ namespace HexPi
                 return xz;
             }
         }
+
+        /**********************************************************************************************//**
+         * @property    public double angleYZ
+         *
+         * @brief   Gets the angle of the rotation around the x axis.
+         *
+         * @return  The angle around x.
+         **************************************************************************************************/
+
         public double angleYZ
         {
             get
@@ -56,6 +99,16 @@ namespace HexPi
         //******
 
         //Functions
+
+        /**********************************************************************************************//**
+         * @fn  public async void init()
+         *
+         * @brief   Initializes the device.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         public async void init()
         {
             try
@@ -72,6 +125,15 @@ namespace HexPi
                 Debug.WriteLine("Error: Accelerometer init failed!");
             }
         }
+
+        /**********************************************************************************************//**
+         * @fn  public void read()
+         *
+         * @brief   Read data for each axis.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
 
         public void read()
         {

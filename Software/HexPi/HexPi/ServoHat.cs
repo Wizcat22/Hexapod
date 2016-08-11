@@ -1,4 +1,10 @@
-﻿using System;
+﻿/**********************************************************************************************//**
+ * @file    servohat.cs
+ *
+ * @brief   Implements the servohat class.
+ **************************************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,13 +15,34 @@ using Windows.Devices.I2c;
 
 namespace HexPi
 {
+    /**********************************************************************************************//**
+     * @class   ServoHat
+     *
+     * @brief   A servo hat.
+     *
+     * @author  Alexander Miller
+     * @date    11.08.2016
+     **************************************************************************************************/
+
     class ServoHat
     {
         //Objects
+        
+        /** @brief   The device. */
         I2cDevice device = null;
         //******
 
         //Functions
+
+        /**********************************************************************************************//**
+         * @fn  public async void init()
+         *
+         * @brief   Initializes this device.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         public async void init()
         {
             try
@@ -32,6 +59,17 @@ namespace HexPi
                 Debug.WriteLine("Error: Servo init failed!");
             }
         }
+
+        /**********************************************************************************************//**
+         * @fn  public void write(byte[] b)
+         *
+         * @brief   Writes the given array to the device.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   b   The array to write.
+         **************************************************************************************************/
 
         public void write(byte[] b)
         {

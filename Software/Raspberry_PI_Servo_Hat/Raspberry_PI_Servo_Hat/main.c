@@ -5,33 +5,150 @@
 * Author : Alexander Miller
 */
 
-//INCLUDE
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/twi.h>
-//------------------------
 
-//DEFINE
+/**********************************************************************************************//**
+ * @def	SLAVE_ADDRESS
+ *
+ * @brief	A macro that defines the i2c slave address.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define SLAVE_ADDRESS 0x42 //TWI Slave address
+
+/**********************************************************************************************//**
+ * @def	NUM_SERVOS
+ *
+ * @brief	A macro that defines the maximum number of servos.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define NUM_SERVOS 24 // 20 is the recommended maximum value (Servos get slower because of longer standby time (>20ms))
+
+/**********************************************************************************************//**
+ * @def	SERVO_STD_VAL
+ *
+ * @brief	A macro that defines servo standard value.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define SERVO_STD_VAL 187 //STANDARD SERVO POSITION (1,5ms)
+
+/**********************************************************************************************//**
+ * @def	SERVO_MIN_VAL
+ *
+ * @brief	A macro that defines servo minimum value.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define SERVO_MIN_VAL 125 //MINUMUM (-45°) SERVO POSITION (1ms)
+
+/**********************************************************************************************//**
+ * @def	SERVO_MAX_VAL
+ *
+ * @brief	A macro that defines servo maximum value.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define SERVO_MAX_VAL 250 //MAXIMUM (+45°) SERVO POSITION (2ms)
+
+/**********************************************************************************************//**
+ * @def	LED1_ON
+ *
+ * @brief	A macro to turn LED 1 on.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED1_ON PORTD|=(1<<PD0) //MACRO: Turn LED1 on
+
+/**********************************************************************************************//**
+ * @def	LED2_ON
+ *
+ * @brief	A macro to turn LED 2 on.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED2_ON PORTD|=(1<<PD1) //MACRO: Turn LED2 on
+
+/**********************************************************************************************//**
+ * @def	LED3_ON
+ *
+ * @brief	A macro to turn LED 3 on.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED3_ON PORTD|=(1<<PD2) //MACRO: Turn LED3 on
+
+/**********************************************************************************************//**
+ * @def	LED1_OFF
+ *
+ * @brief	A macro to turn LED 1 off.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED1_OFF PORTD&=~(1<<PD0) //MACRO: Turn LED1 off
+
+/**********************************************************************************************//**
+ * @def	LED2_OFF
+ *
+ * @brief	A macro to turn LED 2 off.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED2_OFF PORTD&=~(1<<PD1) //MACRO: Turn LED2 off
+
+/**********************************************************************************************//**
+ * @def	LED3_OFF
+ *
+ * @brief	A macro to turn LED 3 off.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 #define LED3_OFF PORTD&=~(1<<PD2) //MACRO: Turn LED3 off
-//------------------------
-
-//GLOBAL
-unsigned volatile char data[NUM_SERVOS]; //CHAR ARRAY WITH SERVO DATA
-unsigned volatile char loop = 0; //loop count
-//------------------------
 
 
-//init twi/i2c
+
+/** @brief	CHAR ARRAY WITH SERVO DATA. */
+unsigned volatile char data[NUM_SERVOS];
+
+/** @brief	loop count. */
+unsigned volatile char loop = 0;
+
+/**********************************************************************************************//**
+ * @fn	void init_twi(void)
+ *
+ * @brief	Init twi.
+ * 			Configure TWI interface as slave.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 void init_twi(void){
 
 	//Set address of i2c slave and enable general call
@@ -40,9 +157,16 @@ void init_twi(void){
 	TWCR &= ~((1<<TWSTA) | (1<<TWSTO)) ;
 
 }
-//------------------------
 
-//INIT OUTPUTS
+/**********************************************************************************************//**
+ * @fn	void init_outputs(void)
+ *
+ * @brief	Init outputs.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 void init_outputs(void){
 
 	DDRA = 0xFF; //Servo Outputs: PA0=SERVO_19 - PA7 = SERVO_12
@@ -51,10 +175,21 @@ void init_outputs(void){
 	DDRD = 0xFF; //Servo Outputs: PD3=SERVO_1 - PD7 = SERVO_5 ; LED Outputs: PD0 = LED_1 - PD2 = LED_3
 
 }
-//------------------------
 
 
-//INIT TIMER
+
+/**********************************************************************************************//**
+ * @fn	void init_timer(void)
+ *
+ * @brief	Init timer.
+ * 			Configure Timer0 to work in Fast-PWM-Mode with TOP at 0xFF and OCRx update at TOP.
+ * 			The Prescaler is set to 64.
+ * 			Time per overflow = 2,048ms 
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 void init_timer(void){
 
 	//TIMER0 (8bit) , Mode 3 - Fast PWM TOP = 0xFF ,OCRx update at TOP, prescaler = 64 , Time per overflow = 0.002048 sec. = 2.048 ms (at 8Mhz Clock)
@@ -64,9 +199,18 @@ void init_timer(void){
 	//Enable TIMER0 Interrupts (Compare Match A/B and Overflow)
 	TIMSK0 |= (1<<OCIE0A) | (1<<OCIE0B) | (1<<TOIE0);
 }
-//------------------------
 
-//ISR OC0A -> RESET SERVOS 1 - 12
+
+/**********************************************************************************************//**
+ * @fn	ISR(TIMER0_COMPA_vect)
+ *
+ * @brief	Interrupt Service Routine to end Servopulse 1 - 12
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ *
+ **************************************************************************************************/
+
 ISR(TIMER0_COMPA_vect){
 
 	PORTD &= ~(0xF8) ;
@@ -74,20 +218,41 @@ ISR(TIMER0_COMPA_vect){
 	PORTA &= ~(0x80) ;
 
 }
-//------------------------
 
-//ISR OC0A -> RESET SERVOS 13 - 24
+/**********************************************************************************************//**
+ * @fn	ISR(TIMER0_COMPB_vect)
+ *
+ * @brief	Interrupt Service Routine to end Servopulse 13 - 24
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ *
+ **************************************************************************************************/
+
 ISR(TIMER0_COMPB_vect){
 
 	PORTA &= ~(0x7F) ;
 	PORTB &= ~(0x1F) ;
 
 }
-//------------------------
+
 
 //ISR TIOV -> SET SERVO OUTPUTS AND SET CORRESPONDING OC0A/OC0B VALUES
+
+/**********************************************************************************************//**
+ * @fn	ISR(TIMER0_OVF_vect)
+ *
+ * @brief	Interrupt Service Routine for timer overflow.
+ * 			This ISR starts the servo signals for two servos and sets OCRx values to the length of the pulses.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ *
+ **************************************************************************************************/
+
 ISR(TIMER0_OVF_vect){
 
+	//Start pulse for two servos
 	switch (loop)
 	{
 		case 0:
@@ -145,9 +310,16 @@ ISR(TIMER0_OVF_vect){
 	OCR0B = data[loop+(NUM_SERVOS/2)];
 
 }
-//------------------------
 
-//INIT ALL
+/**********************************************************************************************//**
+ * @fn	void init_all(void)
+ *
+ * @brief	Initializes all components.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ **************************************************************************************************/
+
 void init_all(void){
 
 	//SET INITIAL SERVO POSITION (1,5ms)
@@ -165,9 +337,18 @@ void init_all(void){
 	sei();
 
 }
-//------------------------
 
-//MAIN
+/**********************************************************************************************//**
+ * @fn	int main(void)
+ *
+ * @brief	Main entry-point for this application.
+ *
+ * @author	Alexander Miller
+ * @date	11.08.2016
+ *
+ * @return	Exit-code for the process - 0 for success, else an error code.
+ **************************************************************************************************/
+
 int main(void)
 {
 	init_all();
@@ -175,10 +356,11 @@ int main(void)
 	unsigned char init_received = 0;
 	unsigned char twi_data = 0;
 
-	//main -> get data (twi)
 	while (1)
 	{
+		//Wait for IC2 communication
 		while (!(TWCR & (1<<TWINT))){}
+
 
 		switch(TWSR){
 			case 0x60: //Received own address and write bit, ACK returned
@@ -192,15 +374,18 @@ int main(void)
 			case 0x90: //Addressed with general call and data byte received, ACK returned
 			LED2_ON;
 			twi_data = TWDR;
+			//wait for 22 which indicates the first servo value
 			if (twi_data == 22)
 			{
 				init_received = 0;
 				data_counter = 0;
 			}
+			//wait for 11 which indicates the last servo value
 			if(twi_data == 11){
 				init_received = 1;
 				data_counter = 0;
 			}
+			//if 22 was received previously set the received value as servo position
 			if (init_received && twi_data != 22 && twi_data != 11)
 			{
 				data[data_counter] = twi_data;
@@ -213,10 +398,8 @@ int main(void)
 			LED1_OFF;
 			break;
 		}
-		
-		//TWCR &= ~(1<<TWINT);
-		TWCR |= (1<<TWINT); //reset von TWINT durch setzen????
+		TWCR |= (1<<TWINT);
 
 	}
 }
-//------------------------
+

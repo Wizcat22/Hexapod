@@ -1,4 +1,10 @@
-﻿using System;
+﻿/**********************************************************************************************//**
+ * @file    hexapod.cs
+ *
+ * @brief   Implements the hexapod class.
+ **************************************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,29 +12,65 @@ using System.Threading.Tasks;
 
 namespace HexPi
 {
+    /**********************************************************************************************//**
+     * @class   Hexapod
+     *
+     * @brief   A hexapod.
+     *
+     * @author  Alexander Miller
+     * @date    11.08.2016
+     **************************************************************************************************/
+
     class Hexapod
     {
         //Objects
+        
+        /** @brief   The servo hat. */
         ServoHat servo = new ServoHat();
+
+        /** @brief   The accelerometer. */
         Accelerometer accel = new Accelerometer();
         //******
 
         //Fields
+        
+        /** @brief   The last direction. */
         byte lastDirection = 0;
+
+        /** @brief   Width of the body in mm. */
         const double bodyWidth = 200;
+
+        /** @brief   The body heigth in mm. */
         const double bodyHeigth = 300;
         //******
 
         //Arrays
+        
+        /** @brief   The servo data. */
         byte[] data = new byte[26];
+
+        /** @brief   The gait offsets. */
         int[] gait = { 25, 75, 75, 25, 25, 75 };
+
+        /** @brief   The angles of the leg paths in rotation. */
         int[] rotation = { 135, 45, 180, 0, 225, 315 };
-        //int[] gait = { 0,0,0,0,0,0};
+        
+        /** @brief   The legs. */
         ILeg[] legs = new ILeg[6];
         //******
 
 
         //Functions
+
+        /**********************************************************************************************//**
+         * @fn  public void init()
+         *
+         * @brief   Initializes this device.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         public void init()
         {
             servo.init();
@@ -59,9 +101,21 @@ namespace HexPi
 
         }
 
+        /**********************************************************************************************//**
+         * @fn  public void move(double inc, byte dir)
+         *
+         * @brief   Moves the robot.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   inc Amount to increment by.
+         * @param   dir The direction to move in.
+         **************************************************************************************************/
+
         public void move(double inc, byte dir)
         {
-
+            //If the direction has changed, center all les
             if (dir != lastDirection)
             {
                 centerLegs();
@@ -103,6 +157,15 @@ namespace HexPi
 
         }
 
+        /**********************************************************************************************//**
+         * @fn  private void calcOffsets()
+         *
+         * @brief   Calculates the z offsets of the TCPs to level the body.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         private void calcOffsets()
         {
             double mul = 1;
@@ -112,13 +175,10 @@ namespace HexPi
                 if (i % 2 == 0)
                 {
                     legs[i].Zoff += mul * Math.Sin(accel.angleYZ);
-
-                    //legs[i].Yoff = cosyz;
                 }
                 else
                 {
                     legs[i].Zoff -= mul * Math.Sin(accel.angleYZ);
-                    //legs[i].Yoff = cosyz;
                 }
 
             }
@@ -126,68 +186,19 @@ namespace HexPi
             legs[0].Zoff -= mul * Math.Sin(accel.angleXZ);
             legs[1].Zoff -= mul * Math.Sin(accel.angleXZ);
 
-
-            //legs[2].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[2].XPos / 10);
-            //legs[3].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[3].XPos / 10);
-
-
             legs[4].Zoff += mul * Math.Sin(accel.angleXZ);
             legs[5].Zoff += mul * Math.Sin(accel.angleXZ);
 
-
-
-            //legs[1].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-            //legs[3].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-            //legs[5].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-
-            //legs[0].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-            //legs[2].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-            //legs[4].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-
         }
 
-        //private void calcOffsets()
-        //{
-        //    double mul = 0.01;
-
-        //    for (int i = 0; i < legs.Length; i++)
-        //    {
-        //        if (i % 2 == 0)
-        //        {
-        //            legs[i].Zoff += mul * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
-
-        //            //legs[i].Yoff = cosyz;
-        //        }
-        //        else
-        //        {
-        //            legs[i].Zoff -= mul * Math.Sin(accel.angleYZ) * ((bodyWidth / 2) + legs[i].YPos);
-        //            //legs[i].Yoff = cosyz;
-        //        }
-
-        //    }
-
-        //    legs[0].Zoff -= mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[0].XPos / 10));
-        //    legs[1].Zoff -= mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[1].XPos / 10));
-
-
-        //    legs[2].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[2].XPos / 10);
-        //    legs[3].Zoff += mul * Math.Sin(accel.angleXZ) * (legs[3].XPos / 10);
-
-
-        //    legs[4].Zoff += mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[4].XPos / 10));
-        //    legs[5].Zoff += mul * Math.Sin(accel.angleXZ) * ((bodyHeigth / 2) + (legs[5].XPos / 10));
-
-
-
-        //    //legs[1].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-        //    //legs[3].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-        //    //legs[5].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-
-        //    //legs[0].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-        //    //legs[2].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-        //    //legs[4].Xoff = Math.Cos(accel.angleXZ) * (legs[1].BodyWidth / 2);
-
-        //}
+        /**********************************************************************************************//**
+         * @fn  private void setData()
+         *
+         * @brief   Fills the data array for the servos.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
 
         private void setData()
         {
@@ -229,10 +240,21 @@ namespace HexPi
             //Debug.WriteLine("Leg 5 : " + data[10] + " " + data[11] + " " + data[12]);
         }
 
+        /**********************************************************************************************//**
+         * @fn  private void centerLegs()
+         *
+         * @brief   Centers all legs.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         **************************************************************************************************/
+
         private void centerLegs()
         {
-            int time = 100;
-            //double zOld = 0.0;
+            //time between steps
+            int time = 30;
+
+            //clear all z offsets
             foreach (ILeg l in legs)
             {
                 l.Zoff = 0;
@@ -243,6 +265,7 @@ namespace HexPi
                 Task.Delay(time).Wait();
             }
 
+            //put all legs down
             foreach (ILeg l in legs)
             {
                 l.ZPos = 0;
@@ -253,9 +276,9 @@ namespace HexPi
                 Task.Delay(time).Wait();
             }
 
+            //center each leg
             foreach (ILeg l in legs)
             {
-                //zOld = l.ZPos;
                 //Up
                 l.ZPos = l.StepSizeZ;
                 l.inverseKinematics();
