@@ -8,6 +8,7 @@ using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 using Windows.Gaming.Input;
 using System.Threading;
+using Windows.System;
 
 namespace HexPi
 {
@@ -48,6 +49,8 @@ namespace HexPi
         /** @brief   The rotational coordinate of the input. */
         double r = 0;
 
+        /** @brief   A bool value. System turns off if true. */
+        bool shutdown = false;
 
         /** @brief   The threshold for the input. */
         double threshold = 0.25;
@@ -175,6 +178,7 @@ namespace HexPi
                     y = -gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
                     r = gamepadStatus.RightThumbstickX;
+                    shutdown = (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick));
 
                 }
                 else
@@ -183,6 +187,15 @@ namespace HexPi
                     {
                         input = Gamepad.Gamepads.First();
                     }
+                }
+
+                //check if the system should be turned off
+                if (shutdown)
+                {
+                    Debug.WriteLine("_WARNING_: SYSTEM SHUTDOWN INITIALIZED!");
+                    ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
+                    
+                    
                 }
 
                 //check if any of the axis is above the threshold
