@@ -82,9 +82,9 @@ namespace HexPi
                 data[i] = 187;
             }
             //set start byte 
-            data[0] = 11;
+            data[0] = 22;
             //set end byte
-            data[25] = 22;
+            data[25] = 11;
 
             //init legs
 
