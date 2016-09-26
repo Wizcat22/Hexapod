@@ -52,6 +52,9 @@ namespace HexPi
         /** @brief   A bool value. System turns off if true. */
         bool shutdown = false;
 
+        /** @brief   A bool value. Activates demomode if true. */
+        bool demomode = false;
+
         /** @brief   The threshold for the input. */
         double threshold = 0.25;
         //******
@@ -179,6 +182,7 @@ namespace HexPi
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
                     r = gamepadStatus.RightThumbstickX;
                     shutdown = (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick));
+                    demomode = (gamepadStatus.Buttons == (GamepadButtons.LeftThumbstick | GamepadButtons.RightThumbstick | GamepadButtons.LeftShoulder | GamepadButtons.RightShoulder));
 
                 }
                 else
@@ -196,6 +200,13 @@ namespace HexPi
                     ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
                     
                     
+                }
+
+                //check if demomode is active
+                if (demomode)
+                {
+                    Debug.WriteLine("DEMO MODE ACTIVE!");
+                    robot.demo();
                 }
 
                 //check if any of the axis is above the threshold

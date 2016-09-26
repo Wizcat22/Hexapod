@@ -241,6 +241,271 @@ namespace HexPi
         }
 
         /**********************************************************************************************//**
+         * @fn  private void demo()
+         *
+         * @brief   Initialises some special movements for demonstrations.
+         *
+         * @author  Alexander Miller
+         * @date    26.09.2016
+         **************************************************************************************************/
+        public void demo()
+        {
+            throw new NotImplementedException();
+
+            //time between steps
+            int time = 30;
+
+            centerLegs();
+            Task.Delay(time).Wait();
+
+
+            //MOVE UP AND DOWN
+            //Move down
+            for (int i = 0; i < 30; i++)
+            {
+                foreach (ILeg l in legs)
+                {
+                    l.ZPos = i;
+                }
+                demohelper();
+                Task.Delay(time).Wait();
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                //Move up
+                for (int j = 30; j > -30; j--)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.ZPos = j;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+                //Move down
+                for (int k = -30; k < 30; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.ZPos = k;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+            }
+            //--------------
+            centerLegs();
+            //MOVE BACK AND FORWARD
+            //Move forward
+            for (int i = 0; i < 30; i++)
+            {
+                foreach (ILeg l in legs)
+                {
+                    l.XPos = i;
+                }
+                demohelper();
+                Task.Delay(time).Wait();
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                //Move forward
+                for (int j = 30; j > -30; j--)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.XPos = j;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+                //Move back
+                for (int k = -30; k < 30; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.XPos = k;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+            }
+            //--------------
+            centerLegs();
+            //MOVE LEFT AND RIGHT
+            //Move LEFT
+            for (int i = 0; i < 30; i++)
+            {
+                foreach (ILeg l in legs)
+                {
+                    l.YPos = i;
+                }
+                demohelper();
+                Task.Delay(time).Wait();
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                //Move right
+                for (int j = 30; j > -30; j--)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.YPos = j;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+                //Move left
+                for (int k = -30; k < 30; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.YPos = k;
+                    }
+                    demohelper();
+                    Task.Delay(time).Wait();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            legs[0].TOffset = 0;
+            legs[1].TOffset = 0;
+            legs[2].TOffset = 0;
+            legs[3].TOffset = 0;
+            legs[4].TOffset = 0;
+            legs[5].TOffset = 0;
+
+            centerLegs();
+
+
+            //MOVE X AND Z
+            for (int i = 0; i < 10; i++)
+            {
+                for (int k = 0; k < 100; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.calcPositionX(1);
+                    }
+                    demohelper();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            //MOVE Y AND Z
+            for (int i = 0; i < 10; i++)
+            {
+                for (int k = 0; k < 100; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.calcPositionY(1);
+                    }
+                    demohelper();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            //MOVE X AND Y
+            for (int i = 0; i < 10; i++)
+            {
+                for (int k = 0; k < 100; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.calcPositionX(1);
+                        l.calcPositionY(0);
+                        l.ZPos = 0;
+                    }
+                    demohelper();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            //MOVE X AND Y AND Z
+            for (int i = 0; i < 10; i++)
+            {
+                for (int k = 0; k < 100; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.calcPositionX(1);
+                        l.calcPositionY(0);
+                        l.ZPos = 0;
+                    }
+                    demohelper();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            legs[0].TOffset = gait[0];
+            legs[1].TOffset = gait[1];
+            legs[2].TOffset = gait[2];
+            legs[3].TOffset = gait[3];
+            legs[4].TOffset = gait[4];
+            legs[5].TOffset = gait[5];
+            centerLegs();
+
+            //ROTATE
+            for (int i = 0; i < 10; i++)
+            {
+                for (int k = 0; k < 100; k++)
+                {
+                    foreach (ILeg l in legs)
+                    {
+                        l.calcPositionR(1);
+                    }
+                    demohelper();
+                }
+            }
+            //--------------
+            centerLegs();
+
+            //for (int i = 0; i < 30; i++)
+            //{
+            //    foreach (ILeg l in legs)
+            //    {
+
+            //    }
+            //}
+
+            //END OF DEMO
+            legs[0].TOffset = gait[0];
+            legs[1].TOffset = gait[1];
+            legs[2].TOffset = gait[2];
+            legs[3].TOffset = gait[3];
+            legs[4].TOffset = gait[4];
+            legs[5].TOffset = gait[5];
+            centerLegs();
+        }
+
+        /**********************************************************************************************//**
+        * @fn  private void demohelper()
+        *
+        * @brief   This function is used to minimize code in demomode().
+        *
+        * @author  Alexander Miller
+        * @date    26.09.2016
+        **************************************************************************************************/
+        private void demohelper()
+        {
+            foreach (ILeg l in legs)
+            {
+                l.inverseKinematics();
+                l.calcData();
+                setData();
+                servo.write(data);
+            }
+        }
+
+        /**********************************************************************************************//**
          * @fn  private void centerLegs()
          *
          * @brief   Centers all legs.
@@ -271,10 +536,11 @@ namespace HexPi
                 l.ZPos = 0;
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
-                Task.Delay(time).Wait();
             }
+
+            setData();
+            servo.write(data);
+            Task.Delay(time).Wait();
 
             //center each leg
             foreach (ILeg l in legs)

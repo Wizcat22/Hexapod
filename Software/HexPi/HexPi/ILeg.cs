@@ -306,6 +306,27 @@ namespace HexPi
                 }
             }
         }
+
+        /**********************************************************************************************//**
+        * @property    public double TOffset
+        *
+        * @brief   Gets or sets the t offset.
+        *
+        * @return  The TOffset.
+        **************************************************************************************************/
+        public double TOffset
+        {
+            get
+            {
+                return tOffset;
+            }
+
+            set
+            {
+                tOffset = value;
+            }
+        }
+
         //******
 
         //Abstract functions
