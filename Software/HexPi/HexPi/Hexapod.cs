@@ -25,11 +25,8 @@ namespace HexPi
     {
         //Objects
         
-        /** @brief   The servo hat. */
-        ServoHat servo = new ServoHat();
-
         /** @brief   The accelerometer. */
-        Accelerometer accel = new Accelerometer();
+        //Accelerometer accel = new Accelerometer();
         //******
 
         //Fields
@@ -45,9 +42,6 @@ namespace HexPi
         //******
 
         //Arrays
-        
-        /** @brief   The servo data. */
-        byte[] data = new byte[26];
 
         /** @brief   The gait offsets. */
         int[] gait = { 25, 75, 75, 25, 25, 75 };
@@ -73,31 +67,18 @@ namespace HexPi
 
         public void init()
         {
-            servo.init();
-            accel.init();
-
-            //init data array
-            for (int i = 0; i < data.Length; i++)
-            {
-                data[i] = 187;
-            }
-            //set start byte 
-            data[0] = 22;
-            //set end byte
-            data[25] = 11;
+            //accel.init();
 
             //init legs
 
-            legs[0] = new LeftLeg(gait[0], 5, -6, 4, rotation[0]);
-            legs[2] = new LeftLeg(gait[2], 5, -3, 4, rotation[2]);
-            legs[4] = new LeftLeg(gait[4], 0, -4, 10, rotation[4]);
+            legs[0] = new LeftLeg(gait[0], 8,2,0, rotation[0], 0x11);
+            legs[2] = new LeftLeg(gait[2], 3,0,-5, rotation[2], 0x12);
+            legs[4] = new LeftLeg(gait[4], 5, 3, -2, rotation[4], 0x13);
 
 
-            legs[1] = new RightLeg(gait[1], -5, -5, 5, rotation[1]);
-            legs[3] = new RightLeg(gait[3], 0, -2, -5, rotation[3]);
-            legs[5] = new RightLeg(gait[5], 0, 0, -3, rotation[5]);
-
-
+            legs[1] = new RightLeg(gait[1], 2, -5, 0, rotation[1], 0x21);
+            legs[3] = new RightLeg(gait[3], 1, -3, 0, rotation[3], 0x22);
+            legs[5] = new RightLeg(gait[5], 8, 5, 0, rotation[5], 0x23);
 
         }
 
@@ -138,9 +119,9 @@ namespace HexPi
                         lastDirection = (byte)Controller.directions.ROTATE;
                         break;
                     case (byte)Controller.directions.CENTER:
-                        accel.read();
-                        calcOffsets();
-                        l.calcPositionZ(true);
+                        //accel.read();
+                        //calcOffsets();
+                        //l.calcPositionZOffset();
                         lastDirection = (byte)Controller.directions.CENTER;
                         break;
                     default:
@@ -149,11 +130,9 @@ namespace HexPi
 
                 l.inverseKinematics();
                 l.calcData();
+                l.sendData();
 
             }
-
-            setData();
-            servo.write(data);
 
         }
 
@@ -166,79 +145,31 @@ namespace HexPi
          * @date    11.08.2016
          **************************************************************************************************/
 
-        private void calcOffsets()
-        {
-            double mul = 1;
+        //private void calcOffsets()
+        //{
+        //    double mul = 1;
 
-            for (int i = 0; i < legs.Length; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    legs[i].Zoff += mul * Math.Sin(accel.angleYZ);
-                }
-                else
-                {
-                    legs[i].Zoff -= mul * Math.Sin(accel.angleYZ);
-                }
+        //    for (int i = 0; i < legs.Length; i++)
+        //    {
+        //        if (i % 2 == 0)
+        //        {
+        //            legs[i].Zoff += mul * Math.Sin(accel.angleYZ);
+        //        }
+        //        else
+        //        {
+        //            legs[i].Zoff -= mul * Math.Sin(accel.angleYZ);
+        //        }
 
-            }
+        //    }
 
-            legs[0].Zoff -= mul * Math.Sin(accel.angleXZ);
-            legs[1].Zoff -= mul * Math.Sin(accel.angleXZ);
+        //    legs[0].Zoff -= mul * Math.Sin(accel.angleXZ);
+        //    legs[1].Zoff -= mul * Math.Sin(accel.angleXZ);
 
-            legs[4].Zoff += mul * Math.Sin(accel.angleXZ);
-            legs[5].Zoff += mul * Math.Sin(accel.angleXZ);
+        //    legs[4].Zoff += mul * Math.Sin(accel.angleXZ);
+        //    legs[5].Zoff += mul * Math.Sin(accel.angleXZ);
 
-        }
+        //}
 
-        /**********************************************************************************************//**
-         * @fn  private void setData()
-         *
-         * @brief   Fills the data array for the servos.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
-
-        private void setData()
-        {
-
-            data[19] = legs[0].getMotorData(2);
-            data[20] = legs[0].getMotorData(1);
-            data[21] = legs[0].getMotorData(0);
-
-            //Debug.WriteLine("Leg 0 : " + data[1] + " " + data[2] + " " + data[3]);
-
-            data[4] = legs[1].getMotorData(2);
-            data[5] = legs[1].getMotorData(1);
-            data[6] = legs[1].getMotorData(0);
-
-            //Debug.WriteLine("Leg 1 : " + data[4] + " " + data[5] + " " + data[6]);
-
-            data[16] = legs[2].getMotorData(2);
-            data[17] = legs[2].getMotorData(1);
-            data[18] = legs[2].getMotorData(0);
-
-            //Debug.WriteLine("Leg 2 : " + data[7] + " " + data[8] + " " + data[9]);
-
-            data[7] = legs[3].getMotorData(2);
-            data[8] = legs[3].getMotorData(1);
-            data[9] = legs[3].getMotorData(0);
-
-            //Debug.WriteLine("Leg 3 : " + data[7] + " " + data[8] + " " + data[9]);
-
-            data[13] = legs[4].getMotorData(2);
-            data[14] = legs[4].getMotorData(1);
-            data[15] = legs[4].getMotorData(0);
-
-            //Debug.WriteLine("Leg 4 : " + data[19] + " " + data[20] + " " + data[21]);
-
-            data[10] = legs[5].getMotorData(2);
-            data[11] = legs[5].getMotorData(1);
-            data[12] = legs[5].getMotorData(0);
-
-            //Debug.WriteLine("Leg 5 : " + data[10] + " " + data[11] + " " + data[12]);
-        }
 
         /**********************************************************************************************//**
          * @fn  private void centerLegs()
@@ -252,7 +183,7 @@ namespace HexPi
         private void centerLegs()
         {
             //time between steps
-            int time = 30;
+            int time = 50;
 
             //clear all z offsets
             foreach (ILeg l in legs)
@@ -260,8 +191,7 @@ namespace HexPi
                 l.Zoff = 0;
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
+                l.sendData();
                 Task.Delay(time).Wait();
             }
 
@@ -271,8 +201,7 @@ namespace HexPi
                 l.ZPos = 0;
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
+                l.sendData();
                 Task.Delay(time).Wait();
             }
 
@@ -283,24 +212,21 @@ namespace HexPi
                 l.ZPos = l.StepSizeZ;
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
+                l.sendData();
                 Task.Delay(time).Wait();
 
                 //Center
                 l.calcPositionCenter();
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
+                l.sendData();
                 Task.Delay(time).Wait();
 
                 //Down
                 l.ZPos = 0;
                 l.inverseKinematics();
                 l.calcData();
-                setData();
-                servo.write(data);
+                l.sendData();
                 Task.Delay(time).Wait();
 
             }

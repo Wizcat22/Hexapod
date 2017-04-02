@@ -32,12 +32,16 @@ LIB_DEP:=
 LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
-SUBDIRS := 
+SUBDIRS :=  \
+../include \
+../src
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
-../main.c
+../src/ATXMEGA32A4U.c \
+../src/INA3221.c \
+../src/main.c
 
 
 PREPROCESSING_SRCS += 
@@ -47,16 +51,24 @@ ASM_SRCS +=
 
 
 OBJS +=  \
-main.o
+src/ATXMEGA32A4U.o \
+src/INA3221.o \
+src/main.o
 
 OBJS_AS_ARGS +=  \
-main.o
+src/ATXMEGA32A4U.o \
+src/INA3221.o \
+src/main.o
 
 C_DEPS +=  \
-main.d
+src/ATXMEGA32A4U.d \
+src/INA3221.d \
+src/main.d
 
 C_DEPS_AS_ARGS +=  \
-main.d
+src/ATXMEGA32A4U.d \
+src/INA3221.d \
+src/main.d
 
 OUTPUT_FILE_PATH +=LegController.elf
 
@@ -75,10 +87,14 @@ LINKER_SCRIPT_DEP+=
 
 
 
-./%.o: .././%.c
+
+
+
+
+src/%.o: ../src/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.9.2
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.63\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atxmega32a4u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.63\gcc\dev\atxmega32a4u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.63\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -mmcu=atxmega32a4u -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.63\gcc\dev\atxmega32a4u" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 

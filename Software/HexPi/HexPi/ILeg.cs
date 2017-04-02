@@ -6,9 +6,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Devices.I2c;
 
 namespace HexPi
 {
@@ -23,8 +26,14 @@ namespace HexPi
 
     abstract class ILeg
     {
-        //Fields
-        
+        #region FIELDS
+
+        /** @brief   The device. */
+        I2cDevice device = null;
+
+        /** @brief   I2C Buffer. */
+        protected byte[] data = new byte[4];
+
         /** @brief   The TCP offset of the x coordinate. */
         protected double xOff = 0.0;
 
@@ -42,7 +51,7 @@ namespace HexPi
 
         /** @brief   The lenght of the direct connection of the second joint and the TCP. */
         protected double L3 = 0;
-       
+
         /** @brief   The angle of the first joint. */
         protected double alpha = 0;
 
@@ -72,13 +81,13 @@ namespace HexPi
 
         /** @brief   The y position of the TCP. */
         protected double yPos = 0;
-        
+
         /** @brief   The z position of the TCP. */
         protected double zPos = 0;
 
         /** @brief   The data for the first motor. */
         protected byte motorData0 = 0;
-        
+
         /** @brief   The data for the second motor. */
         protected byte motorData1 = 0;
 
@@ -87,15 +96,21 @@ namespace HexPi
 
         /** @brief   The rotation. */
         protected double rotation = 0;
+
+        /** @brief   The rotation of the xy-axis at xy-movement. */
+        protected double xyRotation = 0;
+
         //******
 
-        //Constants
-        
+        #endregion FIELDS
+
+        #region CONSTANTS
+
         /** @brief   The step size for x coordinate in mm. */
-        protected const double stepSizeX = 30;
+        protected const double stepSizeX = 20;
 
         /** @brief   The step size for y coordinate in mm. */
-        protected const double stepSizeY = 30;
+        protected const double stepSizeY = 20;
 
         /** @brief   The step size for z coordinate in mm. */
         protected const double stepSizeZ = 30;
@@ -107,27 +122,28 @@ namespace HexPi
         protected const double period = 100;
 
         /** @brief   The height of the first joint. */
-        protected const double zOffset = 95;
+        protected const double zOffset = 88;
 
         /** @brief   The distance between the first and second joint in mm. */
-        protected const double A1 = 30;
+        protected const double A1 = 52;
 
         /** @brief   The lenght of the upper leg in mm. */
-        protected const double A2 = 65;
+        protected const double A2 = 69;
 
         /** @brief   The lenght of the lower leg in mm. */
-        protected const double A3 = 95;
-        //******
+        protected const double A3 = 88;
 
-        //Properties
+        #endregion CONSTANTS
+
+        #region PROPERTIES
 
         /**********************************************************************************************//**
-         * @property    public double XPos
-         *
-         * @brief   Gets or sets the x position.
-         *
-         * @return  The x coordinate position.
-         **************************************************************************************************/
+        * @property    public double XPos
+        *
+        * @brief   Gets or sets the x position.
+        *
+        * @return  The x coordinate position.
+        **************************************************************************************************/
 
         public double XPos
         {
@@ -306,9 +322,10 @@ namespace HexPi
                 }
             }
         }
-        //******
 
-        //Abstract functions
+        #endregion PROPERTIES
+
+        #region ABSTRACT_FUNCTIONS
 
         /**********************************************************************************************//**
          * @fn  public abstract void inverseKinematics();
@@ -335,10 +352,69 @@ namespace HexPi
          **************************************************************************************************/
 
         public abstract void calcPositionR(double increment);
-        //******
 
+        #endregion ABSTRACT_FUNKTIONS
 
-        //Functions
+        #region FUNCTIONS
+
+        /**********************************************************************************************//**
+* @fn  public async void init()
+*
+* @brief   Initializes this device.
+*
+* @author  Alexander Miller
+* @date    11.08.2016
+**************************************************************************************************/
+
+        public async void init(int address)
+        {
+            try
+            {
+                I2cConnectionSettings settings = new I2cConnectionSettings(address); // Address
+                settings.BusSpeed = I2cBusSpeed.StandardMode;
+                settings.SharingMode = I2cSharingMode.Shared;
+                string aqs = I2cDevice.GetDeviceSelector("I2C1");
+                DeviceInformationCollection dis = await DeviceInformation.FindAllAsync(aqs);
+                device = await I2cDevice.FromIdAsync(dis[0].Id, settings);
+                data[0] = 2;
+            }
+            catch
+            {
+                Debug.WriteLine("Error: I2C init failed!");
+            }
+        }
+
+        /**********************************************************************************************//**
+         * @fn  public void sendData()
+         *
+         * @brief   Send Motor positions.
+         *
+         * @author  Alexander Miller
+         * @date    01.03.2017
+         *
+         **************************************************************************************************/
+
+        public void sendData()
+        {
+            try
+            {
+                if (device != null)
+                {
+                    device.Write(data);
+                }
+                else
+                {
+                    //Debug.WriteLine("Error: I2C write failed!");
+                }
+
+            }
+            catch (Exception e)
+            {
+                //Debug.WriteLine("Error: I2C hat write failed!" + e.Message);
+            }
+
+        }
+
 
         /**********************************************************************************************//**
          * @fn  public void calcPositionCenter()
@@ -367,6 +443,41 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
+        public void calcPositionXY(double x, double y)
+        {
+            int frame = 10;
+            t = ((t - Math.Sqrt(x * x + y * y)) % period + period) % period;
+
+            //if t is equal to period/2 +- frame
+            if ((t>= period/2-frame) && t<=period/2+frame)
+            {
+                xyRotation = Math.Atan2(x,y);
+            }
+
+            if (t <= period / 2)
+            {
+                xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t - (stepSizeR * Math.Cos(xyRotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t - (stepSizeR * Math.Sin(xyRotation));
+            }
+            else
+            {
+                xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(xyRotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(xyRotation));
+            }
+            calcPositionZ();
+        }
+
+        /**********************************************************************************************//**
+         * @fn  public void calcPositionX(double increment)
+         *
+         * @brief   Calculates the TCP position for movement in x direction.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   increment   Amount to increment by.
+         **************************************************************************************************/
+
         public void calcPositionX(double increment)
         {
             t = ((t + increment) % period + period) % period;
@@ -379,7 +490,7 @@ namespace HexPi
             {
                 xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX + xOff;
             }
-            calcPositionZ(false);
+            calcPositionZ();
         }
 
         /**********************************************************************************************//**
@@ -405,11 +516,11 @@ namespace HexPi
             {
                 yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY + yOff;
             }
-            calcPositionZ(false);
+            calcPositionZ();
         }
 
         /**********************************************************************************************//**
-         * @fn  public void calcPositionZ(bool off)
+         * @fn  protected void calcPositionZ()
          *
          * @brief   Calculates the TCP position for movement in z direction.
          *
@@ -419,12 +530,8 @@ namespace HexPi
          * @param   off Turns the offset of.
          **************************************************************************************************/
 
-        public void calcPositionZ(bool off)
+        protected void calcPositionZ()
         {
-            if(off)
-            {
-                t = 0.0;
-            }
             if (t <= period / 2)
             {
                 zPos = 0 + zOff;
@@ -442,6 +549,22 @@ namespace HexPi
             {
                 zPos = -stepSizeZ;
             }
+        }
+
+        /**********************************************************************************************//**
+         * @fn  public void calcPositionZOffset()
+         *
+         * @brief   Calculates the TCP position while standing.
+         *
+         * @author  Alexander Miller
+         * @date    06.03.2017
+         *
+         * @param   off Turns the offset of.
+         **************************************************************************************************/
+
+        public void calcPositionZOffset()
+        {
+                zPos = 0 + zOff;
         }
 
         /**********************************************************************************************//**
@@ -472,7 +595,7 @@ namespace HexPi
         /**********************************************************************************************//**
          * @fn  public void calcData()
          *
-         * @brief   Calculates the data for the Servo Hat.
+         * @brief   Calculates the data for the LegController.
          *
          * @author  Alexander Miller
          * @date    11.08.2016
@@ -480,10 +603,12 @@ namespace HexPi
 
         public void calcData()
         {
-            motorData0 = (byte)(1.38888888888 * alpha + 187.5);
-            motorData1 = (byte)(1.38888888888 * beta + 187.5);
-            motorData2 = (byte)(1.38888888888 * gamma + 187.5);
+            data[1] = (byte)(255 & ((sbyte)gamma));
+            data[2] = (byte)(255 & ((sbyte)-beta));
+            data[3] = (byte)(255 & ((sbyte)-alpha));
         }
-        //******
+
+        #endregion FUNCTIONS
+
     }
 }

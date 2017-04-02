@@ -168,8 +168,8 @@ namespace HexPi
             {
 
 
+                //Task.Delay(0).Wait();
                 Task.Delay(0).Wait();
-
                 
                 if (input != null)
                 {

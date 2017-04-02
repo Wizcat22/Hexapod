@@ -32,6 +32,8 @@ namespace HexPi
         I2cDevice device = null;
         //******
 
+        byte[] a = new byte[2];
+
         //Functions
 
         /**********************************************************************************************//**
@@ -47,8 +49,9 @@ namespace HexPi
         {
             try
             {
-                I2cConnectionSettings settings = new I2cConnectionSettings(0x42); // Address
-                settings.BusSpeed = I2cBusSpeed.StandardMode;
+                I2cConnectionSettings settings = new I2cConnectionSettings(0x2); // Address
+                //I2cConnectionSettings settings = new I2cConnectionSettings(0x42); // Address
+                settings.BusSpeed = I2cBusSpeed.FastMode;
                 settings.SharingMode = I2cSharingMode.Shared;
                 string aqs = I2cDevice.GetDeviceSelector("I2C1");
                 DeviceInformationCollection dis = await DeviceInformation.FindAllAsync(aqs);
@@ -77,7 +80,11 @@ namespace HexPi
             {
                 if (device != null)
                 {
-                    device.Write(b);     
+                    //device.Write(b);
+                    
+                    a[0] = 1;
+                    a[1] += 1 ;
+                    device.Write(a);   
                 }
                 else
                 {

@@ -40,7 +40,7 @@ namespace HexPi
          * @param   rotation    The angle of the leg path in rotation.
          **************************************************************************************************/
 
-        public LeftLeg(int tOffset, int aOff, int bOff, int cOff , double rotation)
+        public LeftLeg(int tOffset, int aOff, int bOff, int cOff , double rotation,int address)
         {
             this.tOffset = tOffset;
             t = this.tOffset;
@@ -50,6 +50,10 @@ namespace HexPi
             gammaOff = cOff;
 
             this.rotation = (rotation / 180) * Math.PI;
+
+            init(address);
+
+
         }
 
         /**********************************************************************************************//**
@@ -83,7 +87,6 @@ namespace HexPi
             alpha = (alpha * 180 / Math.PI - alphaOff) * 1;
             beta = (beta * 180 / Math.PI - betaOff - 90) * -1;
             gamma = (gamma * 180 / Math.PI - gammaOff - 90) * 1;
-
             //Debug.WriteLine("DEBUG: " + alpha + " :: " + beta + " :: " + gamma);
 
         }
@@ -113,7 +116,7 @@ namespace HexPi
                 xPos = -4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(rotation));
                 yPos = -4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(rotation));
             }
-            calcPositionZ(false);
+            calcPositionZ();
         }
         //******
     }
