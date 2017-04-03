@@ -19,9 +19,6 @@
 #pragma region VARIABLES
 
 uint8_t slave_address = 0x11; //I2C SLAVE ADDRESS
-int8_t servo_1_deg = 0; //SERVO POSITION 0°-180°
-int8_t servo_2_deg = 0; //SERVO POSITION 0°-180°
-int8_t servo_3_deg = 0; //SERVO POSITION 0°-180°
 
 #pragma endregion VARIABLES
 
@@ -44,6 +41,16 @@ void init_pll(void){
 	while (!(OSC.STATUS & OSC_PLLRDY_bm)){}
 	CCP = CCP_IOREG_gc;
 	CLK.CTRL = CLK_SCLKSEL_PLL_gc;
+
+}
+
+void init_watchdog(void){
+
+CCP = CCP_IOREG_gc; //Disable interrupts for 4 clock cycles and protect I/O
+WDT.CTRL = WDT_PER_2KCLK_gc | WDT_ENABLE_bm | WDT_CEN_bm;
+/* Wait for WD to synchronize with new settings. */
+while(WDT.STATUS & WDT_SYNCBUSY_bm ){
+}
 
 }
 
@@ -120,6 +127,31 @@ void uart_send(char data){
 
 }
 
+void uart_send_word(uint16_t data){
+
+uart_send(data>>8); //send high-byte
+uart_send(data); // send low-byte
+uart_send('\n');
+}
+
+void uart_send_string(char s[]){
+int x =0;
+while (s[x] != '\0')
+{
+	uart_send(s[x]);
+	x++;
+}
+uart_send('\n');
+}
+
+void uart_send_number(int32_t num){
+
+char str[20];
+sprintf(str, "%d", num);
+uart_send_string(str);
+
+}
+
 void led_set_color(uint16_t H, float S, float V){
 
 	float R = 0.0;
@@ -153,10 +185,10 @@ void led_set_color(uint16_t H, float S, float V){
 	}
 
 
-	TCC0.CCA = (uint16_t)(16000*R);
-	TCC0.CCB = (uint16_t)(16000*G);
-	TCC0.CCC = (uint16_t)(16000*B);
-	TCC0.CTRLFSET |= (1<<3);
+	TCC0.CCABUF = (uint16_t)(16000*R);
+	TCC0.CCBBUF = (uint16_t)(16000*G);
+	TCC0.CCCBUF = (uint16_t)(16000*B);
+	//TCC0.CTRLFSET |= (1<<3);
 	
 
 
@@ -180,6 +212,11 @@ void twi_slave_get_data(void){
 	{
 		if (TWIC_SLAVE_DATA == (slave_address<<1))
 		{
+			int8_t s0 = 0;
+			int8_t s1 = 0;
+			int8_t s2 = 0;
+
+
 			TWIC_SLAVE_CTRLB = 0b00000011;
 			while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
 			switch(TWIC_SLAVE_DATA)
@@ -193,15 +230,15 @@ void twi_slave_get_data(void){
 				case 2:
 				TWIC_SLAVE_CTRLB = 0b00000011;
 				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				servo_1_deg = TWIC_SLAVE_DATA;
+				s0 = TWIC_SLAVE_DATA;
 				TWIC_SLAVE_CTRLB = 0b00000011;
 				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				servo_2_deg = TWIC_SLAVE_DATA;
+				s1 = TWIC_SLAVE_DATA;
 				TWIC_SLAVE_CTRLB = 0b00000011;
 				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				servo_3_deg = TWIC_SLAVE_DATA;
+				s2 = TWIC_SLAVE_DATA;
 				TWIC_SLAVE_CTRLB = 0b00000010;
-
+				servo_set_position(s0,s1,s2);
 
 
 			}
@@ -242,17 +279,13 @@ int16_t twi_master_read_data(char reg){
 	low = TWIE_MASTER_DATA;
 	TWIE_MASTER_CTRLC |= TWI_MASTER_CMD_STOP_gc; //Issue STOP-condition
 
-	uart_send(high);
-	uart_send(low);
-
 	return (low + (high<<8));
 }
 
-void servo_set_position(){
-led_set_color(120+servo_1_deg,1,0.0005);
-TCD0.CCA = (uint16_t)(22.22222222222 * servo_1_deg + 3000);
-TCD0.CCB = (uint16_t)(22.22222222222 * servo_2_deg + 3000);
-TCD0.CCC = (uint16_t)(22.22222222222 * servo_3_deg + 3000);
+void servo_set_position(int8_t s0, int8_t s1, int8_t s2){
+TCD0.CCABUF = (uint16_t)(22.22222222222 * s0 + 3000);
+TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
+TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
 }
 
 void delay(int ms){

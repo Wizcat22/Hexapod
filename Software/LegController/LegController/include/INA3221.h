@@ -15,26 +15,26 @@
 
 #pragma region INA3221 REGISTERS
 
-#define INA_CFG_R 0x00
-#define INA_C1_SV_R 0x01
-#define INA_C1_BV_R 0x02
-#define INA_C2_SV_R 0x03
-#define INA_C2_BV_R 0x04
-#define INA_C3_SV_R 0x05
-#define INA_C3_BV_R 0x06
-#define INA_C1_CRIT_LIMIT_R 0x07
-#define INA_C1_WARN_LIMIT_R 0x08
-#define INA_C2_CRIT_LIMIT_R 0x09
-#define INA_C2_WARN_LIMIT_R 0x0A
-#define INA_C3_CRIT_LIMIT_R 0x0B
-#define INA_C3_WARN_LIMIT_R 0x0C
-#define INA_SV_SUM_R 0x0D
-#define INA_SV_SUM_LIMIT_R 0x0E
-#define INA_MASK_ENABLE_R 0x0F
-#define INA_PV_UPPER_LIMIT_R 0x10
-#define INA_PV_LOWER_LIMIT_R 0x11
-#define INA_MANUFACTURER_ID_R 0xFE
-#define INA_DIE_ID_R 0xFF
+#define INA_CFG_R 0x00 //All-register reset
+#define INA_C1_SV_R 0x01 //Avg. shunt voltage
+#define INA_C1_BV_R 0x02 //Avg. bus voltage
+#define INA_C2_SV_R 0x03 //Avg. shunt voltage
+#define INA_C2_BV_R 0x04 //Avg. bus voltage
+#define INA_C3_SV_R 0x05 //Avg. shunt voltage
+#define INA_C3_BV_R 0x06 //Avg. bus voltage
+#define INA_C1_CRIT_LIMIT_R 0x07 //Critical alert limit
+#define INA_C1_WARN_LIMIT_R 0x08 //Warning alert limit
+#define INA_C2_CRIT_LIMIT_R 0x09 //Critical alert limit
+#define INA_C2_WARN_LIMIT_R 0x0A //Warning alert limit
+#define INA_C3_CRIT_LIMIT_R 0x0B //Critical alert limit
+#define INA_C3_WARN_LIMIT_R 0x0C //Warning alert limit
+#define INA_SV_SUM_R 0x0D //Shunt voltage sum
+#define INA_SV_SUM_LIMIT_R 0x0E //Shunt voltage limit
+#define INA_MASK_ENABLE_R 0x0F //Mask/Enable
+#define INA_PV_UPPER_LIMIT_R 0x10 //Power-valid Upper Limit
+#define INA_PV_LOWER_LIMIT_R 0x11 //Power-valid Lower Limit
+#define INA_MANUFACTURER_ID_R 0xFE //Manufacturer ID = 0x5449 = TI
+#define INA_DIE_ID_R 0xFF //Die ID = 0x3220
 
 #pragma endregion INA3221 REGISTERS
 
