@@ -5,12 +5,35 @@
 *  Author: Alexander Miller
 */
 
+#pragma region DEFINES
+
 #define F_CPU 16000000UL
+
+#define LED_SATURATION 1.0f
+#define LED_BRIGTHNESS 0.005f
+
+#define C_RED 0
+#define C_YELLOW 60
+#define C_GREEN 120
+#define C_CYAN 180
+#define C_BLUE 240
+#define C_MAGENTA 300
+
+#define HEIGHT 88
+#define A1 52
+#define A2 69
+#define A3 88
+
+#pragma endregion DEFINES
+
+
 
 #pragma region INCLUDES
 
 #include <avr/io.h>
+#include <avr/eeprom.h>
 #include <util/delay.h>
+#include <stdio.h>
 #include "../include/ATXMEGA32A4U.h"
 #include "../include/INA3221.h"
 
@@ -19,6 +42,8 @@
 #pragma region VARIABLES
 
 uint8_t slave_address = 0x11; //I2C SLAVE ADDRESS
+
+int8_t servo_cal[] = {0,0,0};
 
 #pragma endregion VARIABLES
 
@@ -46,11 +71,24 @@ void init_pll(void){
 
 void init_watchdog(void){
 
-CCP = CCP_IOREG_gc; //Disable interrupts for 4 clock cycles and protect I/O
-WDT.CTRL = WDT_PER_2KCLK_gc | WDT_ENABLE_bm | WDT_CEN_bm;
-/* Wait for WD to synchronize with new settings. */
-while(WDT.STATUS & WDT_SYNCBUSY_bm ){
+	CCP = CCP_IOREG_gc; //Disable interrupts for 4 clock cycles and protect I/O
+	WDT.CTRL = WDT_PER_8KCLK_gc | WDT_ENABLE_bm | WDT_CEN_bm; //Enable watchdog and set timeout to 8 sek. @ 3.3V
+	while(WDT.STATUS & WDT_SYNCBUSY_bm ){} //Wait for WD to synchronize with new settings
+
 }
+
+void init_eeprom(void){
+
+	for (uint8_t p=0;p<3;p++)
+	{
+		uint8_t temp = eeprom_read_byte((uint8_t *) p);
+		if (temp != 0xFF)
+		{
+			servo_cal[p] = temp ;
+		}
+	}
+
+
 
 }
 
@@ -78,9 +116,11 @@ void init_gpio(void){
 
 void init_servo(void){
 	//Init timer0 (16bit)
-	TCD0.PER = 40000; //Set Timer0 top value
-	TCD0.CTRLA = TC0_CLKSEL2_bm; //Set Timer0 clock source and prescaler
+	TCD0.PER = 40000; //Set Timer0 top value (16Mhz & 8 prescaler = 20ms)
+	TCD0.CTRLA = TC0_CLKSEL2_bm; //Set Timer0 clock source and prescaler (8)
 	TCD0.CTRLB = TC0_WGMODE0_bm | TC0_WGMODE1_bm |TC0_CCAEN_bm| TC0_CCBEN_bm| TC0_CCCEN_bm; //Enable singleslope mode and enable pins OC0A - OC0C for pwm
+
+	servo_set_deg(0,0,0);
 
 }
 
@@ -129,30 +169,32 @@ void uart_send(char data){
 
 void uart_send_word(uint16_t data){
 
-uart_send(data>>8); //send high-byte
-uart_send(data); // send low-byte
-uart_send('\n');
+	uart_send(data>>8); //send high-byte
+	uart_send(data); // send low-byte
+	uart_send('\n');
 }
 
 void uart_send_string(char s[]){
-int x =0;
-while (s[x] != '\0')
-{
-	uart_send(s[x]);
-	x++;
-}
-uart_send('\n');
+	int x =0;
+	while (s[x] != '\0')
+	{
+		uart_send(s[x]);
+		x++;
+	}
+	uart_send('\n');
 }
 
 void uart_send_number(int32_t num){
 
-char str[20];
-sprintf(str, "%d", num);
-uart_send_string(str);
+	char str[20];
+	sprintf(str, "%d", num);
+	uart_send_string(str);
 
 }
 
 void led_set_color(uint16_t H, float S, float V){
+
+	H = H%360;
 
 	float R = 0.0;
 	float G = 0.0;
@@ -208,44 +250,92 @@ void init_LED(void){
 
 void twi_slave_get_data(void){
 
-	if ((TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm))
-	{
-		if (TWIC_SLAVE_DATA == (slave_address<<1))
+	uint8_t data_byte[] = {0,0,0};
+	uint16_t data_word[] = {0,0,0};
+
+	if ((TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){ //If transaction happened
+		if (TWIC_SLAVE_DATA == (slave_address<<1)) //If the received address is correct (should be always the case)
 		{
-			int8_t s0 = 0;
-			int8_t s1 = 0;
-			int8_t s2 = 0;
+			TWIC_SLAVE_CTRLB = 0b00000011; //Send ack
+			data_byte[0]= twi_slave_get_byte(); //Get "Register"-address
+
+			//0 = init
+			//1 = Set led color
+			//2 = Set servo degree
+			//3 = Set leg position
+			//4 = Set servo calibration value and save in eeprom 
 
 
-			TWIC_SLAVE_CTRLB = 0b00000011;
-			while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-			switch(TWIC_SLAVE_DATA)
+			switch (data_byte[0])
 			{
-				case 1:
-				TWIC_SLAVE_CTRLB = 0b00000011;
-				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				led_set_color(TWIC_SLAVE_DATA,1,0.005f);
-				TWIC_SLAVE_CTRLB = 0b00000010;
+				case 0: //Init
+				led_set_color(C_GREEN,LED_SATURATION,LED_BRIGTHNESS);
 				break;
-				case 2:
-				TWIC_SLAVE_CTRLB = 0b00000011;
-				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				s0 = TWIC_SLAVE_DATA;
-				TWIC_SLAVE_CTRLB = 0b00000011;
-				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				s1 = TWIC_SLAVE_DATA;
-				TWIC_SLAVE_CTRLB = 0b00000011;
-				while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-				s2 = TWIC_SLAVE_DATA;
-				TWIC_SLAVE_CTRLB = 0b00000010;
-				servo_set_position(s0,s1,s2);
-
-
+				case 1: //Set led color
+				data_word[0] = twi_slave_get_word(); //Get color-value
+				led_set_color(data_word[0],LED_SATURATION,LED_BRIGTHNESS);
+				break;
+				case 2: //2 = Set servo degree
+				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
+				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
+				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
+				servo_set_deg(data_byte[0],data_byte[0],data_byte[0]);
+				break;
+				case 3: //3 = Set leg position
+				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
+				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
+				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
+				leg_set_position(data_byte[0],data_byte[0],data_byte[0]);
+				break;
+				case 4:
+				for (char i=0; i<3;i++)
+				{
+					data_byte[i] = twi_slave_get_byte(); //Servo calibration value
+					eeprom_write_byte((uint8_t *) i,data_byte[i]); //Save servo calibration value to eeprom
+					servo_cal[i] = data_byte[i]; //Set servo calibration value
+				}
+				break;
+				//case value:
+				///* Your code here */
+				//break;
+				default:
+				/* Your code here */
+				break;
 			}
+
 		}
-		
+
+
+
 	}
 
+
+
+}
+
+
+uint8_t twi_slave_get_byte(void){
+
+	uint8_t data = 0;
+	while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+	data = TWIC_SLAVE_DATA;
+	TWIC_SLAVE_CTRLB = 0b00000011; //Send ack
+	return data;
+
+}
+
+uint16_t twi_slave_get_word(void){
+
+	uint16_t data = 0;
+	uint8_t high = 0;
+	uint8_t low = 0;
+
+	
+	high = twi_slave_get_byte();
+	low = twi_slave_get_byte();
+
+	data = (low + (high<<8));
+	return data;
 
 }
 
@@ -282,10 +372,82 @@ int16_t twi_master_read_data(char reg){
 	return (low + (high<<8));
 }
 
-void servo_set_position(int8_t s0, int8_t s1, int8_t s2){
-TCD0.CCABUF = (uint16_t)(22.22222222222 * s0 + 3000);
-TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
-TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
+void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
+	
+	float a = 0.0f; //Alpha
+	float b = 0.0f; //Beta
+	float c = 0.0f; //Gamma
+
+	float l1 = 0.0f;
+	float l2 = 0.0f;
+	float l3 = 0.0f;
+	
+	//ALPHA
+	a = atan2(xPos, A1 + A2 + yPos);
+
+	//BETA
+	l1 = HEIGHT - zPos;
+	l2 = A2 + yPos;
+	l3 = sqrt(l1 * l1 + l2 * l2);
+
+	b = acos(l1 / l3);
+
+	b = b + acos((A2 * A2 - A3 * A3 + l3 * l3) / (2 * A2 * l3));
+
+	//GAMMA
+	c = acos((A3 * A3 - l3 * l3 + A2 * A2) / (2 * A3 * A2));
+
+	//RAD TO DEG
+
+
+	a = (a * 180 / M_PI) * -1;
+	b = (b * 180 / M_PI - 90) * 1;
+	c = (c * 180 / M_PI - 90) * -1;
+
+	servo_set_deg(a,b,c);
+}
+
+
+
+void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
+	
+
+	s0=s0+servo_cal[0];
+	s1=s1+servo_cal[1];
+	s2=s2+servo_cal[2];
+
+	//Check if values are in range
+	if (s0 < -90)
+	{
+		s0 = -90;
+	}
+	else if (s0 > 90)
+	{
+		s0 = 90;
+	}
+
+	if (s1 < -90)
+	{
+		s1 = -90;
+	}
+	else if (s1 > 90)
+	{
+		s1 = 90;
+	}
+
+	if (s2 < -90)
+	{
+		s2 = -90;
+	}
+	else if (s2 > 90)
+	{
+		s2 = 90;
+	}
+
+
+	TCD0.CCABUF = (uint16_t)(22.22222222222 * s0 + 3000);
+	TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
+	TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
 }
 
 void delay(int ms){

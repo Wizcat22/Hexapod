@@ -15,6 +15,8 @@
 #define F_TWI_NS 100000UL
 #define F_TWI_HS 400000UL
 
+
+
 #pragma endregion DEFINES
 
 #pragma region FUNCTIONS
@@ -27,6 +29,7 @@ void init_servo(void);
 void init_twiE_MASTER(void);
 void init_twiC_SLAVE(void);
 void init_UART(void);
+void init_eeprom(void);
 void uart_send(char data);
 void uart_send_word(uint16_t data);
 void uart_send_string(char s[]);
@@ -34,9 +37,12 @@ void uart_send_number(int32_t num);
 void led_set_color(uint16_t H, float S, float V);
 void init_LED(void);
 void twi_slave_get_data(void);
+uint8_t twi_slave_get_byte(void);
+uint16_t twi_slave_get_word(void);
 void twi_master_send_data(char reg,uint16_t data);
 int16_t twi_master_read_data(char reg);
-void servo_set_position(int8_t s0, int8_t s1, int8_t s2);
+void servo_set_deg(int8_t s0, int8_t s1, int8_t s2);
+void leg_set_position(int8_t s0, int8_t s1, int8_t s2);
 void delay(int ms);
 
 

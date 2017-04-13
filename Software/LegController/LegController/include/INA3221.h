@@ -86,7 +86,6 @@
 
 #pragma region FUNCTIONS
 
-void ina3221_init_i2c(unsigned long speed);
 void ina3221_set_config(char register, uint16_t config);
 void ina3221_read_value(char register);
 
