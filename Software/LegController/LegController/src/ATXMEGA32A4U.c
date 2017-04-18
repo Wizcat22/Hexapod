@@ -41,7 +41,7 @@
 
 #pragma region VARIABLES
 
-uint8_t slave_address = 0x11; //I2C SLAVE ADDRESS
+uint8_t slave_address = 0x21; //I2C SLAVE ADDRESS
 
 int8_t servo_cal[] = {0,0,0};
 
@@ -181,7 +181,7 @@ void uart_send_string(char s[]){
 		uart_send(s[x]);
 		x++;
 	}
-	uart_send('\n');
+	//uart_send('\n');
 }
 
 void uart_send_number(int32_t num){
@@ -279,13 +279,13 @@ void twi_slave_get_data(void){
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
-				servo_set_deg(data_byte[0],data_byte[0],data_byte[0]);
+				servo_set_deg(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 3: //3 = Set leg position
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
-				leg_set_position(data_byte[0],data_byte[0],data_byte[0]);
+				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 4:
 				for (char i=0; i<3;i++)
@@ -302,6 +302,7 @@ void twi_slave_get_data(void){
 				/* Your code here */
 				break;
 			}
+			TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 
 		}
 
@@ -404,7 +405,7 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	b = (b * 180 / M_PI - 90) * 1;
 	c = (c * 180 / M_PI - 90) * -1;
 
-	servo_set_deg(a,b,c);
+	servo_set_deg(-c,b,a);
 }
 
 

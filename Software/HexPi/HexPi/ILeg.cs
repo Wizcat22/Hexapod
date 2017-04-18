@@ -371,12 +371,11 @@ namespace HexPi
             try
             {
                 I2cConnectionSettings settings = new I2cConnectionSettings(address); // Address
-                settings.BusSpeed = I2cBusSpeed.StandardMode;
+                settings.BusSpeed = I2cBusSpeed.FastMode;
                 settings.SharingMode = I2cSharingMode.Shared;
                 string aqs = I2cDevice.GetDeviceSelector("I2C1");
                 DeviceInformationCollection dis = await DeviceInformation.FindAllAsync(aqs);
                 device = await I2cDevice.FromIdAsync(dis[0].Id, settings);
-                data[0] = 2;
             }
             catch
             {
@@ -404,13 +403,13 @@ namespace HexPi
                 }
                 else
                 {
-                    //Debug.WriteLine("Error: I2C write failed!");
+                    Debug.WriteLine("Error: I2C write failed!");
                 }
 
             }
             catch (Exception e)
             {
-                //Debug.WriteLine("Error: I2C hat write failed!" + e.Message);
+                Debug.WriteLine("Error: I2C hat write failed!" + e.Message);
             }
 
         }
@@ -603,9 +602,19 @@ namespace HexPi
 
         public void calcData()
         {
+            //data[0] = 3;
+            //data[1] = (Byte)XPos;
+            //data[2] = (Byte)YPos;
+            //data[3] = (Byte)ZPos;
+
+
+            data[0] = 2;
             data[1] = (byte)(255 & ((sbyte)gamma));
+
             data[2] = (byte)(255 & ((sbyte)-beta));
+
             data[3] = (byte)(255 & ((sbyte)-alpha));
+
         }
 
         #endregion FUNCTIONS
