@@ -64,7 +64,7 @@ namespace HexPi
          * @brief   Values that represent directions.
          **************************************************************************************************/
 
-        public enum directions { CENTER, X, Y, ROTATE };
+        public enum directions { CENTER, XY, ROTATE };
         //******
 
         //Properties
@@ -174,8 +174,8 @@ namespace HexPi
                 if (input != null)
                 {
                     GamepadReading gamepadStatus = input.GetCurrentReading();
-                    x = gamepadStatus.LeftThumbstickY;
-                    y = -gamepadStatus.LeftThumbstickX;
+                    x = gamepadStatus.LeftThumbstickX;
+                    y = -gamepadStatus.LeftThumbstickY;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
                     r = gamepadStatus.RightThumbstickX;
                     shutdown = (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick));
@@ -202,28 +202,22 @@ namespace HexPi
                 if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(r) >= threshold)
                 {
                     //if the x coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in x-direction
-                    if (Math.Abs(x) > Math.Abs(y) && Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)
+                    if ((Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)|| (Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold))
                     {
 
-                        robot.move(x, (byte)directions.X);
-                    }
-                    //if the y coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in y-direction
-                    else if (Math.Abs(y) > Math.Abs(x) && Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold)
-                    {
-
-                        robot.move(y, (byte)directions.Y);
+                        robot.move(x,y, (byte)directions.XY);
                     }
                     //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
                     else if (Math.Abs(r) > Math.Abs(x) && Math.Abs(r) > Math.Abs(y) && Math.Abs(r) >= threshold)
                     {
 
-                        robot.move(r, (byte)directions.ROTATE);
+                        robot.move(r,0, (byte)directions.ROTATE);
                     }
                 }
                 //do nothing if none of the values is above the threshold
                 else
                 {
-                    robot.move(0, (byte)directions.CENTER);
+                    robot.move(0,0, (byte)directions.CENTER);
                 }
 
             }

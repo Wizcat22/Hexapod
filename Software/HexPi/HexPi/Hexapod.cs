@@ -71,14 +71,14 @@ namespace HexPi
 
             //init legs
 
-            legs[0] = new LeftLeg(gait[0], 8,2,0, rotation[0], 0x11);
-            legs[2] = new LeftLeg(gait[2], 3,0,-5, rotation[2], 0x12);
-            legs[4] = new LeftLeg(gait[4], 5, 3, -2, rotation[4], 0x13);
+            legs[0] = new ILeg(gait[0], 8,-5,2, rotation[0], 0x11);
+            legs[2] = new ILeg(gait[2], 3,0,5, rotation[2], 0x12);
+            legs[4] = new ILeg(gait[4], 5, -3, 2, rotation[4], 0x13);
 
 
-            legs[1] = new RightLeg(gait[1], 2, -5, 0, rotation[1], 0x21);
-            legs[3] = new RightLeg(gait[3], 1, -3, 0, rotation[3], 0x22);
-            legs[5] = new RightLeg(gait[5], 8, 5, 0, rotation[5], 0x23);
+            legs[1] = new ILeg(gait[1], -2, -5, 0, rotation[1], 0x21);
+            legs[3] = new ILeg(gait[3], -1, -3, 0, rotation[3], 0x22);
+            legs[5] = new ILeg(gait[5], -8, 5, 0, rotation[5], 0x23);
 
         }
 
@@ -94,7 +94,7 @@ namespace HexPi
          * @param   dir The direction to move in.
          **************************************************************************************************/
 
-        public void move(double inc, byte dir)
+        public void move(double inc_a,double inc_b, byte dir)
         {
             //If the direction has changed, center all les
             if (dir != lastDirection)
@@ -106,16 +106,13 @@ namespace HexPi
             {
                 switch (dir)
                 {
-                    case (byte)Controller.directions.X:
-                        l.calcPositionX(inc);
-                        lastDirection = (byte)Controller.directions.X;
-                        break;
-                    case (byte)Controller.directions.Y:
-                        l.calcPositionY(inc);
-                        lastDirection = (byte)Controller.directions.Y;
+                    case (byte)Controller.directions.XY:
+                        l.calcPositionXY(inc_a,inc_b);
+
+                        lastDirection = (byte)Controller.directions.XY;
                         break;
                     case (byte)Controller.directions.ROTATE:
-                        l.calcPositionR(inc);
+                        l.calcPositionR(inc_a);
                         lastDirection = (byte)Controller.directions.ROTATE;
                         break;
                     case (byte)Controller.directions.CENTER:
@@ -128,7 +125,6 @@ namespace HexPi
                         break;
                 }
 
-                l.inverseKinematics();
                 l.calcData();
                 l.sendData();
 
@@ -189,7 +185,7 @@ namespace HexPi
             foreach (ILeg l in legs)
             {
                 l.Zoff = 0;
-                l.inverseKinematics();
+                
                 l.calcData();
                 l.sendData();
                 Task.Delay(time).Wait();
@@ -199,7 +195,7 @@ namespace HexPi
             foreach (ILeg l in legs)
             {
                 l.ZPos = 0;
-                l.inverseKinematics();
+                
                 l.calcData();
                 l.sendData();
                 Task.Delay(time).Wait();
@@ -210,21 +206,21 @@ namespace HexPi
             {
                 //Up
                 l.ZPos = l.StepSizeZ;
-                l.inverseKinematics();
+                
                 l.calcData();
                 l.sendData();
                 Task.Delay(time).Wait();
 
                 //Center
                 l.calcPositionCenter();
-                l.inverseKinematics();
+               
                 l.calcData();
                 l.sendData();
                 Task.Delay(time).Wait();
 
                 //Down
                 l.ZPos = 0;
-                l.inverseKinematics();
+                
                 l.calcData();
                 l.sendData();
                 Task.Delay(time).Wait();

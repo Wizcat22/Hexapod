@@ -24,7 +24,7 @@ namespace HexPi
      * @date    11.08.2016
      **************************************************************************************************/
 
-    abstract class ILeg
+    class ILeg
     {
         #region FIELDS
 
@@ -327,35 +327,44 @@ namespace HexPi
 
         #region ABSTRACT_FUNCTIONS
 
-        /**********************************************************************************************//**
-         * @fn  public abstract void inverseKinematics();
-         *
-         * @brief   Inverse kinematics.
-         *          This function calculates the motorangles based on the TCP position and lenght of the leg.
-         *          The calculations are different for the right and left side of the robot.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
-
-        public abstract void inverseKinematics();
-
-        /**********************************************************************************************//**
-         * @fn  public abstract void calcPositionR(double increment);
-         *
-         * @brief   Calculates the leg position in a rotational movement.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         *
-         * @param   increment   Amount to increment by.
-         **************************************************************************************************/
-
-        public abstract void calcPositionR(double increment);
-
         #endregion ABSTRACT_FUNKTIONS
 
         #region FUNCTIONS
+
+
+        /**********************************************************************************************//**
+         * @fn  public ILeg(int tOffset, int aOff, int bOff, int cOff , double rotation)
+         *
+         * @brief   Constructor.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   tOffset     The control offset.
+         * @param   aOff        The offset for alpha.
+         * @param   bOff        The offset for beta.
+         * @param   cOff        The offset for gamma.
+         * @param   rotation    The angle of the leg path in rotation.
+         **************************************************************************************************/
+
+        public ILeg(int tOffset, int aOff, int bOff, int cOff, double rotation, int address)
+        {
+            this.tOffset = tOffset;
+            t = this.tOffset;
+
+            alphaOff = aOff;
+            betaOff = bOff;
+            gammaOff = cOff;
+
+            this.rotation = (rotation / 180) * Math.PI;
+
+            init(address);
+
+
+
+        }
+
+
 
         /**********************************************************************************************//**
 * @fn  public async void init()
@@ -382,6 +391,36 @@ namespace HexPi
                 Debug.WriteLine("Error: I2C init failed!");
             }
         }
+
+
+        /**********************************************************************************************//**
+         * @fn  public override void calcPositionR(double increment)
+         *
+         * @brief   Calculates the leg position in a rotational movement.
+         *
+         * @author  Alexander Miller
+         * @date    11.08.2016
+         *
+         * @param   increment   Amount to increment by.
+         **************************************************************************************************/
+
+        public void calcPositionR(double increment)
+        {
+
+            t = ((t - increment) % period + period) % period;
+            if (t <= period / 2)
+            {
+                xPos = 4 * ((stepSizeR * Math.Cos(rotation)) / period) * t - (stepSizeR * Math.Cos(rotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(rotation)) / period) * t - (stepSizeR * Math.Sin(rotation)); ;
+            }
+            else
+            {
+                xPos = -4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(rotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(rotation));
+            }
+            calcPositionZ();
+        }
+        //******
 
         /**********************************************************************************************//**
          * @fn  public void sendData()
@@ -602,19 +641,17 @@ namespace HexPi
 
         public void calcData()
         {
-            //data[0] = 3;
-            //data[1] = (Byte)XPos;
-            //data[2] = (Byte)YPos;
-            //data[3] = (Byte)ZPos;
+            ////Write calibration data
+            //data[0] = 4;
+            //data[3] = (byte)alphaOff;
+            //data[2] = (byte)betaOff;
+            //data[1] = (byte)gammaOff;
+            //Debug.WriteLine("Writing calibration data!");
 
-
-            data[0] = 2;
-            data[1] = (byte)(255 & ((sbyte)gamma));
-
-            data[2] = (byte)(255 & ((sbyte)-beta));
-
-            data[3] = (byte)(255 & ((sbyte)-alpha));
-
+            data[0] = 3;
+            data[1] = (Byte)XPos;
+            data[2] = (Byte)YPos;
+            data[3] = (Byte)ZPos;
         }
 
         #endregion FUNCTIONS
