@@ -41,7 +41,7 @@
 
 #pragma region VARIABLES
 
-uint8_t slave_address = 0x21; //I2C SLAVE ADDRESS
+uint8_t slave_address = 0x13; //I2C SLAVE ADDRESS
 
 int8_t servo_cal[] = {0,0,0};
 
@@ -384,11 +384,11 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	float l3 = 0.0f;
 	
 	//ALPHA
-	a = atan2(xPos, A1 + A2 + yPos);
+	a = atan2(-xPos, A1 + A2 - yPos);
 
 	//BETA
 	l1 = HEIGHT - zPos;
-	l2 = A2 + yPos;
+	l2 = A2 - yPos;
 	l3 = sqrt(l1 * l1 + l2 * l2);
 
 	b = acos(l1 / l3);
@@ -401,11 +401,11 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	//RAD TO DEG
 
 
-	a = (a * 180 / M_PI) * -1;
-	b = (b * 180 / M_PI - 90) * 1;
-	c = (c * 180 / M_PI - 90) * -1;
+	a = (a * 180 / M_PI);
+	b = (b * 180 / M_PI - 90);
+	c = (c * 180 / M_PI - 90);
 
-	servo_set_deg(-c,b,a);
+	servo_set_deg(c,b,a);
 }
 
 
