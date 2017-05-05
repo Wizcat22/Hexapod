@@ -57,10 +57,15 @@ int main(void)
 	
 	asm("wdr"); //Reset Watchdog
 
-	twi_master_send_data(INA_CFG_R,(uint16_t) (INA_RST_B));
-	twi_master_send_data(INA_CFG_R, 0b0111010111111111);
-	//uart_send_word(twi_master_read_data(INA_MANUFACTURER_ID_R)); 
+	//twi_master_send_data(INA_CFG_R,(uint16_t) (INA_RST_B)); //RESET
+	//twi_master_send_data(INA_CFG_R, 0b0111010111111111); //CONFIG
+	//uart_send_word(twi_master_read_data(INA_MANUFACTURER_ID_R));
 	//uart_send_word(twi_master_read_data(INA_DIE_ID_R));
+
+	//ina3221_set_config(INA_CFG_R, (uint16_t) (INA_RST_B)); //Reset
+	//ina3221_set_config(INA_CFG_R, 0b0111010111111111); //Config
+	//uart_send_word(ina3221_read_value(INA_MANUFACTURER_ID_R)); 
+	//uart_send_word(ina3221_read_value(INA_DIE_ID_R));
 	
 	uint16_t hue = 0;
 	float huehue = 0;

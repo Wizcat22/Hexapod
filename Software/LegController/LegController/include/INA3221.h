@@ -86,8 +86,13 @@
 
 #pragma region FUNCTIONS
 
-void ina3221_set_config(char register, uint16_t config);
-void ina3221_read_value(char register);
+void ina3221_set_config(uint16_t config);
+int16_t ina3221_read_value(char reg);
+void ina3221_get_current(uint16_t data[]);
+uint16_t ina3221_calculate_current(uint16_t channel);
+void ina3221_init();
+void ina3221_trigger_measurement();
+uint8_t ina3221_check_ground();
 
 #pragma endregion FUNCTIONS
 

@@ -7,7 +7,12 @@
 
 #pragma region DEFINES
 
-#define F_CPU 16000000UL
+//#define F_CPU 16000000UL
+
+#define STATUS_OK 0
+#define STATUS_ERR 1
+#define STATUS_2 2
+#define STATUS_3 3
 
 #define LED_SATURATION 1.0f
 #define LED_BRIGTHNESS 0.005f
@@ -48,6 +53,11 @@ int8_t servo_cal[] = {0,0,0};
 int8_t lastAlpha = 0;
 int8_t lastBeta = 0;
 int8_t lastGamma = 0;
+
+int8_t lastZPos = 0;
+uint8_t grounded = 0; // 0 = no ground contact 
+
+int8_t terrain = 0; // 0 = terrain mode off
 
 #pragma endregion VARIABLES
 
@@ -115,6 +125,10 @@ void init_gpio(void){
 	PORTD.PIN3CTRL = PORT_OPC_PULLUP_gc;
 	PORTD.PIN4CTRL = PORT_OPC_PULLUP_gc;
 	PORTD.PIN5CTRL = PORT_OPC_PULLUP_gc;
+
+	//STATUS PINS
+	PORTA.DIR |= (1<<1)|(1<<2);
+	
 
 }
 
@@ -269,6 +283,7 @@ void twi_slave_get_data(void){
 			//3 = Set leg position
 			//4 = Set servo calibration value and save in eeprom 
 			//5 = Reset
+			//6 = Set Terrain mode
 
 
 
@@ -305,6 +320,9 @@ void twi_slave_get_data(void){
 				case 5: //5 = Reset
 				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				while (1){} // Wait until Watchdog-reset
+				break;
+				case 6: //6 = Set Terrain mode
+				terrain = twi_slave_get_byte();
 				break;
 				//case value:
 				///* Your code here */
@@ -386,6 +404,29 @@ int16_t twi_master_read_data(char reg){
 
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	
+	if (terrain != 0) //if terrain mode is active
+	{
+		if (zPos < lastZPos) // if new position is lower
+		{ 
+			if (grounded == 0) // no ground detected
+			{
+				lastZPos = zPos;
+			}
+			else
+			{
+				zPos = lastZPos;
+			}
+		}
+		else
+		{
+			lastZPos = zPos;
+		}
+	}
+	else
+	{
+		lastZPos = zPos;
+	}
+
 	float a = 0.0f; //Alpha
 	float b = 0.0f; //Beta
 	float c = 0.0f; //Gamma
@@ -432,6 +473,10 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
 	}
 
+	if (terrain != 0) //if in terrain mode
+	{
+		//check for ground 
+	}
 	
 }
 
@@ -476,6 +521,27 @@ void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	TCD0.CCABUF = (uint16_t)(22.22222222222 * s0 + 3000);
 	TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
 	TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
+}
+
+void set_status_pins(uint8_t s){
+PORTA.OUTCLR = PIN1_bm;
+PORTA.OUTCLR = PIN2_bm;
+switch (s)
+{
+	case 1:
+	PORTA_OUTSET = PIN1_bm;
+	break;
+	case 2:
+	PORTA_OUTSET = PIN2_bm;
+	break;
+	case 3:
+	PORTA_OUTSET = PIN1_bm;
+	PORTA_OUTSET = PIN2_bm;
+	break;
+	default:
+	/* Your code here */
+	break;
+}
 }
 
 void delay(int ms){
