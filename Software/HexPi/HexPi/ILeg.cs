@@ -34,33 +34,6 @@ namespace HexPi
         /** @brief   I2C Buffer. */
         protected byte[] data = new byte[4];
 
-        /** @brief   The TCP offset of the x coordinate. */
-        protected double xOff = 0.0;
-
-        /** @brief   The TCP offset of the y coordinate. */
-        protected double yOff = 0.0;
-
-        /** @brief   The TCP offset of the z coordinate. */
-        protected double zOff = 0.0;
-
-        /** @brief   The height of the first joint minus the actual TCP z position . */
-        protected double L1 = 0;
-
-        /** @brief   The distance of the second joint to the TCP. */
-        protected double L2 = 0;
-
-        /** @brief   The lenght of the direct connection of the second joint and the TCP. */
-        protected double L3 = 0;
-
-        /** @brief   The angle of the first joint. */
-        protected double alpha = 0;
-
-        /** @brief   The angle of the second joint. */
-        protected double beta = 0;
-
-        /** @brief   The angle of the third joint. */
-        protected double gamma = 0;
-
         /** @brief   The offset of the first angle. */
         protected double alphaOff = 0;
 
@@ -85,20 +58,19 @@ namespace HexPi
         /** @brief   The z position of the TCP. */
         protected double zPos = 0;
 
-        /** @brief   The data for the first motor. */
-        protected byte motorData0 = 0;
+        /** @brief   The leg-position x-offset */
+        protected double xOffset = 0;
 
-        /** @brief   The data for the second motor. */
-        protected byte motorData1 = 0;
-
-        /** @brief   The data for the third motor. */
-        protected byte motorData2 = 0;
+        /** @brief   The leg-position y-offset */
+        protected double yOffset = 0;
 
         /** @brief   The rotation. */
         protected double rotation = 0;
 
         /** @brief   The rotation of the xy-axis at xy-movement. */
         protected double xyRotation = 0;
+
+        protected double id = 0;
 
         //******
 
@@ -252,76 +224,7 @@ namespace HexPi
             }
         }
 
-        /**********************************************************************************************//**
-         * @property    public double Xoff
-         *
-         * @brief   Gets or sets the x offset.
-         *
-         * @return  The XOFF.
-         **************************************************************************************************/
-
-        public double Xoff
-        {
-            get
-            {
-                return xOff;
-            }
-
-            set
-            {
-                xOff = value;
-            }
-        }
-
-        /**********************************************************************************************//**
-         * @property    public double Yoff
-         *
-         * @brief   Gets or sets the y offset.
-         *
-         * @return  The yoff.
-         **************************************************************************************************/
-
-        public double Yoff
-        {
-            get
-            {
-                return yOff;
-            }
-
-            set
-            {
-                yOff = value;
-            }
-        }
-
-        /**********************************************************************************************//**
-         * @property    public double Zoff
-         *
-         * @brief   Gets or sets the z offset.
-         *
-         * @return  The zoff.
-         **************************************************************************************************/
-
-        public double Zoff
-        {
-            get
-            {
-                return zOff;
-            }
-
-            set
-            {
-                zOff = value;
-                if (zOff > 2 * stepSizeZ / 3)
-                {
-                    zOff = 2 * stepSizeZ / 3;
-                }
-                else if (zOff < -2 * stepSizeZ / 3)
-                {
-                    zOff = -2 * stepSizeZ / 3;
-                }
-            }
-        }
+       
 
         #endregion PROPERTIES
 
@@ -347,7 +250,7 @@ namespace HexPi
          * @param   rotation    The angle of the leg path in rotation.
          **************************************************************************************************/
 
-        public ILeg(int tOffset, int aOff, int bOff, int cOff, double rotation, int address)
+        public ILeg(int tOffset, int aOff, int bOff, int cOff, double rotation, int address,int xOff,int yOff)
         {
             this.tOffset = tOffset;
             t = this.tOffset;
@@ -355,6 +258,10 @@ namespace HexPi
             alphaOff = aOff;
             betaOff = bOff;
             gammaOff = cOff;
+
+            xOffset = xOff;
+            yOffset = yOff;
+            
 
             this.rotation = (rotation / 180) * Math.PI;
 
@@ -379,6 +286,7 @@ namespace HexPi
         {
             try
             {
+                id = address;
                 I2cConnectionSettings settings = new I2cConnectionSettings(address); // Address
                 settings.BusSpeed = I2cBusSpeed.FastMode;
                 settings.SharingMode = I2cSharingMode.Shared;
@@ -442,7 +350,7 @@ namespace HexPi
                 }
                 else
                 {
-                    Debug.WriteLine("Error: I2C write failed!");
+                    //Debug.WriteLine("Error: I2C write failed!");
                 }
 
             }
@@ -522,11 +430,11 @@ namespace HexPi
             yPos = 0.0;
             if (t <= period / 2)
             {
-                xPos = 4 * stepSizeX / period * t - stepSizeX + xOff;
+                xPos = 4 * stepSizeX / period * t - stepSizeX;
             }
             else
             {
-                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX + xOff;
+                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
             }
             calcPositionZ();
         }
@@ -548,11 +456,11 @@ namespace HexPi
             xPos = 0.0; //+ xoff;
             if (t <= period / 2)
             {
-                yPos = 4 * stepSizeY / period * t - stepSizeY + yOff;
+                yPos = 4 * stepSizeY / period * t - stepSizeY;
             }
             else
             {
-                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY + yOff;
+                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
             }
             calcPositionZ();
         }
@@ -572,12 +480,12 @@ namespace HexPi
         {
             if (t <= period / 2)
             {
-                zPos = 0 + zOff;
+                zPos = 0;
 
             }
             else
             {
-                zPos = -1 * ((stepSizeZ - Math.Abs(zOff)) * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ - Math.Abs(zOff) + zOff;
+                zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ;
             }
             if (zPos > stepSizeZ)
             {
@@ -589,46 +497,8 @@ namespace HexPi
             }
         }
 
-        /**********************************************************************************************//**
-         * @fn  public void calcPositionZOffset()
-         *
-         * @brief   Calculates the TCP position while standing.
-         *
-         * @author  Alexander Miller
-         * @date    06.03.2017
-         *
-         * @param   off Turns the offset of.
-         **************************************************************************************************/
 
-        public void calcPositionZOffset()
-        {
-                zPos = 0 + zOff;
-        }
-
-        /**********************************************************************************************//**
-         * @fn  public byte getMotorData(int n)
-         *
-         * @brief   Gets motor data.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         *
-         * @param   n   Chooses the motor.
-         *
-         * @return  The motor data.
-         **************************************************************************************************/
-
-        public byte getMotorData(int n)
-        {
-            switch (n)
-            {
-                case 0: return motorData0;
-                case 1: return motorData1;
-                case 2: return motorData2;
-                default: return 100;
-            }
-
-        }
+        
 
         /**********************************************************************************************//**
          * @fn  public void calcData()
@@ -652,6 +522,36 @@ namespace HexPi
             data[1] = (Byte)XPos;
             data[2] = (Byte)YPos;
             data[3] = (Byte)ZPos;
+        }
+
+        public void calcPose(double x, double y, double z, double a, double b)
+        {
+            
+            double tempX = xOffset;
+            double tempY = yOffset;
+            double tempZ = zOffset;
+            double sA = Math.Sin(z);
+            double sB = Math.Sin(y);
+            double sC = Math.Sin(x);
+            double cA = Math.Cos(z);
+            double cB = Math.Cos(y);
+            double cC = Math.Cos(x);
+            
+
+
+
+
+            double newX = tempX * (cA * cB) + tempY * (cA * sB * sC - sA * cC) + tempZ * (sA * sC + cA * sB * cC);
+            double newY = tempX * (sA * cB) + tempY * (cA*cC+sA*sB*sC) + tempZ * (sA*sB*cC-cA*sC);
+            double newZ = tempX * (-sB) + tempY * (cB*sC) + tempZ * (cB*cC);
+
+            xPos = newX - tempX + a;
+            yPos = newY - tempY ;
+            zPos = newZ - tempZ + b;
+       
+            //Debug.WriteLine("Ytemp: " + tempY + " Y: " + newY);
+            Debug.WriteLine("ID: " + id + "X: " + xPos + " Y: " + yPos + " Z: " + zPos);
+
         }
 
         #endregion FUNCTIONS

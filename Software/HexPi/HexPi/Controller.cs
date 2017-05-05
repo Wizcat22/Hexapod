@@ -37,20 +37,22 @@ namespace HexPi
 
         //Fields
         
-        /** @brief   The x coordinate of the input. */
+        /** @brief   The x-axis input. */
         double x = 0;
 
-        /** @brief   The y coordinate of the input. */
+        /** @brief   The y-axis input. */
         double y = 0;
 
-        /** @brief   The z coordinate of the input. */
+        /** @brief   The z-axis input. */
         double z = 0;
 
-        /** @brief   The rotational coordinate of the input. */
-        double r = 0;
+        /** @brief   The a-axis input. */
+        double a = 0;
 
-        /** @brief   A bool value. System turns off if true. */
-        bool shutdown = false;
+        /** @brief   The b-axis input */
+        double b = 0;
+
+        int mode = 0;
 
         /** @brief   The threshold for the input. */
         double threshold = 0.25;
@@ -67,72 +69,16 @@ namespace HexPi
         public enum directions { CENTER, XY, ROTATE };
         //******
 
+        public enum modes {WALK,POSE,SHUTDOWN };
+
         //Properties
 
-        /**********************************************************************************************//**
-         * @property    public double X
-         *
-         * @brief   Gets the x coordinate of the input.
-         *
-         * @return  The x coordinate.
-         **************************************************************************************************/
 
-        public double X
-        {
-            get
-            {
-                return Math.Round(x, 2);
-            }
-        }
+        
 
-        /**********************************************************************************************//**
-         * @property    public double Y
-         *
-         * @brief   Gets the y coordinate of the input.
-         *
-         * @return  The y coordinate.
-         **************************************************************************************************/
+        
 
-        public double Y
-        {
-            get
-            {
-                return Math.Round(y, 2);
-            }
-        }
-
-        /**********************************************************************************************//**
-         * @property    public double Z
-         *
-         * @brief   Gets the z coordinate of the input.
-         *
-         * @return  The z coordinate.
-         **************************************************************************************************/
-
-        public double Z
-        {
-            get
-            {
-                return Math.Round(z, 2);
-            }
-        }
-
-        /**********************************************************************************************//**
-         * @property    public double R
-         *
-         * @brief   Gets the rotational coordinate of the input..
-         *
-         * @return  The rotational coordinate.
-         **************************************************************************************************/
-
-        public double R
-        {
-            get
-            {
-                return Math.Round(z, 2);
-            }
-        }
-        //******
+        
 
         //Functions
 
@@ -167,7 +113,7 @@ namespace HexPi
             while (true)
             {
 
-
+                
                 //Task.Delay(0).Wait();
                 Task.Delay(0).Wait();
                 
@@ -177,9 +123,26 @@ namespace HexPi
                     x = gamepadStatus.LeftThumbstickX;
                     y = -gamepadStatus.LeftThumbstickY;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
-                    r = gamepadStatus.RightThumbstickX;
-                    shutdown = (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick));
+                    a = gamepadStatus.RightThumbstickX;
+                    b = gamepadStatus.RightThumbstickY;
+                    
 
+                    //Shutdown = A&B&X&Y&LThumb
+                    if (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick))
+                    {
+                        mode = (int)modes.SHUTDOWN;
+                    }
+                    //Pose = B
+                    else if (gamepadStatus.Buttons == GamepadButtons.RightShoulder)
+                    {
+                        mode = (int)modes.POSE;
+                    }
+                    //Walk = default
+                    else
+                    {
+                        mode = (int)modes.WALK;
+                    }
+                     
                 }
                 else
                 {
@@ -189,36 +152,22 @@ namespace HexPi
                     }
                 }
 
-                //check if the system should be turned off
-                if (shutdown)
+                switch (mode)
                 {
-                    Debug.WriteLine("_WARNING_: SYSTEM SHUTDOWN INITIALIZED!");
-                    ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
-                    
-                    
+                    case (int)modes.WALK:
+                        walk();
+                        break;
+                    case (int)modes.POSE:
+                        pose();
+                        break;
+                    case (int)modes.SHUTDOWN:
+                        shutdown();
+                        break;
+                    default:
+                        break;
                 }
 
-                //check if any of the axis is above the threshold
-                if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(r) >= threshold)
-                {
-                    //if the x coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in x-direction
-                    if ((Math.Abs(x) > Math.Abs(r) && Math.Abs(x) >= threshold)|| (Math.Abs(y) > Math.Abs(r) && Math.Abs(y) >= threshold))
-                    {
-
-                        robot.move(x,y, (byte)directions.XY);
-                    }
-                    //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
-                    else if (Math.Abs(r) > Math.Abs(x) && Math.Abs(r) > Math.Abs(y) && Math.Abs(r) >= threshold)
-                    {
-
-                        robot.move(r,0, (byte)directions.ROTATE);
-                    }
-                }
-                //do nothing if none of the values is above the threshold
-                else
-                {
-                    robot.move(0,0, (byte)directions.CENTER);
-                }
+                
 
             }
         }
@@ -294,12 +243,52 @@ namespace HexPi
             }
         }
 
-        public double getGuiData(byte n, byte xyz)
-        {
-            return robot.getLegPos(n, xyz);
-
-        }
         //******
 
+        //Initialize shutdown
+        private void shutdown()
+        {
+            Debug.WriteLine("_WARNING_: SYSTEM SHUTDOWN INITIALIZED!");
+            ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
+        }
+
+        // Walk in xy direction / turn in r direction
+        private void walk()
+        {
+            //check if any of the axis is above the threshold
+            if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(a) >= threshold)
+            {
+                //if the x coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in x-direction
+                if ((Math.Abs(x) > Math.Abs(a) && Math.Abs(x) >= threshold) || (Math.Abs(y) > Math.Abs(a) && Math.Abs(y) >= threshold))
+                {
+
+                    robot.move(x, y, (byte)directions.XY);
+                }
+                //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
+                else if (Math.Abs(a) > Math.Abs(x) && Math.Abs(a) > Math.Abs(y) && Math.Abs(a) >= threshold)
+                {
+
+                    robot.move(a, 0, (byte)directions.ROTATE);
+                }
+            }
+            //do nothing if none of the values is above the threshold
+            else
+            {
+                robot.move(0, 0, (byte)directions.CENTER);
+            }
+        }
+
+        //Apply YawPitchRoll to body
+        private void pose()
+        {
+            //1° = 0,0174533 rad
+            double degX = 0.174533 * x;
+            double degY = 0.174533 * y;
+            double degZ = 0.174533 * z;
+            double distA = 10 * a;
+            double distB = 10 * b;
+            //Set rotation around xyz axis and translation in ab-axis
+            robot.pose(degX,degY,degZ,distA,distB);
+        }
     }
 }

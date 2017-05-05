@@ -24,13 +24,13 @@ namespace HexPi
     class Hexapod
     {
         //Objects
-        
+
         /** @brief   The accelerometer. */
         //Accelerometer accel = new Accelerometer();
         //******
 
         //Fields
-        
+
         /** @brief   The last direction. */
         byte lastDirection = 0;
 
@@ -43,11 +43,8 @@ namespace HexPi
 
         //Arrays
 
-        /** @brief   The gait offsets. */
-        int[] gait = { 25, 75, 75, 25, 25, 75 };
 
-        /** @brief   The angles of the leg paths in rotation. */
-        int[] rotation = { 135, 45, 180, 0, 225, 315 };
+
         
         /** @brief   The legs. */
         ILeg[] legs = new ILeg[6];
@@ -68,17 +65,17 @@ namespace HexPi
         public void init()
         {
             //accel.init();
-
             //init legs
+            //left
+            //giat offset,cal a,cal b, cal c , deg offset, i2c address;
+            legs[0] = new ILeg(25, 8,-5,2, 135, 0x11,150,175);
+            legs[2] = new ILeg(75, 3,0,5, 180, 0x12, 0, 175);
+            legs[4] = new ILeg(25, 5, -3, 2, 225, 0x13, -150, 175);
 
-            legs[0] = new ILeg(gait[0], 8,-5,2, rotation[0], 0x11);
-            legs[2] = new ILeg(gait[2], 3,0,5, rotation[2], 0x12);
-            legs[4] = new ILeg(gait[4], 5, -3, 2, rotation[4], 0x13);
-
-
-            legs[1] = new ILeg(gait[1], -2, -5, 0, rotation[1], 0x21);
-            legs[3] = new ILeg(gait[3], -1, -3, 0, rotation[3], 0x22);
-            legs[5] = new ILeg(gait[5], -8, 5, 0, rotation[5], 0x23);
+            //right
+            legs[1] = new ILeg(75, -2, -5, 0, 45, 0x21, 150, -175);
+            legs[3] = new ILeg(25, -1, -3, 0, 0, 0x22, 0, -175);
+            legs[5] = new ILeg(75, -8, 5, 0, 315, 0x23, -150, -175);
 
         }
 
@@ -132,39 +129,17 @@ namespace HexPi
 
         }
 
-        /**********************************************************************************************//**
-         * @fn  private void calcOffsets()
-         *
-         * @brief   Calculates the z offsets of the TCPs to level the body.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+        public void pose(double x, double y, double z, double a, double b)
+        {
+            foreach (ILeg leg in legs)
+            {
+                leg.calcPose(x,y,z,a,b);
+                leg.calcData();
+                leg.sendData();
+            }
+        }
 
-        //private void calcOffsets()
-        //{
-        //    double mul = 1;
-
-        //    for (int i = 0; i < legs.Length; i++)
-        //    {
-        //        if (i % 2 == 0)
-        //        {
-        //            legs[i].Zoff += mul * Math.Sin(accel.angleYZ);
-        //        }
-        //        else
-        //        {
-        //            legs[i].Zoff -= mul * Math.Sin(accel.angleYZ);
-        //        }
-
-        //    }
-
-        //    legs[0].Zoff -= mul * Math.Sin(accel.angleXZ);
-        //    legs[1].Zoff -= mul * Math.Sin(accel.angleXZ);
-
-        //    legs[4].Zoff += mul * Math.Sin(accel.angleXZ);
-        //    legs[5].Zoff += mul * Math.Sin(accel.angleXZ);
-
-        //}
+        
 
 
         /**********************************************************************************************//**
@@ -184,7 +159,7 @@ namespace HexPi
             //clear all z offsets
             foreach (ILeg l in legs)
             {
-                l.Zoff = 0;
+                
                 
                 l.calcData();
                 l.sendData();
@@ -228,16 +203,7 @@ namespace HexPi
             }
         }
 
-        public double getLegPos(byte n, byte xyz)
-        {
-            switch (xyz)
-            {
-                case 0: return Math.Round(legs[n].XPos);
-                case 1: return Math.Round(legs[n].YPos);
-                case 2: return Math.Round(legs[n].ZPos);
-                default: return 0.0;
-            }
-        }
+
         //******
     }
 }
