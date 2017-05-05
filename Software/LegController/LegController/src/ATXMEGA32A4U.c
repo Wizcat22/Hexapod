@@ -45,6 +45,10 @@ uint8_t slave_address = 0x13; //I2C SLAVE ADDRESS
 
 int8_t servo_cal[] = {0,0,0};
 
+int8_t lastAlpha = 0;
+int8_t lastBeta = 0;
+int8_t lastGamma = 0;
+
 #pragma endregion VARIABLES
 
 #pragma region FUNCTIONS
@@ -290,7 +294,7 @@ void twi_slave_get_data(void){
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
 				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
 				break;
-				case 4:
+				case 4: //4 = Set servo calibration value and save in eeprom
 				for (char i=0; i<3;i++)
 				{
 					data_byte[i] = twi_slave_get_byte(); //Servo calibration value
@@ -298,7 +302,7 @@ void twi_slave_get_data(void){
 					servo_cal[i] = data_byte[i]; //Set servo calibration value
 				}
 				break;
-				case 5:
+				case 5: //5 = Reset
 				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				while (1){} // Wait until Watchdog-reset
 				break;
@@ -386,6 +390,10 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	float b = 0.0f; //Beta
 	float c = 0.0f; //Gamma
 
+	int8_t alpha = 0;
+	int8_t beta = 0;
+	int8_t gamma = 0;
+
 	float l1 = 0.0f;
 	float l2 = 0.0f;
 	float l3 = 0.0f;
@@ -408,11 +416,23 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	//RAD TO DEG
 
 
-	a = (a * 180 / M_PI);
-	b = (b * 180 / M_PI - 90);
-	c = (c * 180 / M_PI - 90);
+	alpha = (int8_t)(a * 180 / M_PI);
+	beta = (int8_t)(b * 180 / M_PI - 90);
+	gamma = (int8_t)(c * 180 / M_PI - 90);
 
-	servo_set_deg(c,b,a);
+	if ((alpha == 0 && beta == 0 && gamma == 0)&& (xPos != 0 && yPos != 0 && zPos != 0))
+	{
+		servo_set_deg(lastGamma,lastBeta,lastAlpha);
+	}
+	else{
+	servo_set_deg(gamma,beta,alpha);
+	lastAlpha = alpha;
+	lastBeta = beta;
+	lastGamma = gamma;
+
+	}
+
+	
 }
 
 
