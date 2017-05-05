@@ -264,6 +264,9 @@ void twi_slave_get_data(void){
 			//2 = Set servo degree
 			//3 = Set leg position
 			//4 = Set servo calibration value and save in eeprom 
+			//5 = Reset
+
+
 
 
 			switch (data_byte[0])
@@ -294,6 +297,10 @@ void twi_slave_get_data(void){
 					eeprom_write_byte((uint8_t *) i,data_byte[i]); //Save servo calibration value to eeprom
 					servo_cal[i] = data_byte[i]; //Set servo calibration value
 				}
+				break;
+				case 5:
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
+				while (1){} // Wait until Watchdog-reset
 				break;
 				//case value:
 				///* Your code here */
