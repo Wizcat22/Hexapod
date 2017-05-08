@@ -28,13 +28,13 @@
     <AppXManifest Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-05-03T10:51:35.632</Modified>
+      <Modified>2017-05-08T15:18:57.939</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\x64\Debug\HexPi.exe">
       <PackagePath>entrypoint\HexPi.exe</PackagePath>
-      <Modified>2017-05-03T10:51:34.267</Modified>
+      <Modified>2017-05-08T15:18:55.241</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Alexander Miller\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -513,11 +513,11 @@
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-05-03T08:27:59.485</Modified>
+      <Modified>2017-05-08T15:18:57.634</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\x64\Debug\Core\HexPi.exe">
       <PackagePath>HexPi.exe</PackagePath>
-      <Modified>2017-05-03T10:51:35.623</Modified>
+      <Modified>2017-05-08T15:18:57.931</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

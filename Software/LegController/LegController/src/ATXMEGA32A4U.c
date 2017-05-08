@@ -8,6 +8,8 @@
 #pragma region DEFINES
 
 //#define F_CPU 16000000UL
+#define I2C_SLAVE_ADD 0x21
+#define SIDE
 
 #define STATUS_OK 0
 #define STATUS_ERR 1
@@ -46,7 +48,7 @@
 
 #pragma region VARIABLES
 
-uint8_t slave_address = 0x13; //I2C SLAVE ADDRESS
+uint8_t slave_address = I2C_SLAVE_ADD; //I2C SLAVE ADDRESS
 
 int8_t servo_cal[] = {0,0,0};
 
@@ -323,6 +325,7 @@ void twi_slave_get_data(void){
 				break;
 				case 6: //6 = Set Terrain mode
 				terrain = twi_slave_get_byte();
+				
 				break;
 				//case value:
 				///* Your code here */
@@ -405,11 +408,13 @@ int16_t twi_master_read_data(char reg){
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	
 	if (terrain != 0) //if terrain mode is active
-	{
+	{led_set_color(C_GREEN,1,0.05);
 		if (zPos < lastZPos) // if new position is lower
 		{ 
+			
 			if (grounded == 0) // no ground detected
 			{
+				grounded = ina3221_check_ground();
 				lastZPos = zPos;
 			}
 			else
@@ -417,13 +422,16 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 				zPos = lastZPos;
 			}
 		}
-		else
+		else if (zPos > lastZPos)
 		{
-			lastZPos = zPos;
+						grounded = 0;
+						lastZPos = zPos;
 		}
+
 	}
 	else
 	{
+	led_set_color(C_RED,1,0.05);
 		lastZPos = zPos;
 	}
 
@@ -461,9 +469,9 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	beta = (int8_t)(b * 180 / M_PI - 90);
 	gamma = (int8_t)(c * 180 / M_PI - 90);
 
-	if ((alpha == 0 && beta == 0 && gamma == 0)&& (xPos != 0 && yPos != 0 && zPos != 0))
+	if ((beta == 0 && gamma == 0) && (xPos != 0 || yPos != 0 || zPos != 0))
 	{
-		servo_set_deg(lastGamma,lastBeta,lastAlpha);
+		servo_set_deg(lastGamma,lastBeta,alpha);
 	}
 	else{
 	servo_set_deg(gamma,beta,alpha);
@@ -473,10 +481,6 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
 	}
 
-	if (terrain != 0) //if in terrain mode
-	{
-		//check for ground 
-	}
 	
 }
 
@@ -484,6 +488,13 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
 void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	
+	#ifdef	SIDE
+
+	s2 = -s2;
+	s1 = -s1;
+	s0 = -s0;
+	#endif
+
 
 	s0=s0+servo_cal[0];
 	s1=s1+servo_cal[1];

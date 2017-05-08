@@ -68,14 +68,16 @@ namespace HexPi
             //init legs
             //left
             //giat offset,cal a,cal b, cal c , deg offset, i2c address;
-            legs[0] = new ILeg(25, 8,-5,2, 135, 0x11,150,175);
-            legs[2] = new ILeg(75, 3,0,5, 180, 0x12, 0, 175);
+
+
+            legs[0] = new ILeg(25, 8, -5, 2, 135, 0x11, 150, 175);
+            legs[2] = new ILeg(75, 3, 0, 5, 180, 0x12, 0, 175);
             legs[4] = new ILeg(25, 5, -3, 2, 225, 0x13, -150, 175);
 
             //right
-            legs[1] = new ILeg(75, -2, -5, 0, 45, 0x21, 150, -175);
+            legs[1] = new ILeg(75, -2, -5, 0, 315, 0x21, 150, -175);
             legs[3] = new ILeg(25, -1, -3, 0, 0, 0x22, 0, -175);
-            legs[5] = new ILeg(75, -8, 5, 0, 315, 0x23, -150, -175);
+            legs[5] = new ILeg(75, -8, 5, 0, 45, 0x23, -150, -175);
 
         }
 
@@ -91,7 +93,7 @@ namespace HexPi
          * @param   dir The direction to move in.
          **************************************************************************************************/
 
-        public void move(double inc_a,double inc_b, byte dir)
+        public void move(double inc_a,double inc_b, byte dir,bool terrainmode)
         {
             //If the direction has changed, center all les
             if (dir != lastDirection)
@@ -104,12 +106,12 @@ namespace HexPi
                 switch (dir)
                 {
                     case (byte)Controller.directions.XY:
-                        l.calcPositionXY(inc_a,inc_b);
+                        l.calcPositionXY(inc_a,inc_b,terrainmode);
 
                         lastDirection = (byte)Controller.directions.XY;
                         break;
                     case (byte)Controller.directions.ROTATE:
-                        l.calcPositionR(inc_a);
+                        l.calcPositionR(inc_a,terrainmode);
                         lastDirection = (byte)Controller.directions.ROTATE;
                         break;
                     case (byte)Controller.directions.CENTER:
@@ -123,7 +125,6 @@ namespace HexPi
                 }
 
                 l.calcData();
-                l.sendData();
 
             }
 
@@ -135,7 +136,6 @@ namespace HexPi
             {
                 leg.calcPose(x,y,z,a,b);
                 leg.calcData();
-                leg.sendData();
             }
         }
 
@@ -162,7 +162,6 @@ namespace HexPi
                 
                 
                 l.calcData();
-                l.sendData();
                 Task.Delay(time).Wait();
             }
 
@@ -172,7 +171,6 @@ namespace HexPi
                 l.ZPos = 0;
                 
                 l.calcData();
-                l.sendData();
                 Task.Delay(time).Wait();
             }
 
@@ -183,21 +181,18 @@ namespace HexPi
                 l.ZPos = l.StepSizeZ;
                 
                 l.calcData();
-                l.sendData();
                 Task.Delay(time).Wait();
 
                 //Center
                 l.calcPositionCenter();
                
                 l.calcData();
-                l.sendData();
                 Task.Delay(time).Wait();
 
                 //Down
                 l.ZPos = 0;
                 
                 l.calcData();
-                l.sendData();
                 Task.Delay(time).Wait();
 
             }

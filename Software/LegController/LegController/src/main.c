@@ -75,7 +75,7 @@ int main(void)
 		asm("wdr"); //Reset Watchdog
 
 		twi_slave_get_data();
-		led_set_color(hue,1,0.05);
+		//led_set_color(hue,1,0.05);
 
 		hue = ((uint16_t)huehue)%360;
 		huehue = huehue + 0.1;

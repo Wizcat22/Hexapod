@@ -28,11 +28,14 @@ namespace HexPi
     {
         #region FIELDS
 
+        protected enum modes : byte {NORMAL,TERRAIN};
+
         /** @brief   The device. */
         I2cDevice device = null;
 
-        /** @brief   I2C Buffer. */
-        protected byte[] data = new byte[4];
+        byte mode = 0;
+
+
 
         /** @brief   The offset of the first angle. */
         protected double alphaOff = 0;
@@ -91,7 +94,11 @@ namespace HexPi
         protected const double stepSizeR = 30;
 
         /** @brief   The period. */
-        protected const double period = 100;
+        protected const int period = 100;
+
+        protected const int lift = period / 2 + 10;
+        protected const int sense = period / 2 + 40;
+        
 
         /** @brief   The height of the first joint. */
         protected const double zOffset = 88;
@@ -104,6 +111,7 @@ namespace HexPi
 
         /** @brief   The lenght of the lower leg in mm. */
         protected const double A3 = 88;
+
 
         #endregion CONSTANTS
 
@@ -312,21 +320,21 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
-        public void calcPositionR(double increment)
+        public void calcPositionR(double increment,bool terrainmode)
         {
 
-            t = ((t - increment) % period + period) % period;
+            t = ((t + increment) + period) % period;
             if (t <= period / 2)
             {
-                xPos = 4 * ((stepSizeR * Math.Cos(rotation)) / period) * t - (stepSizeR * Math.Cos(rotation));
-                yPos = 4 * ((stepSizeR * Math.Sin(rotation)) / period) * t - (stepSizeR * Math.Sin(rotation)); ;
+                xPos = -4 * ((stepSizeR * Math.Cos(rotation)) / period) * t + (stepSizeR * Math.Cos(rotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(rotation)) / period) * t + (stepSizeR * Math.Sin(rotation));
             }
             else
             {
-                xPos = -4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(rotation));
-                yPos = -4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(rotation));
+                xPos = 4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(rotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(rotation));
             }
-            calcPositionZ();
+            calcPositionZ(terrainmode);
         }
         //******
 
@@ -340,7 +348,7 @@ namespace HexPi
          *
          **************************************************************************************************/
 
-        public void sendData()
+        public void sendData(byte[] data)
         {
             try
             {
@@ -389,104 +397,142 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
-        public void calcPositionXY(double x, double y)
+        public void calcPositionXY(double x, double y, Boolean terrainmode)
         {
             int frame = 10;
-            t = ((t - Math.Sqrt(x * x + y * y)) % period + period) % period;
+
+
+
+            t = (t + Math.Sqrt(x * x + y * y)) % period;
 
             //if t is equal to period/2 +- frame
             if ((t>= period/2-frame) && t<=period/2+frame)
             {
-                xyRotation = Math.Atan2(x,y);
+                xyRotation = Math.Atan2(-y,-x);
             }
 
-            if (t <= period / 2)
+            if (terrainmode)
             {
-                xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t - (stepSizeR * Math.Cos(xyRotation));
-                yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t - (stepSizeR * Math.Sin(xyRotation));
+
+                if (mode != (byte)ILeg.modes.TERRAIN)
+                {
+                    mode = (byte)ILeg.modes.TERRAIN;
+                    sendMode(mode);
+                }
+
+                //if (t <= period / 2)
+                //{
+
+                //    xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
+                //    yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
+                //}
+                //else if (t > period / 2 && t <= lift)
+                //{
+                //    xPos = -stepSizeR * Math.Cos(xyRotation);
+                //    yPos = -stepSizeR * Math.Sin(xyRotation);
+                //}
+                //else if (t > lift && t <= sense)
+                //{
+                //    xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / (sense - lift)) * (t - lift) - (stepSizeR * Math.Cos(xyRotation));
+                //    yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / (sense - lift)) * (t - lift) - (stepSizeR * Math.Sin(xyRotation));
+                //}
+                //else if (t > sense)
+                //{
+                //    xPos = stepSizeR * Math.Cos(xyRotation);
+                //    yPos = stepSizeR * Math.Sin(xyRotation);
+
+                //}
+                calcPositionZ(terrainmode);
             }
             else
             {
-                xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) + (stepSizeR * Math.Cos(xyRotation));
-                yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) + (stepSizeR * Math.Sin(xyRotation));
+                if (mode != (byte)ILeg.modes.NORMAL)
+                {
+                    mode = (byte)ILeg.modes.NORMAL;
+                    sendMode(mode);
+                }
+
+                if (t <= period / 2)
+                {
+                    xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
+                    yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
+                }
+                else
+                {
+                    xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
+                    yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
+                }
+                calcPositionZ(terrainmode);
             }
-            calcPositionZ();
+
+            
+
+
+
+            if (xPos > stepSizeX)
+            {
+                xPos = stepSizeX;
+            }
+            else if (xPos < -stepSizeX)
+            {
+                xPos = -stepSizeX;
+            }
+            if (yPos > stepSizeY)
+            {
+                yPos = stepSizeY;
+            }
+            else if (yPos < -stepSizeY)
+            {
+                yPos = -stepSizeY;
+            }
+
+
+            
         }
 
-        /**********************************************************************************************//**
-         * @fn  public void calcPositionX(double increment)
-         *
-         * @brief   Calculates the TCP position for movement in x direction.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         *
-         * @param   increment   Amount to increment by.
-         **************************************************************************************************/
 
-        public void calcPositionX(double increment)
+        protected void calcPositionZ(Boolean terrainmode)
         {
-            t = ((t + increment) % period + period) % period;
-            yPos = 0.0;
-            if (t <= period / 2)
+            if (terrainmode)
             {
-                xPos = 4 * stepSizeX / period * t - stepSizeX;
+                if (t <= period / 2)
+                {
+
+                    zPos = 0;
+                   
+                }
+                else if (t > period / 2 && t <= lift)
+                {
+                    zPos = 2 * stepSizeZ / (lift - period / 2) * (t - period / 2);
+                }
+                else if (t > lift && t <= sense)
+                {
+                    zPos = stepSizeZ;
+                }
+                else if (t > sense)
+                {
+                    zPos = -2 * stepSizeZ / (sense - period / 2) * (t - sense)+stepSizeZ;
+
+                }
             }
             else
             {
-                xPos = -4 * stepSizeX / period * (t - period / 2) + stepSizeX;
-            }
-            calcPositionZ();
-        }
+                if (t <= period / 2)
+                {
+                    zPos = 0;
 
-        /**********************************************************************************************//**
-         * @fn  public void calcPositionY(double increment)
-         *
-         * @brief   Calculates the TCP position for movement in y direction.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         *
-         * @param   increment   Amount to increment by.
-         **************************************************************************************************/
-
-        public void calcPositionY(double increment)
-        {
-            t = ((t + increment) % period + period) % period;
-            xPos = 0.0; //+ xoff;
-            if (t <= period / 2)
-            {
-                yPos = 4 * stepSizeY / period * t - stepSizeY;
-            }
-            else
-            {
-                yPos = -4 * stepSizeY / period * (t - period / 2) + stepSizeY;
-            }
-            calcPositionZ();
-        }
-
-        /**********************************************************************************************//**
-         * @fn  protected void calcPositionZ()
-         *
-         * @brief   Calculates the TCP position for movement in z direction.
-         *
-         * @author  Alexander Miller
-         * @date    11.08.2016
-         *
-         * @param   off Turns the offset of.
-         **************************************************************************************************/
-
-        protected void calcPositionZ()
-        {
-            if (t <= period / 2)
-            {
-                zPos = 0;
+                }
+                else
+                {
+                    zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ;
+                }
 
             }
-            else
-            {
-                zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ;
-            }
+
+            
+
+
+
             if (zPos > stepSizeZ)
             {
                 zPos = stepSizeZ;
@@ -511,17 +557,32 @@ namespace HexPi
 
         public void calcData()
         {
-            ////Write calibration data
-            //data[0] = 4;
-            //data[3] = (byte)alphaOff;
-            //data[2] = (byte)betaOff;
-            //data[1] = (byte)gammaOff;
-            //Debug.WriteLine("Writing calibration data!");
 
+            byte[] data = new byte[4];
             data[0] = 3;
             data[1] = (Byte)XPos;
             data[2] = (Byte)YPos;
             data[3] = (Byte)ZPos;
+            sendData(data);
+        }
+
+        public void sendMode(byte m)
+        {
+            byte[] data = new byte[2];
+            data[0]=6;
+            data[1] = m;
+            sendData(data);
+        }
+
+        public void sendCalibrationData()
+        {
+            //Write calibration data
+            byte[] data = new byte[4];
+            data[0] = 4;
+            data[3] = (byte)alphaOff;
+            data[2] = (byte)betaOff;
+            data[1] = (byte)gammaOff;
+            Debug.WriteLine("Writing calibration data!");
         }
 
         public void calcPose(double x, double y, double z, double a, double b)
