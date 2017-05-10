@@ -96,7 +96,7 @@ namespace HexPi
         public void move(double inc_a,double inc_b, byte dir,bool terrainmode)
         {
             //If the direction has changed, center all les
-            if (dir != lastDirection)
+            if (dir != lastDirection && lastDirection != (byte)Controller.directions.CENTER)
             {
                 centerLegs();
             }
@@ -123,8 +123,15 @@ namespace HexPi
                     default:
                         break;
                 }
-
-                l.calcData();
+                if (terrainmode)
+                {
+                    l.calcDataTerrain();
+                }
+                else
+                {
+                    l.calcData();
+                }
+                
 
             }
 
@@ -132,6 +139,13 @@ namespace HexPi
 
         public void pose(double x, double y, double z, double a, double b)
         {
+            //If the direction has changed, center all les
+            if (lastDirection != (byte)Controller.directions.CENTER)
+            {
+                centerLegs();
+                lastDirection = (byte)Controller.directions.CENTER;
+            }
+
             foreach (ILeg leg in legs)
             {
                 leg.calcPose(x,y,z,a,b);

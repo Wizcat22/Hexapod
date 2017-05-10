@@ -52,11 +52,11 @@ namespace HexPi
         /** @brief   The b-axis input */
         double b = 0;
 
-        int mode = 0;
-
         /** @brief   The threshold for the input. */
         double threshold = 0.25;
         //******
+
+        byte mode = 0;
 
         //Enums
 
@@ -69,7 +69,7 @@ namespace HexPi
         public enum directions { CENTER, XY, ROTATE };
         //******
 
-        public enum modes {WALK,POSE,SHUTDOWN, TERRAIN };
+        public enum modes {WALK,POSE,SHUTDOWN, TERRAIN, ADAPTIVE };
 
         //Properties
 
@@ -115,7 +115,7 @@ namespace HexPi
 
                 
                 //Task.Delay(0).Wait();
-                Task.Delay(0).Wait();
+                Task.Delay(1).Wait();
                 
                 if (input != null)
                 {
@@ -290,11 +290,11 @@ namespace HexPi
         private void pose()
         {
             //1° = 0,0174533 rad
-            double degX = 0.174533 * x;
-            double degY = 0.174533 * y;
+            double degX = 0.174533 * y;
+            double degY = 0.174533 * -x;
             double degZ = 0.174533 * z;
-            double distA = 50 * a;
-            double distB = 50 * b;
+            double distA = 20 * a;
+            double distB = 20 * b;
             //Set rotation around xyz axis and translation in ab-axis
             robot.pose(degX,degY,degZ,distA,distB);
         }

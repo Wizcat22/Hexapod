@@ -17,8 +17,9 @@
 
 #pragma region VARIABLES
 
-uint16_t config = 0b0111111000000001;
+uint16_t config = 0b0111110000000001;
 uint16_t measurements[] = {0,0,0};
+uint16_t last_measurements[] = {0,0,0};
 
 #pragma endregion VARIABLES
 
@@ -69,16 +70,20 @@ void ina3221_trigger_measurement(){
 uint8_t ina3221_check_ground(){
 
 ina3221_get_current(measurements);
-uart_send_string("Test: \r\n");
-uart_send_number(measurements[1]);
-uart_send_string("\r\n");
-
+//uart_send_string("Test: \r\n");
+//uart_send_number(measurements[1]);
+//uart_send_string("\r\n");
+if (abs(last_measurements[1]-measurements[1]) >= 200)
+{
+	return 0;
+}
 if (measurements[1] >100)
 {
+	last_measurements[1] = 0;
 	return 1;
 }
 
-
+last_measurements[1] = measurements[1];
 return 0;
 
 }

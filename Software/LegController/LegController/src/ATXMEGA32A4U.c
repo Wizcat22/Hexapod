@@ -297,18 +297,22 @@ void twi_slave_get_data(void){
 				break;
 				case 1: //Set led color
 				data_word[0] = twi_slave_get_word(); //Get color-value
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				led_set_color(data_word[0],LED_SATURATION,LED_BRIGTHNESS);
 				break;
 				case 2: //2 = Set servo degree
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				servo_set_deg(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 3: //3 = Set leg position
+				terrain = 0;
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 4: //4 = Set servo calibration value and save in eeprom
@@ -318,13 +322,19 @@ void twi_slave_get_data(void){
 					eeprom_write_byte((uint8_t *) i,data_byte[i]); //Save servo calibration value to eeprom
 					servo_cal[i] = data_byte[i]; //Set servo calibration value
 				}
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				break;
 				case 5: //5 = Reset
 				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 				while (1){} // Wait until Watchdog-reset
 				break;
 				case 6: //6 = Set Terrain mode
-				terrain = twi_slave_get_byte();
+				terrain = 1;
+				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
+				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
+				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
+				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
+				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
 				
 				break;
 				//case value:
@@ -334,7 +344,7 @@ void twi_slave_get_data(void){
 				/* Your code here */
 				break;
 			}
-			TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
+			
 
 		}
 
@@ -406,6 +416,13 @@ int16_t twi_master_read_data(char reg){
 }
 
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
+
+		#ifdef	SIDE
+		xPos = -xPos;
+		yPos = -yPos;
+		zPos = zPos;
+
+		#endif
 	
 	if (terrain != 0) //if terrain mode is active
 	{led_set_color(C_GREEN,1,0.05);
@@ -415,6 +432,7 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 			if (grounded == 0) // no ground detected
 			{
 				grounded = ina3221_check_ground();
+				
 				lastZPos = zPos;
 			}
 			else
@@ -488,12 +506,13 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
 void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	
-	#ifdef	SIDE
+			#ifdef	SIDE
+			s0 = -s0;
+			s1 = -s1;
+			s2 = s2;
 
-	s2 = -s2;
-	s1 = -s1;
-	s0 = -s0;
-	#endif
+			#endif
+
 
 
 	s0=s0+servo_cal[0];
