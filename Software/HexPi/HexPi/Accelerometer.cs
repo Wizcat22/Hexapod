@@ -42,10 +42,19 @@ namespace HexPi
 
         /** @brief   The z coordinate. */
         private double z = 0.0;
+
+        /** @brief   The x coordinate. */
+        private double offsetX = 0.0;
+
+        /** @brief   The y coordinate. */
+        private double offsetY = 0.0;
+
+        /** @brief   The z coordinate. */
+        private double offsetZ = 0.0;
         //******
 
         //Arrays
-        
+
         /** @brief   Buffer for write data. */
         byte[] writeBuffer = new byte[] { 0x28 };
 
@@ -55,20 +64,33 @@ namespace HexPi
 
         //Properties
 
+
+        public Accelerometer()
+        {
+            init();
+            read();
+            offsetX = x;
+            offsetY = y;
+            offsetZ = z;
+        }
+
+
         /**********************************************************************************************//**
-         * @property    public double angleXZ
+         * @property    public double roll
          *
          * @brief   Gets the angle of the rotation around the y axis.
          *
          * @return  The angle y.
          **************************************************************************************************/
 
-        public double angleXZ
+        public double Pitch
         {
             get
             {
-                double xz = Math.Round(Math.Acos(x / (Math.Sqrt(x * x + z * z))) - Math.PI / 2, 2);
-                if(double.IsNaN(xz) || double.IsInfinity(xz))
+                double xz = Math.Round((Math.Acos(x / (Math.Sqrt(x * x + z * z))) - Math.PI / 2) * 100 * Math.PI / 180, 2);
+                
+
+                if (double.IsNaN(xz) || double.IsInfinity(xz))
                 {
                     return 0;
                 }
@@ -84,15 +106,16 @@ namespace HexPi
          * @return  The angle around x.
          **************************************************************************************************/
 
-        public double angleYZ
+        public double Roll
         {
             get
             {
-                double yz = Math.Round(Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2, 2);
+                double yz = Math.Round((Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2)*100 * Math.PI / 180, 2);
                 if (double.IsNaN(yz) ||double.IsInfinity(yz))
                 {
                     return 0;
                 }
+ 
                 return yz;
             }
         }
@@ -142,13 +165,29 @@ namespace HexPi
 
                 if (device != null)
                 {
+                    int length= 10;
+                    bool status = false;
+                    byte[] STATUS_REG = new byte[1];
                     device.Write(new byte[] { 0x10, 0x80 });
-                    device.Write(writeBuffer);
-                    device.Read(readBuffer);
-                    x = Math.Round((Int16)(readBuffer[1] << 8 | readBuffer[0]) / 16383.0, 2);
-                    y = Math.Round((Int16)(readBuffer[3] << 8 | readBuffer[2]) / 16383.0, 2);
-                    z = Math.Round((Int16)(readBuffer[5] << 8 | readBuffer[4]) / 16383.0, 2);
-
+                    for (int i = 0; i < length; i++)
+                    {
+                        while (!status)
+                        {
+                            device.Write(new byte[] { 0x1E });
+                            device.Read(STATUS_REG);
+                            status = (STATUS_REG[0] & 1) == 1;
+                        }
+                        device.Write(writeBuffer);
+                        device.Read(readBuffer);
+                        x += Math.Round(((Int16)(readBuffer[1] << 8 | readBuffer[0]) / 16383.0), 2);
+                        y += Math.Round(((Int16)(readBuffer[3] << 8 | readBuffer[2]) / 16383.0), 2);
+                        z += Math.Round(((Int16)(readBuffer[5] << 8 | readBuffer[4]) / 16383.0), 2);
+                        
+                    }
+                    x = Math.Round(x / length,2);
+                    y = Math.Round(y / length, 2);
+                    z = Math.Round(z / length, 2);
+                    //Debug.WriteLine("X= " + x + " Y= " + y + " Z= " + z);
                 }
                 else
                 {

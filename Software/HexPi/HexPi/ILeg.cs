@@ -28,8 +28,6 @@ namespace HexPi
     {
         #region FIELDS
 
-        protected enum modes : byte {NORMAL,TERRAIN};
-
         /** @brief   The device. */
         I2cDevice device = null;
 
@@ -82,10 +80,10 @@ namespace HexPi
         #region CONSTANTS
 
         /** @brief   The step size for x coordinate in mm. */
-        protected const double stepSizeX = 20;
+        protected const double stepSizeX = 30;
 
         /** @brief   The step size for y coordinate in mm. */
-        protected const double stepSizeY = 20;
+        protected const double stepSizeY = 30;
 
         /** @brief   The step size for z coordinate in mm. */
         protected const double stepSizeZ = 30;
@@ -320,7 +318,7 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
-        public void calcPositionR(double increment,bool terrainmode)
+        public void calcPositionR(double increment,byte mode)
         {
 
             t = ((t + increment) + period) % period;
@@ -334,7 +332,7 @@ namespace HexPi
                 xPos = 4 * ((stepSizeR * Math.Cos(rotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(rotation));
                 yPos = 4 * ((stepSizeR * Math.Sin(rotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(rotation));
             }
-            calcPositionZ(terrainmode);
+            calcPositionZ(mode);
         }
         //******
 
@@ -384,6 +382,7 @@ namespace HexPi
             t = tOffset;
             xPos = 0.0;
             yPos = 0.0;
+            zPos = 0.0;
         }
 
         /**********************************************************************************************//**
@@ -397,28 +396,22 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
-        public void calcPositionXY(double x, double y, Boolean terrainmode)
+        public void calcPositionXY(double x, double y, byte mode)
         {
-            int frame = 10;
+            int frame = 1;
 
 
 
             t = (t + Math.Sqrt(x * x + y * y)) % period;
 
-            //if t is equal to period/2 +- frame
-            if ((t>= period/2-frame) && t<=period/2+frame)
+            //if t is equal to period*0.25 or period*0.75 +- frame
+            if ((t>= period*0.75-frame) && (t<=period*0.75+frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
             {
                 xyRotation = Math.Atan2(-y,-x);
             }
 
-            if (terrainmode)
+            if (mode == (byte)Controller.modes.TERRAIN)
             {
-
-                if (mode != (byte)ILeg.modes.TERRAIN)
-                {
-                    mode = (byte)ILeg.modes.TERRAIN;
-                    
-                }
 
                 if (t <= period / 2)
                 {
@@ -442,15 +435,10 @@ namespace HexPi
                     yPos = stepSizeR * Math.Sin(xyRotation);
 
                 }
-                calcPositionZ(terrainmode);
+                calcPositionZ(mode);
             }
             else
             {
-                if (mode != (byte)ILeg.modes.NORMAL)
-                {
-                    mode = (byte)ILeg.modes.NORMAL;
-                    
-                }
 
                 if (t <= period / 2)
                 {
@@ -462,7 +450,7 @@ namespace HexPi
                     xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
                     yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
                 }
-                calcPositionZ(terrainmode);
+                calcPositionZ(mode);
             }
 
             
@@ -491,9 +479,9 @@ namespace HexPi
         }
 
 
-        protected void calcPositionZ(Boolean terrainmode)
+        protected void calcPositionZ(byte mode)
         {
-            if (terrainmode)
+            if (mode == (byte)Controller.modes.TERRAIN)
             {
                 if (t <= period / 2)
                 {
@@ -588,18 +576,18 @@ namespace HexPi
             Debug.WriteLine("Writing calibration data!");
         }
 
-        public void calcPose(double x, double y, double z, double a, double b)
+        public void calcPose(double yaw, double pitch, double roll, double a, double b)
         {
             
-            double tempX = xOffset;
-            double tempY = yOffset;
-            double tempZ = zOffset;
-            double sA = Math.Sin(z);
-            double sB = Math.Sin(y);
-            double sC = Math.Sin(x);
-            double cA = Math.Cos(z);
-            double cB = Math.Cos(y);
-            double cC = Math.Cos(x);
+            double tempX = xOffset-xPos;
+            double tempY = yOffset-yPos;
+            double tempZ = zOffset-zPos;
+            double sA = Math.Sin(yaw);
+            double sB = Math.Sin(pitch);
+            double sC = Math.Sin(roll);
+            double cA = Math.Cos(yaw);
+            double cB = Math.Cos(pitch);
+            double cC = Math.Cos(roll);
             
 
 
@@ -609,12 +597,16 @@ namespace HexPi
             double newY = tempX * (sA * cB) + tempY * (cA*cC+sA*sB*sC) + tempZ * (sA*sB*cC-cA*sC);
             double newZ = tempX * (-sB) + tempY * (cB*sC) + tempZ * (cB*cC);
 
-            xPos = newX - tempX + a;
-            yPos = newY - tempY ;
-            zPos = newZ - tempZ + b;
-       
+            xPos += newX - tempX + a;
+            yPos += newY - tempY ;
+            zPos += newZ - tempZ + b;
+
             //Debug.WriteLine("Ytemp: " + tempY + " Y: " + newY);
-            //Debug.WriteLine("ID: " + id + "X: " + xPos + " Y: " + yPos + " Z: " + zPos);
+            //if (id == 0x23)
+            //{
+            //    Debug.WriteLine("ID: " + id +  " Z: " + Math.Round(zPos,0));
+            //}
+            
 
         }
 

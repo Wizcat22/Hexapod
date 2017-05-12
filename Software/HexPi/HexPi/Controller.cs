@@ -69,7 +69,7 @@ namespace HexPi
         public enum directions { CENTER, XY, ROTATE };
         //******
 
-        public enum modes {WALK,POSE,SHUTDOWN, TERRAIN, ADAPTIVE };
+        public enum modes {WALK,POSE,SHUTDOWN, TERRAIN, BALANCE, ADAPTIVE };
 
         //Properties
 
@@ -142,6 +142,16 @@ namespace HexPi
                     {
                         mode = (int)modes.TERRAIN;
                     }
+                    //BALANCE = A
+                    else if (gamepadStatus.Buttons == GamepadButtons.A)
+                    {
+                        mode = (int)modes.BALANCE;
+                    }
+                    //ADAPTIVE = B
+                    else if (gamepadStatus.Buttons == GamepadButtons.B)
+                    {
+                        mode = (int)modes.ADAPTIVE;
+                    }
                     //Walk = default
                     else
                     {
@@ -159,16 +169,22 @@ namespace HexPi
 
                 switch (mode)
                 {
-                    case (int)modes.WALK:
-                        walk(false);
+                    case (byte)modes.WALK:
+                        walk((byte)modes.WALK);
                         break;
-                    case (int)modes.TERRAIN:
-                        walk(true);
+                    case (byte)modes.BALANCE:
+                        walk((byte)modes.BALANCE);
                         break;
-                    case (int)modes.POSE:
+                    case (byte)modes.ADAPTIVE:
+                        walk((byte)modes.ADAPTIVE);
+                        break;
+                    case (byte)modes.TERRAIN:
+                        walk((byte)modes.TERRAIN);
+                        break;
+                    case (byte)modes.POSE:
                         pose();
                         break;
-                    case (int)modes.SHUTDOWN:
+                    case (byte)modes.SHUTDOWN:
                         shutdown();
                         break;
                     default:
@@ -261,7 +277,7 @@ namespace HexPi
         }
 
         // Walk in xy direction / turn in r direction
-        private void walk(bool terrainmode)
+        private void walk(byte mode)
         {
             //check if any of the axis is above the threshold
             if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(a) >= threshold)
@@ -270,19 +286,19 @@ namespace HexPi
                 if ((Math.Abs(x) > Math.Abs(a) && Math.Abs(x) >= threshold) || (Math.Abs(y) > Math.Abs(a) && Math.Abs(y) >= threshold))
                 {
 
-                    robot.move(x, y, (byte)directions.XY, terrainmode);
+                    robot.move(x, y, (byte)directions.XY, mode);
                 }
                 //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
                 else if (Math.Abs(a) > Math.Abs(x) && Math.Abs(a) > Math.Abs(y) && Math.Abs(a) >= threshold)
                 {
 
-                    robot.move(a, 0, (byte)directions.ROTATE, terrainmode);
+                    robot.move(a, 0, (byte)directions.ROTATE, mode);
                 }
             }
             //do nothing if none of the values is above the threshold
             else
             {
-                robot.move(0, 0, (byte)directions.CENTER, terrainmode);
+                robot.move(0, 0, (byte)directions.CENTER, mode);
             }
         }
 
