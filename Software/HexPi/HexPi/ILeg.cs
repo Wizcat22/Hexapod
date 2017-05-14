@@ -83,7 +83,7 @@ namespace HexPi
         protected const double stepSizeX = 30;
 
         /** @brief   The step size for y coordinate in mm. */
-        protected const double stepSizeY = 30;
+        protected const double stepSizeY = 20;
 
         /** @brief   The step size for z coordinate in mm. */
         protected const double stepSizeZ = 30;
@@ -96,7 +96,7 @@ namespace HexPi
 
         protected const int lift = period / 2 + 10;
         protected const int sense = period / 2 + 40;
-        
+        protected const int frame = 1;
 
         /** @brief   The height of the first joint. */
         protected const double zOffset = 88;
@@ -174,11 +174,8 @@ namespace HexPi
 
             set
             {
+
                 zPos = value;
-                if (zPos > stepSizeZ)
-                {
-                    zPos = stepSizeZ;
-                }
             }
         }
 
@@ -336,6 +333,46 @@ namespace HexPi
         }
         //******
 
+        public void calcPositionTurn(double x,double y,double a)
+        {
+            if (Math.Abs(x) > Math.Abs(y))
+            {
+                t = ((t + x) + period) % period;
+            }
+            else
+            {
+                t = ((t + y) + period) % period;
+            }
+
+            //if t is equal to period*0.25 or period*0.75 +- frame
+            if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
+            {
+                //xyRotation = Math.Atan2(-y, -x);
+                if (Math.Abs(x)>Math.Abs(y))
+                {
+                    //x=100 y= 100*a
+                    double w = Math.Atan2(xOffset,1000 - 900 * a);
+                    xyRotation = 0+w;
+                }
+                else
+                {
+                    xyRotation = 90 * Math.PI / 180;
+                }
+            }
+
+            if (t <= period / 2)
+            {
+                xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
+            }
+            else
+            {
+                xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
+            }
+            calcPositionZ((byte)Controller.modes.WALK);
+        }
+
         /**********************************************************************************************//**
          * @fn  public void sendData()
          *
@@ -398,7 +435,7 @@ namespace HexPi
 
         public void calcPositionXY(double x, double y, byte mode)
         {
-            int frame = 1;
+            
 
 
 
@@ -407,7 +444,7 @@ namespace HexPi
             //if t is equal to period*0.25 or period*0.75 +- frame
             if ((t>= period*0.75-frame) && (t<=period*0.75+frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
             {
-                xyRotation = Math.Atan2(-y,-x);
+                xyRotation = Math.Atan2(y,x);
             }
 
             if (mode == (byte)Controller.modes.TERRAIN)
@@ -486,12 +523,12 @@ namespace HexPi
                 if (t <= period / 2)
                 {
 
-                    zPos = 0;
+                    zPos = -stepSizeZ;
                    
                 }
                 else if (t > period / 2 && t <= lift)
                 {
-                    zPos = stepSizeZ / (lift - period / 2) * (t - period / 2);
+                    zPos = 2*stepSizeZ / (lift - period / 2) * (t - period / 2)-StepSizeZ;
                 }
                 else if (t > lift && t <= sense)
                 {
@@ -499,7 +536,7 @@ namespace HexPi
                 }
                 else if (t > sense)
                 {
-                    zPos = -stepSizeZ / (period-sense) * (t - sense)+stepSizeZ;
+                    zPos = -2*stepSizeZ / (period-sense) * (t - sense)+stepSizeZ;
 
                 }
             }
@@ -545,13 +582,15 @@ namespace HexPi
 
         public void calcData()
         {
-
+            
             byte[] data = new byte[4];
             data[0] = 3;
             data[1] = (Byte)XPos;
             data[2] = (Byte)YPos;
             data[3] = (Byte)ZPos;
+            
             sendData(data);
+
         }
 
         public void calcDataTerrain()

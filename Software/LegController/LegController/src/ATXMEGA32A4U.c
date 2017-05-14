@@ -8,7 +8,7 @@
 #pragma region DEFINES
 
 //#define F_CPU 16000000UL
-#define I2C_SLAVE_ADD 0x21
+#define I2C_SLAVE_ADD 0x23
 #define SIDE
 
 #define STATUS_OK 0
@@ -20,6 +20,7 @@
 #define LED_BRIGTHNESS 0.005f
 
 #define C_RED 0
+#define C_ORANGE 30
 #define C_YELLOW 60
 #define C_GREEN 120
 #define C_CYAN 180
@@ -41,6 +42,8 @@
 #include <avr/eeprom.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "../include/ATXMEGA32A4U.h"
 #include "../include/INA3221.h"
 
@@ -425,7 +428,7 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 		#endif
 	
 	if (terrain != 0) //if terrain mode is active
-	{led_set_color(C_GREEN,1,0.05);
+	{led_set_color(C_ORANGE,1,0.05);
 		if (zPos < lastZPos) // if new position is lower
 		{ 
 			
@@ -449,7 +452,7 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	}
 	else
 	{
-	led_set_color(C_RED,1,0.05);
+	led_set_color(C_GREEN,1,0.05);
 		lastZPos = zPos;
 	}
 
@@ -487,8 +490,9 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	beta = (int8_t)(b * 180 / M_PI - 90);
 	gamma = (int8_t)(c * 180 / M_PI - 90);
 
-	if ((beta == 0 && gamma == 0) && (xPos != 0 || yPos != 0 || zPos != 0))
+	if ((gamma==0 && beta==0) && (yPos!=0 && zPos != 0))
 	{
+		led_set_color(C_RED ,1,0.005);
 		servo_set_deg(lastGamma,lastBeta,alpha);
 	}
 	else{

@@ -101,7 +101,7 @@ namespace HexPi
          * @param   dir The direction to move in.
          **************************************************************************************************/
 
-        public void move(double inc_a,double inc_b, byte dir,byte mode)
+        public void move(double inc_x, double inc_y, double inc_a, byte dir,byte mode)
         {
             //If the direction has changed, center all les
             if (dir != lastDirection && lastDirection != (byte)Controller.directions.CENTER)
@@ -122,13 +122,22 @@ namespace HexPi
                 switch (dir)
                 {
                     case (byte)Controller.directions.XY:
-                        l.calcPositionXY(inc_a,inc_b,mode);
-                        l.calcPose(0, pitch, roll, 0, 0);
+                        l.calcPositionXY(inc_x,inc_y,mode);
+
+                        if (mode == (byte)Controller.modes.BALANCE || mode == (byte)Controller.modes.ADAPTIVE)
+                        {
+                            l.calcPose(0, pitch, roll, 0, 0);
+                        }
+                        
                         lastDirection = (byte)Controller.directions.XY;
                         break;
                     case (byte)Controller.directions.ROTATE:
                         l.calcPositionR(inc_a,mode);
                         lastDirection = (byte)Controller.directions.ROTATE;
+                        break;
+                    case (byte)Controller.directions.TURN:
+                        l.calcPositionTurn(inc_x,inc_y,inc_a);
+                        lastDirection = (byte)Controller.directions.TURN;
                         break;
                     case (byte)Controller.directions.CENTER:
 
@@ -176,11 +185,11 @@ namespace HexPi
         
         private void balance(double newPitch, double newRoll)
         {
-            double p = 0.1;
+            double p = 0.01;
             double i = 0.0;
 
             pitch -= (pitch-newPitch)*p;
-            roll -= (roll - newRoll) *p;
+            roll += (roll - newRoll) *p;
 
             double maxPitch = 10 * 0.0174533;
             double maxRoll = 10 * 0.0174533;
@@ -214,14 +223,6 @@ namespace HexPi
             //time between steps
             int time = 50;
 
-            //clear all z offsets
-            foreach (ILeg l in legs)
-            {
-                
-                
-                l.calcData();
-                Task.Delay(time).Wait();
-            }
 
             //put all legs down
             foreach (ILeg l in legs)
@@ -232,9 +233,14 @@ namespace HexPi
                 Task.Delay(time).Wait();
             }
 
+            pitch = 0;
+            roll = 0;
+
             //center each leg
             foreach (ILeg l in legs)
             {
+                l.calcData();
+                Task.Delay(time).Wait();
                 //Up
                 l.ZPos = l.StepSizeZ;
                 

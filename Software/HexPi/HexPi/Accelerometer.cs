@@ -165,7 +165,7 @@ namespace HexPi
 
                 if (device != null)
                 {
-                    int length= 10;
+                    int length= 20;
                     bool status = false;
                     byte[] STATUS_REG = new byte[1];
                     device.Write(new byte[] { 0x10, 0x80 });
