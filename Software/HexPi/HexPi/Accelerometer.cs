@@ -55,6 +55,10 @@ namespace HexPi
 
         //Arrays
 
+        double[] xVal = new double[3];
+        double[] yVal = new double[3];
+        double[] zVal = new double[3];
+
         /** @brief   Buffer for write data. */
         byte[] writeBuffer = new byte[] { 0x28 };
 
@@ -165,7 +169,8 @@ namespace HexPi
 
                 if (device != null)
                 {
-                    int length= 20;
+                    double[] test = new double[1000];
+                    int length= 10;
                     bool status = false;
                     byte[] STATUS_REG = new byte[1];
                     device.Write(new byte[] { 0x10, 0x80 });
@@ -177,6 +182,7 @@ namespace HexPi
                             device.Read(STATUS_REG);
                             status = (STATUS_REG[0] & 1) == 1;
                         }
+                        status = false;
                         device.Write(writeBuffer);
                         device.Read(readBuffer);
                         x += Math.Round(((Int16)(readBuffer[1] << 8 | readBuffer[0]) / 16383.0), 2);
@@ -184,9 +190,22 @@ namespace HexPi
                         z += Math.Round(((Int16)(readBuffer[5] << 8 | readBuffer[4]) / 16383.0), 2);
                         
                     }
-                    x = Math.Round(x / length,2);
-                    y = Math.Round(y / length, 2);
-                    z = Math.Round(z / length, 2);
+
+                    //Binomialfilter
+                    xVal[2] = xVal[1];
+                    xVal[1] = xVal[0];
+                    xVal[0] = Math.Round(x / length, 2);
+                    x = 0.25 * xVal[0] + 0.5 * xVal[1] + 0.25 * xVal[2];
+
+                    yVal[2] = yVal[1];
+                    yVal[1] = yVal[0];
+                    yVal[0] = Math.Round(y / length, 2);
+                    y = 0.25 * yVal[0] + 0.5 * yVal[1] + 0.25 * yVal[2];
+
+                    zVal[2] = zVal[1];
+                    zVal[1] = zVal[0];
+                    zVal[0] = Math.Round(z / length, 2);
+                    z = 0.25 * zVal[0] + 0.5 * zVal[1] + 0.25 * zVal[2];
                     //Debug.WriteLine("X= " + x + " Y= " + y + " Z= " + z);
                 }
                 else

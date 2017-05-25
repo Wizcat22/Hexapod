@@ -126,7 +126,7 @@ namespace HexPi
 
                         if (mode == (byte)Controller.modes.BALANCE || mode == (byte)Controller.modes.ADAPTIVE)
                         {
-                            l.calcPose(0, pitch, roll, 0, 0);
+                            l.calcPose(0, pitch, -roll, 0, 0);
                         }
                         
                         lastDirection = (byte)Controller.directions.XY;
@@ -145,7 +145,7 @@ namespace HexPi
                         //Debug.WriteLine("X= " + Math.Round((accel.Pitch * 180 / Math.PI),2) + "Y= " + Math.Round((accel.Roll * 180 / Math.PI), 2));
                         //Debug.WriteLine("Xa= " + Math.Round((pitch * 180 / Math.PI), 2) + "Ya= " + Math.Round((roll * 180 / Math.PI), 2));
                         l.calcPositionCenter();
-                        l.calcPose(0, pitch, roll, 0,0);
+                        l.calcPose(0, pitch, -roll, 0,0);
                         lastDirection = (byte)Controller.directions.CENTER;
                         break;
                     default:
@@ -182,17 +182,37 @@ namespace HexPi
             }
         }
 
-        
+        double k_p = 0.0;
+        double k_i = 1;
+        double k_d = 0.0;
+        double T = 0.032;
+        double[] pitch_e = new double[3];
+        double pitch1 = 0;
+        double[] roll_e = new double[3];
+        double roll1 = 0;
+
         private void balance(double newPitch, double newRoll)
         {
-            double p = 0.01;
-            double i = 0.0;
+            pitch1 = pitch;
+            pitch_e[2] = pitch_e[1];
+            pitch_e[1] = pitch_e[0];
+            pitch_e[0] = newPitch - pitch;
+            pitch = pitch1 + (k_p + k_i * T + k_d / T) * pitch_e[0] + (-k_p - 2 * k_d / T) * pitch_e[1] + (k_d / T) * pitch_e[2];
 
-            pitch -= (pitch-newPitch)*p;
-            roll += (roll - newRoll) *p;
+            roll1 = roll;
+            roll_e[2] = roll_e[1];
+            roll_e[1] = roll_e[0];
+            roll_e[0] = newRoll - roll;
+            roll = roll1 + (k_p + k_i * T + k_d / T) * roll_e[0] + (-k_p - 2 * k_d / T) * roll_e[1] + (k_d / T) * roll_e[2];
+            
+            //pitch -= (pitch-newPitch)*p;
+            //roll += (roll - newRoll) *p;
 
             double maxPitch = 10 * 0.0174533;
             double maxRoll = 10 * 0.0174533;
+
+
+
 
             if (pitch > maxPitch)
             {pitch = maxPitch;}
@@ -223,6 +243,17 @@ namespace HexPi
             //time between steps
             int time = 50;
 
+            pitch = 0;
+            roll = 0;
+
+            foreach (ILeg l in legs)
+            {
+                l.calcPose(0, pitch, roll, 0, 0);
+
+                l.calcData();
+                //Task.Delay(time).Wait();
+            }
+
 
             //put all legs down
             foreach (ILeg l in legs)
@@ -233,8 +264,7 @@ namespace HexPi
                 Task.Delay(time).Wait();
             }
 
-            pitch = 0;
-            roll = 0;
+
 
             //center each leg
             foreach (ILeg l in legs)

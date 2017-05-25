@@ -16,7 +16,7 @@
     <PackageRegistrationPath>
     </PackageRegistrationPath>
     <RemoveNonLayoutFiles>true</RemoveNonLayoutFiles>
-    <RegisteredManifestChecksum>85C6140D66D5902C4F13AE7154B9D89367F513351EB1DB58C9DF2581111C503C</RegisteredManifestChecksum>
+    <RegisteredManifestChecksum>F310389CEF0D92A212F7CABF42C93A8F31E72276A5F350D8C839ACD4C3F6E875</RegisteredManifestChecksum>
     <RegisteredPackageMoniker>d5171039-0d11-484b-b165-a8b636b7a23d_1.0.0.0_arm__e82j2rv84mwc2</RegisteredPackageMoniker>
     <RegisteredUserModeAppID>d5171039-0d11-484b-b165-a8b636b7a23d_e82j2rv84mwc2!App</RegisteredUserModeAppID>
     <RegisteredPackageID>d5171039-0d11-484b-b165-a8b636b7a23d</RegisteredPackageID>
@@ -28,13 +28,13 @@
     <AppXManifest Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-05-14T18:16:06.207</Modified>
+      <Modified>2017-05-23T12:08:38.818</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\HexPi.exe">
       <PackagePath>entrypoint\HexPi.exe</PackagePath>
-      <Modified>2017-05-14T18:16:05.980</Modified>
+      <Modified>2017-05-23T12:08:38.601</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Alexander Miller\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -513,11 +513,11 @@
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-05-14T15:06:36.528</Modified>
+      <Modified>2017-05-23T11:40:40.106</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="X:\Alexander Miller\Documents\Git\Hexapod\Software\HexPi\HexPi\bin\ARM\Debug\Core\HexPi.exe">
       <PackagePath>HexPi.exe</PackagePath>
-      <Modified>2017-05-14T18:16:06.204</Modified>
+      <Modified>2017-05-23T12:08:38.815</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

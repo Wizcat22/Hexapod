@@ -110,12 +110,28 @@ namespace HexPi
 
         private void handleInputs()
         {
+            DateTime newDate = DateTime.Now;
+            DateTime oldDate = DateTime.Now;
+            TimeSpan dif;
+
             while (true)
             {
-
+                newDate = DateTime.Now;
+                dif = newDate-oldDate;
+                if (mode == (byte)modes.BALANCE)
+                {
+                    while (dif.Milliseconds < 25)
+                    {
+                        newDate = DateTime.Now;
+                        dif = newDate - oldDate;
+                    }
+                }
                 
+                oldDate = DateTime.Now;
+                Debug.WriteLine("Time: " + dif.Milliseconds);
+
                 //Task.Delay(0).Wait();
-                Task.Delay(1).Wait();
+                Task.Delay(0).Wait();
                 
                 if (input != null)
                 {
@@ -319,7 +335,7 @@ namespace HexPi
             double distA = 20 * a;
             double distB = 20 * b;
             //Set rotation around xyz axis and translation in ab-axis
-            robot.pose(degX,degY,degZ,distA,distB);
+            robot.pose(degZ,degY,degX,distA,distB);
         }
     }
 }

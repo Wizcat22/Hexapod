@@ -335,9 +335,10 @@ namespace HexPi
 
         public void calcPositionTurn(double x,double y,double a)
         {
+            a = -a;
             if (Math.Abs(x) > Math.Abs(y))
             {
-                t = ((t + x) + period) % period;
+                t = ((t + a/Math.Abs(a)* x) + period) % period;
             }
             else
             {
@@ -351,7 +352,7 @@ namespace HexPi
                 if (Math.Abs(x)>Math.Abs(y))
                 {
                     //x=100 y= 100*a
-                    double w = Math.Atan2(xOffset,1000 - 900 * a);
+                    double w = Math.Atan2(xOffset,a/Math.Abs(a)*(1000 - 900 * Math.Abs(a)));
                     xyRotation = 0+w;
                 }
                 else
@@ -523,12 +524,12 @@ namespace HexPi
                 if (t <= period / 2)
                 {
 
-                    zPos = -stepSizeZ;
+                    zPos = 0;
                    
                 }
                 else if (t > period / 2 && t <= lift)
                 {
-                    zPos = 2*stepSizeZ / (lift - period / 2) * (t - period / 2)-StepSizeZ;
+                    zPos = stepSizeZ / (lift - period / 2) * (t - period / 2);
                 }
                 else if (t > lift && t <= sense)
                 {
@@ -536,7 +537,7 @@ namespace HexPi
                 }
                 else if (t > sense)
                 {
-                    zPos = -2*stepSizeZ / (period-sense) * (t - sense)+stepSizeZ;
+                    zPos = -stepSizeZ / (period-sense) * (t - sense)+stepSizeZ;
 
                 }
             }
