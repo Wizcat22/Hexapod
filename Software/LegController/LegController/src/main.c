@@ -83,6 +83,11 @@ int main(void)
 		{
 			huehue = 0;
 		}
+		
+
+
+
+
 		//delay(1);
 		//a = twi_master_read_data(INA_C1_SV_R);
 		//

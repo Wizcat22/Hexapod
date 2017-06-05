@@ -7,9 +7,8 @@
 
 #pragma region DEFINES
 
-//#define F_CPU 16000000UL
-#define I2C_SLAVE_ADD 0x23
-#define SIDE
+#define I2C_SLAVE_ADD 0x11
+//#define SIDE
 
 #define STATUS_OK 0
 #define STATUS_ERR 1
@@ -60,9 +59,7 @@ int8_t lastBeta = 0;
 int8_t lastGamma = 0;
 
 int8_t lastZPos = 0;
-uint8_t grounded = 0; // 0 = no ground contact 
-
-int8_t terrain = 0; // 0 = terrain mode off
+int grounded = 0;
 
 #pragma endregion VARIABLES
 
@@ -207,7 +204,7 @@ void uart_send_string(char s[]){
 	//uart_send('\n');
 }
 
-void uart_send_number(int32_t num){
+void uart_send_number(int num){
 
 	char str[20];
 	sprintf(str, "%d", num);
@@ -253,7 +250,6 @@ void led_set_color(uint16_t H, float S, float V){
 	TCC0.CCABUF = (uint16_t)(16000*R);
 	TCC0.CCBBUF = (uint16_t)(16000*G);
 	TCC0.CCCBUF = (uint16_t)(16000*B);
-	//TCC0.CTRLFSET |= (1<<3);
 	
 
 
@@ -273,11 +269,11 @@ void init_LED(void){
 
 void twi_slave_get_data(void){
 
-	uint8_t data_byte[] = {0,0,0};
-	uint16_t data_word[] = {0,0,0};
+	int8_t data_byte[] = {0,0,0};
+	int16_t data_word[] = {0,0,0};
 
 	if ((TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){ //If transaction happened
-		if (TWIC_SLAVE_DATA == (slave_address<<1)) //If the received address is correct (should be always the case)
+		if (TWIC_SLAVE_DATA == (slave_address<<1)) //If the received address is correct (should be always the case) and R/W bit is not set (write)
 		{
 			TWIC_SLAVE_CTRLB = 0b00000011; //Send ack
 			data_byte[0]= twi_slave_get_byte(); //Get "Register"-address
@@ -286,9 +282,10 @@ void twi_slave_get_data(void){
 			//1 = Set led color
 			//2 = Set servo degree
 			//3 = Set leg position
-			//4 = Set servo calibration value and save in eeprom 
+			//4 = Set servo calibration value and save in eeprom
 			//5 = Reset
 			//6 = Set Terrain mode
+			//7 = Send current position
 
 
 
@@ -311,7 +308,7 @@ void twi_slave_get_data(void){
 				servo_set_deg(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 3: //3 = Set leg position
-				terrain = 0;
+				led_set_color(C_GREEN,1,0.05);
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
@@ -332,12 +329,12 @@ void twi_slave_get_data(void){
 				while (1){} // Wait until Watchdog-reset
 				break;
 				case 6: //6 = Set Terrain mode
-				terrain = 1;
+				led_set_color(C_ORANGE,1,0.05);
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
 				TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
-				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
+				leg_sense_terrain(data_byte[0],data_byte[1],data_byte[2]);
 				
 				break;
 				//case value:
@@ -349,6 +346,29 @@ void twi_slave_get_data(void){
 			}
 			
 
+		}
+		else if (TWIC_SLAVE_DATA == ((slave_address<<1)+1)) //If the received address is correct (should be always the case) and R/W bit is set (read)
+		{	
+			
+			
+			TWIC_SLAVE_CTRLB = 0b00000011; //Send ack
+			
+			while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+			TWIC_SLAVE_DATA = lastZPos;
+			TWIC_SLAVE_CTRLB = 0b00000011;
+			while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+
+			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+			//TWIC_SLAVE_DATA = 22;
+			//TWIC_SLAVE_CTRLB = 0b00000011;
+			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+//
+			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+			//TWIC_SLAVE_DATA = 33;
+			//TWIC_SLAVE_CTRLB = 0b00000011;
+			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
+			
+			TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 		}
 
 
@@ -420,41 +440,15 @@ int16_t twi_master_read_data(char reg){
 
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
-		#ifdef	SIDE
-		xPos = -xPos;
-		yPos = -yPos;
-		zPos = zPos;
+	#ifdef	SIDE
+	xPos = -xPos;
+	yPos = -yPos;
+	zPos = zPos;
 
-		#endif
+	#endif
 	
-	if (terrain != 0) //if terrain mode is active
-	{led_set_color(C_ORANGE,1,0.05);
-		if (zPos < lastZPos) // if new position is lower
-		{ 
-			
-			if (grounded == 0) // no ground detected
-			{
-				grounded = ina3221_check_ground();
-				
-				lastZPos = zPos;
-			}
-			else
-			{
-				zPos = lastZPos;
-			}
-		}
-		else if (zPos > lastZPos)
-		{
-						grounded = 0;
-						lastZPos = zPos;
-		}
-
-	}
-	else
-	{
-	led_set_color(C_GREEN,1,0.05);
-		lastZPos = zPos;
-	}
+	
+	lastZPos = zPos;
 
 	float a = 0.0f; //Alpha
 	float b = 0.0f; //Beta
@@ -490,32 +484,65 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	beta = (int8_t)(b * 180 / M_PI - 90);
 	gamma = (int8_t)(c * 180 / M_PI - 90);
 
-	if ((gamma==0 && beta==0) && (yPos!=0 && zPos != 0))
+	if ((gamma==0 && beta==0) && (yPos>10 || zPos <-10))
 	{
 		led_set_color(C_RED ,1,0.005);
 		servo_set_deg(lastGamma,lastBeta,alpha);
 	}
 	else{
-	servo_set_deg(gamma,beta,alpha);
-	lastAlpha = alpha;
-	lastBeta = beta;
-	lastGamma = gamma;
+		servo_set_deg(gamma,beta,alpha);
+		lastAlpha = alpha;
+		lastBeta = beta;
+		lastGamma = gamma;
 
 	}
 
 	
 }
 
+void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos){
 
+	if (zPos > 0)
+	{
+		grounded = 0;
+		leg_set_position(xPos,yPos,zPos);
+	}
+	else if (zPos <= 0)
+	{
+		if (grounded == 0)
+		{
+			while (grounded == 0)
+			{
+				asm("wdr");
+				lastZPos -= 2;
+				leg_set_position(xPos,yPos,lastZPos);
+				grounded = ina3221_check_ground();
+				//-----
+				if (lastZPos <= -20)
+				{
+					grounded = 1;
+					led_set_color(C_MAGENTA,1,0.05);
+				}
+				//-----
+			}
+		}
+		else
+		{
+			leg_set_position(xPos,yPos,lastZPos);
+		}
+		
+	}
+
+}
 
 void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	
-			#ifdef	SIDE
-			s0 = -s0;
-			s1 = -s1;
-			s2 = s2;
+	#ifdef	SIDE
+	s0 = -s0;
+	s1 = -s1;
+	s2 = s2;
 
-			#endif
+	#endif
 
 
 
@@ -558,24 +585,24 @@ void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 }
 
 void set_status_pins(uint8_t s){
-PORTA.OUTCLR = PIN1_bm;
-PORTA.OUTCLR = PIN2_bm;
-switch (s)
-{
-	case 1:
-	PORTA_OUTSET = PIN1_bm;
-	break;
-	case 2:
-	PORTA_OUTSET = PIN2_bm;
-	break;
-	case 3:
-	PORTA_OUTSET = PIN1_bm;
-	PORTA_OUTSET = PIN2_bm;
-	break;
-	default:
-	/* Your code here */
-	break;
-}
+	PORTA.OUTCLR = PIN1_bm;
+	PORTA.OUTCLR = PIN2_bm;
+	switch (s)
+	{
+		case 1:
+		PORTA_OUTSET = PIN1_bm;
+		break;
+		case 2:
+		PORTA_OUTSET = PIN2_bm;
+		break;
+		case 3:
+		PORTA_OUTSET = PIN1_bm;
+		PORTA_OUTSET = PIN2_bm;
+		break;
+		default:
+		/* Your code here */
+		break;
+	}
 }
 
 void delay(int ms){

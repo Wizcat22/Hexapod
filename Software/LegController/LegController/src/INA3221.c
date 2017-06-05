@@ -9,6 +9,7 @@
 
  #include <avr/io.h>
  #include <util/delay.h>
+ #include <stdlib.h>
  #include <math.h>
  #include "../include/ATXMEGA32A4U.h"
  #include "../include/INA3221.h"
@@ -17,9 +18,8 @@
 
 #pragma region VARIABLES
 
-uint16_t config = 0b0111110000000001;
+uint16_t config = 0b0010111000000001;
 uint16_t measurements[] = {0,0,0};
-uint16_t last_measurements[] = {0,0,0};
 
 #pragma endregion VARIABLES
 
@@ -33,13 +33,29 @@ int16_t ina3221_read_value(char reg){
 	return twi_master_read_data(reg);
 }
 
-void ina3221_get_current(uint16_t data[]){
+void ina3221_get_current(uint16_t data[],uint16_t channel){
 	
-	uint16_t current = 0;
+	uint16_t current1 = 0;
+	uint16_t current2 = 0;
 	ina3221_trigger_measurement();
-	data[0] = ina3221_calculate_current(INA_C1_SV_R);
-	data[1] = ina3221_calculate_current(INA_C2_SV_R);
-	data[2] = ina3221_calculate_current(INA_C3_SV_R);
+
+
+	current1 = ina3221_calculate_current(channel);
+	ina3221_trigger_measurement();
+	current2 = ina3221_calculate_current(channel);
+	
+	while (!(abs(current1-current2) < 50))
+	{		
+			current2 = current1;
+			ina3221_trigger_measurement();
+			current1 = ina3221_calculate_current(channel);
+			 
+	}
+
+	data[2] = data[1];
+	data[1] = data[0];
+	data[0] = current1;
+
 	
 }
 
@@ -69,21 +85,37 @@ void ina3221_trigger_measurement(){
 
 uint8_t ina3221_check_ground(){
 
-ina3221_get_current(measurements);
+ina3221_get_current(measurements,INA_C2_SV_R);
+
+if (measurements[1] == 0)
+{
+	ina3221_get_current(measurements,INA_C2_SV_R);
+}
+if (measurements[2] == 0)
+{
+	ina3221_get_current(measurements,INA_C2_SV_R);
+}
+
 //uart_send_string("Test: \r\n");
 //uart_send_number(measurements[1]);
 //uart_send_string("\r\n");
-if (abs(last_measurements[1]-measurements[1]) >= 200)
+//if (abs(last_measurements[1]-measurements[1]) >= 100)
+//{
+	//return 0;
+//}
+
+uint16_t current = 0.25f * measurements[0] + 0.5f * measurements[1] + 0.25f * measurements[2];
+uart_send_number(current);
+uart_send_string("\r\n");
+
+if (current >100)
 {
-	return 0;
-}
-if (measurements[1] >100)
-{
-	last_measurements[1] = 0;
+	measurements[0] = 0;
+	measurements[1] = 0;
+	measurements[2] = 0;
 	return 1;
 }
 
-last_measurements[1] = measurements[1];
 return 0;
 
 }
