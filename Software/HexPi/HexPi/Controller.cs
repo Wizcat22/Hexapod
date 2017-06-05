@@ -128,10 +128,10 @@ namespace HexPi
                 }
                 
                 oldDate = DateTime.Now;
-                Debug.WriteLine("Time: " + dif.Milliseconds);
+                //Debug.WriteLine("Time: " + dif.Milliseconds);
 
                 //Task.Delay(0).Wait();
-                Task.Delay(0).Wait();
+                Task.Delay(2).Wait();
                 
                 if (input != null)
                 {

@@ -154,14 +154,44 @@ namespace HexPi
                 if (mode == (byte)Controller.modes.TERRAIN)
                 {
                     l.calcDataTerrain();
+                    
                 }
                 else
                 {
                     l.calcData();
+                    
                 }
                 
 
             }
+
+            //if (mode == (byte)Controller.modes.TERRAIN)
+            //{
+            //    int a = 0;
+            //    int sum = 0;
+            //    foreach (ILeg l in legs)
+            //    {
+            //        if (l.ZPos == 0)
+            //        {
+            //            a++;
+            //            sum += l.readData();
+            //        }
+            //    }
+            //    sum = sum/a;
+
+            //    foreach (ILeg l in legs)
+            //    {
+            //        if (l.ZPos == 0)
+            //        {
+            //            l.ZPos = l.readData()-sum;
+            //            l.calcData();
+            //            l.ZPos = 0;
+            //        }
+                    
+            //    }
+
+            //}
+
 
         }
 
@@ -272,14 +302,14 @@ namespace HexPi
                 l.calcData();
                 Task.Delay(time).Wait();
                 //Up
-                l.ZPos = l.StepSizeZ;
+                l.ZPos = (int)l.StepSizeZ;
                 
                 l.calcData();
                 Task.Delay(time).Wait();
 
                 //Center
                 l.calcPositionCenter();
-                l.ZPos = l.StepSizeZ;
+                l.ZPos = (int)l.StepSizeZ;
                 l.calcData();
                 Task.Delay(time).Wait();
 

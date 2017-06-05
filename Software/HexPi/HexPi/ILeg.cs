@@ -33,7 +33,7 @@ namespace HexPi
 
         byte mode = 0;
 
-
+        protected double stepSizeR2 = 30;
 
         /** @brief   The offset of the first angle. */
         protected double alphaOff = 0;
@@ -86,7 +86,7 @@ namespace HexPi
         protected const double stepSizeY = 20;
 
         /** @brief   The step size for z coordinate in mm. */
-        protected const double stepSizeZ = 30;
+        protected const double stepSizeZ = 50;
 
         /** @brief   The step size for rotation in mm. */
         protected const double stepSizeR = 30;
@@ -123,11 +123,11 @@ namespace HexPi
         * @return  The x coordinate position.
         **************************************************************************************************/
 
-        public double XPos
+        public int XPos
         {
             get
             {
-                return xPos;
+                return (int)xPos;
             }
 
             set
@@ -144,11 +144,11 @@ namespace HexPi
          * @return  The y coordinate position.
          **************************************************************************************************/
 
-        public double YPos
+        public int YPos
         {
             get
             {
-                return yPos;
+                return (int)yPos;
             }
 
             set
@@ -165,11 +165,11 @@ namespace HexPi
          * @return  The z coordinate position.
          **************************************************************************************************/
 
-        public double ZPos
+        public int ZPos
         {
             get
             {
-                return zPos;
+                return (int)zPos;
             }
 
             set
@@ -227,7 +227,7 @@ namespace HexPi
             }
         }
 
-       
+
 
         #endregion PROPERTIES
 
@@ -253,7 +253,7 @@ namespace HexPi
          * @param   rotation    The angle of the leg path in rotation.
          **************************************************************************************************/
 
-        public ILeg(int tOffset, int aOff, int bOff, int cOff, double rotation, byte address,int xOff,int yOff)
+        public ILeg(int tOffset, int aOff, int bOff, int cOff, double rotation, byte address, int xOff, int yOff)
         {
             this.tOffset = tOffset;
             t = this.tOffset;
@@ -264,7 +264,7 @@ namespace HexPi
 
             xOffset = xOff;
             yOffset = yOff;
-            
+
 
             this.rotation = (rotation / 180) * Math.PI;
 
@@ -315,7 +315,7 @@ namespace HexPi
          * @param   increment   Amount to increment by.
          **************************************************************************************************/
 
-        public void calcPositionR(double increment,byte mode)
+        public void calcPositionR(double increment, byte mode)
         {
 
             t = ((t + increment) + period) % period;
@@ -333,12 +333,12 @@ namespace HexPi
         }
         //******
 
-        public void calcPositionTurn(double x,double y,double a)
+        public void calcPositionTurn(double x, double y, double a)
         {
             a = -a;
             if (Math.Abs(x) > Math.Abs(y))
             {
-                t = ((t + a/Math.Abs(a)* x) + period) % period;
+                t = ((t + a / Math.Abs(a) * x) + period) % period;
             }
             else
             {
@@ -349,11 +349,55 @@ namespace HexPi
             if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
             {
                 //xyRotation = Math.Atan2(-y, -x);
-                if (Math.Abs(x)>Math.Abs(y))
+                if (Math.Abs(x) > Math.Abs(y))
                 {
-                    //x=100 y= 100*a
-                    double w = Math.Atan2(xOffset,a/Math.Abs(a)*(1000 - 900 * Math.Abs(a)));
-                    xyRotation = 0+w;
+                    double rad = a / Math.Abs(a) * ((1000 - 500 * Math.Abs(a))- Math.Abs(yOffset));
+                    
+                    double w = Math.Atan2(xOffset, rad);
+                    //double w = Math.Atan2(xOffset, a / Math.Abs(a) * (1000 - yOffset));
+                    //Debug.WriteLine("W "+id + " : " + (w*180/Math.PI));
+                    xyRotation = 0 + w;
+
+
+
+                    //-------------
+                    if (yOffset < 0)
+                    {
+                        if (rad>yOffset)
+                        {
+                            stepSizeR2 = stepSizeR;
+                        }
+                        else
+                        {
+                            stepSizeR2 = stepSizeR * (Math.Abs(rad) - Math.Abs(yOffset)) / (Math.Abs(rad) + Math.Abs(yOffset));
+                        }
+                    }
+                    if (yOffset > 0)
+                    {
+                        if (rad < yOffset)
+                        {
+                            stepSizeR2 = stepSizeR;
+                        }
+                        else
+                        {
+                            stepSizeR2 = stepSizeR * (Math.Abs(rad) - Math.Abs(yOffset)) / (Math.Abs(rad) + Math.Abs(yOffset));
+                        }
+                    }
+
+                    //Debug.WriteLine("S " + id + " : " + stepSizeR2);
+
+
+
+                    if (stepSizeR2 > stepSizeR)
+                    {
+                        stepSizeR2 = stepSizeR;
+                    }
+                    else if (stepSizeR2 < 0)
+                    {
+                        stepSizeR2 = 0;
+                    }
+                    //---------
+
                 }
                 else
                 {
@@ -363,13 +407,13 @@ namespace HexPi
 
             if (t <= period / 2)
             {
-                xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
-                yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
+                xPos = -4 * ((stepSizeR2 * Math.Cos(xyRotation)) / period) * t + (stepSizeR2 * Math.Cos(xyRotation));
+                yPos = -4 * ((stepSizeR2 * Math.Sin(xyRotation)) / period) * t + (stepSizeR2 * Math.Sin(xyRotation));
             }
             else
             {
-                xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
-                yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
+                xPos = 4 * ((stepSizeR2 * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR2 * Math.Cos(xyRotation));
+                yPos = 4 * ((stepSizeR2 * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR2 * Math.Sin(xyRotation));
             }
             calcPositionZ((byte)Controller.modes.WALK);
         }
@@ -405,6 +449,33 @@ namespace HexPi
 
         }
 
+        public sbyte readData()
+        {
+            try
+            {
+                if (device != null )
+                {
+                    byte[] data = new byte[1];
+                    
+                    
+                    //device.Read(data);
+                    device.Read(data);
+                    return (sbyte)data[0];  
+                        
+                }
+                else
+                {
+                    //Debug.WriteLine("Error: I2C write failed!");
+                    
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error: I2C hat write failed!" + e.Message);
+            }
+            return 0;
+        }
 
         /**********************************************************************************************//**
          * @fn  public void calcPositionCenter()
@@ -436,16 +507,25 @@ namespace HexPi
 
         public void calcPositionXY(double x, double y, byte mode)
         {
+
+
+
+
             
-
-
-
-            t = (t + Math.Sqrt(x * x + y * y)) % period;
-
-            //if t is equal to period*0.25 or period*0.75 +- frame
-            if ((t>= period*0.75-frame) && (t<=period*0.75+frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
+            if (mode == (byte)Controller.modes.TERRAIN)
             {
-                xyRotation = Math.Atan2(y,x);
+                t = (t + Math.Sqrt(x * x + y * y)/3) % period;
+            }
+            else
+            {
+                t = (t + Math.Sqrt(x * x + y * y)) % period;
+            }
+
+
+                //if t is equal to period*0.25 or period*0.75 +- frame
+                if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
+            {
+                xyRotation = Math.Atan2(y, x);
             }
 
             if (mode == (byte)Controller.modes.TERRAIN)
@@ -479,19 +559,19 @@ namespace HexPi
             {
 
                 if (t <= period / 2)
-                {
-                    xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
-                    yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
-                }
-                else
-                {
-                    xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
-                    yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
-                }
-                calcPositionZ(mode);
+            {
+                xPos = -4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * t + (stepSizeR * Math.Cos(xyRotation));
+                yPos = -4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * t + (stepSizeR * Math.Sin(xyRotation));
+            }
+            else
+            {
+                xPos = 4 * ((stepSizeR * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Cos(xyRotation));
+                yPos = 4 * ((stepSizeR * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeR * Math.Sin(xyRotation));
+            }
+            calcPositionZ(mode);
             }
 
-            
+
 
 
 
@@ -513,23 +593,26 @@ namespace HexPi
             }
 
 
-            
+
         }
 
 
         protected void calcPositionZ(byte mode)
         {
+
             if (mode == (byte)Controller.modes.TERRAIN)
             {
                 if (t <= period / 2)
                 {
 
                     zPos = 0;
-                   
+
                 }
+
                 else if (t > period / 2 && t <= lift)
                 {
-                    zPos = stepSizeZ / (lift - period / 2) * (t - period / 2);
+                    //zPos = stepSizeZ / (lift - period / 2) * (t - period / 2);
+                    zPos = stepSizeZ;
                 }
                 else if (t > lift && t <= sense)
                 {
@@ -537,8 +620,8 @@ namespace HexPi
                 }
                 else if (t > sense)
                 {
-                    zPos = -stepSizeZ / (period-sense) * (t - sense)+stepSizeZ;
-
+                    //zPos = -stepSizeZ / (period - sense) * (t - sense) + stepSizeZ;
+                    zPos = 0;
                 }
             }
             else
@@ -555,7 +638,7 @@ namespace HexPi
 
             }
 
-            
+
 
 
 
@@ -570,7 +653,7 @@ namespace HexPi
         }
 
 
-        
+
 
         /**********************************************************************************************//**
          * @fn  public void calcData()
@@ -583,13 +666,13 @@ namespace HexPi
 
         public void calcData()
         {
-            
+
             byte[] data = new byte[4];
             data[0] = 3;
             data[1] = (Byte)XPos;
             data[2] = (Byte)YPos;
             data[3] = (Byte)ZPos;
-            
+
             sendData(data);
 
         }
@@ -618,27 +701,27 @@ namespace HexPi
 
         public void calcPose(double yaw, double pitch, double roll, double a, double b)
         {
-            
-            double tempX = xOffset-xPos;
-            double tempY = yOffset-yPos;
-            double tempZ = zOffset-zPos;
+
+            double tempX = xOffset - xPos;
+            double tempY = yOffset - yPos;
+            double tempZ = zOffset - zPos;
             double sA = Math.Sin(yaw);
             double sB = Math.Sin(pitch);
             double sC = Math.Sin(roll);
             double cA = Math.Cos(yaw);
             double cB = Math.Cos(pitch);
             double cC = Math.Cos(roll);
-            
+
 
 
 
 
             double newX = tempX * (cA * cB) + tempY * (cA * sB * sC - sA * cC) + tempZ * (sA * sC + cA * sB * cC);
-            double newY = tempX * (sA * cB) + tempY * (cA*cC+sA*sB*sC) + tempZ * (sA*sB*cC-cA*sC);
-            double newZ = tempX * (-sB) + tempY * (cB*sC) + tempZ * (cB*cC);
+            double newY = tempX * (sA * cB) + tempY * (cA * cC + sA * sB * sC) + tempZ * (sA * sB * cC - cA * sC);
+            double newZ = tempX * (-sB) + tempY * (cB * sC) + tempZ * (cB * cC);
 
             xPos += newX - tempX + a;
-            yPos += newY - tempY ;
+            yPos += newY - tempY;
             zPos += newZ - tempZ + b;
 
             //Debug.WriteLine("Ytemp: " + tempY + " Y: " + newY);
@@ -646,7 +729,7 @@ namespace HexPi
             //{
             //    Debug.WriteLine("ID: " + id +  " Z: " + Math.Round(zPos,0));
             //}
-            
+
 
         }
 
