@@ -10,10 +10,6 @@
 #define I2C_SLAVE_ADD 0x11
 //#define SIDE
 
-#define STATUS_OK 0
-#define STATUS_ERR 1
-#define STATUS_2 2
-#define STATUS_3 3
 
 #define LED_SATURATION 1.0f
 #define LED_BRIGTHNESS 0.005f
@@ -126,11 +122,7 @@ void init_gpio(void){
 	PORTD.DIR &= ~(1<<3) | ~(1<<4) | ~(1<<5);
 	PORTD.PIN3CTRL = PORT_OPC_PULLUP_gc;
 	PORTD.PIN4CTRL = PORT_OPC_PULLUP_gc;
-	PORTD.PIN5CTRL = PORT_OPC_PULLUP_gc;
-
-	//STATUS PINS
-	PORTA.DIR |= (1<<1)|(1<<2);
-	
+	PORTD.PIN5CTRL = PORT_OPC_PULLUP_gc;	
 
 }
 
@@ -263,7 +255,7 @@ void init_LED(void){
 	TCC0.CTRLA = TC0_CLKSEL2_bm;; //PRESCALER=8
 	TCC0.CTRLB = TC0_WGMODE0_bm | TC0_WGMODE1_bm | TC0_CCAEN_bm | TC0_CCBEN_bm | TC0_CCCEN_bm; //SINGLESLOPE AND CHANNELS A,B and C ENABLED
 
-	led_set_color(60*((PORTD.IN & 0x38)>>3)-60,1,0.005);
+	led_set_color(C_GREEN,1,0.005);
 
 }
 
@@ -357,16 +349,6 @@ void twi_slave_get_data(void){
 			TWIC_SLAVE_DATA = lastZPos;
 			TWIC_SLAVE_CTRLB = 0b00000011;
 			while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-
-			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-			//TWIC_SLAVE_DATA = 22;
-			//TWIC_SLAVE_CTRLB = 0b00000011;
-			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-//
-			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
-			//TWIC_SLAVE_DATA = 33;
-			//TWIC_SLAVE_CTRLB = 0b00000011;
-			//while (!(TWIC_SLAVE_STATUS & TWI_SLAVE_CLKHOLD_bm)){}
 			
 			TWIC_SLAVE_CTRLB = 0b00000010; //Send ack
 		}
@@ -582,27 +564,6 @@ void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	TCD0.CCABUF = (uint16_t)(22.22222222222 * s0 + 3000);
 	TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
 	TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
-}
-
-void set_status_pins(uint8_t s){
-	PORTA.OUTCLR = PIN1_bm;
-	PORTA.OUTCLR = PIN2_bm;
-	switch (s)
-	{
-		case 1:
-		PORTA_OUTSET = PIN1_bm;
-		break;
-		case 2:
-		PORTA_OUTSET = PIN2_bm;
-		break;
-		case 3:
-		PORTA_OUTSET = PIN1_bm;
-		PORTA_OUTSET = PIN2_bm;
-		break;
-		default:
-		/* Your code here */
-		break;
-	}
 }
 
 void delay(int ms){

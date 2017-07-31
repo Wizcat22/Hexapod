@@ -40,42 +40,42 @@
 
 #pragma region INA3221 CONFIG
 
-#define INA_RST_B (1<<15)
-#define INA_CH1_EN_B (1<<14)
-#define INA_CH2_EN_B (1<<13)
-#define INA_CH3_EN_B (1<<12)
-#define INA_AVG_MODE_1_B (0<<9)
-#define INA_AVG_MODE_4_B (1<<9)
-#define INA_AVG_MODE_16_B (2<<9)
-#define INA_AVG_MODE_64_B (3<<9)
-#define INA_AVG_MODE_128_B (4<<9)
-#define INA_AVG_MODE_256_B (5<<9)
-#define INA_AVG_MODE_512_B (6<<9)
-#define INA_AVG_MODE_1024_B (7<<9)
-#define INA_BS_CONV_TIME_140us_B (0<<6)
-#define INA_BS_CONV_TIME_204us_B (1<<6)
-#define INA_BS_CONV_TIME_332us_B (2<<6)
-#define INA_BS_CONV_TIME_588us_B (3<<6)
-#define INA_BS_CONV_TIME_1100us_B (4<<6)
-#define INA_BS_CONV_TIME_2116us_B (5<<6)
-#define INA_BS_CONV_TIME_4156us_B (6<<6)
-#define INA_BS_CONV_TIME_8244us_B (7<<6)
-#define INA_SV_CONV_TIME_140us_B (0<<3)
-#define INA_SV_CONV_TIME_204us_B (1<<3)
-#define INA_SV_CONV_TIME_332us_B (2<<3)
-#define INA_SV_CONV_TIME_588us_B (3<<3)
-#define INA_SV_CONV_TIME_1100us_B (4<<3)
-#define INA_SV_CONV_TIME_2116us_B (5<<3)
-#define INA_SV_CONV_TIME_4156us_B (6<<3)
-#define INA_SV_CONV_TIME_8244us_B (7<<3)
-#define INA_OP_MODE_POWER_DOWN0_B (0<<0)
-#define INA_OP_MODE_SV_SINGLE_SHOT_B (1<<3)
-#define INA_OP_MODE_BV_SINGLE_SHOT_B (2<<3)
-#define INA_OP_MODE_SV_AND_BV_SINGLE_SHOT_B (3<<3)
-#define INA_OP_MODE_POWER_DOWN1_B (4<<3)
-#define INA_OP_MODE_SV_CONTINOUS_B (5<<3)
-#define INA_OP_MODE_BV_CONTINOUS_B (6<<3)
-#define INA_OP_MODE_SV_AND_BV_CONTINOUS_B (7<<3)
+#define INA_RST_B 0x8000
+#define INA_CH1_EN_B 0x4000
+#define INA_CH2_EN_B 0x2000
+#define INA_CH3_EN_B 0x1000
+#define INA_AVG_MODE_1_B 0x0
+#define INA_AVG_MODE_4_B 0x200
+#define INA_AVG_MODE_16_B 0x400
+#define INA_AVG_MODE_64_B 0x600
+#define INA_AVG_MODE_128_B 0x800
+#define INA_AVG_MODE_256_B 0xA00
+#define INA_AVG_MODE_512_B 0xC00
+#define INA_AVG_MODE_1024_B 0xE00
+#define INA_BS_CONV_TIME_140us_B 0x0
+#define INA_BS_CONV_TIME_204us_B 0x40
+#define INA_BS_CONV_TIME_332us_B 0x80
+#define INA_BS_CONV_TIME_588us_B 0xC0
+#define INA_BS_CONV_TIME_1100us_B 0x100
+#define INA_BS_CONV_TIME_2116us_B 0x140
+#define INA_BS_CONV_TIME_4156us_B 0x180
+#define INA_BS_CONV_TIME_8244us_B 0x1C0
+#define INA_SV_CONV_TIME_140us_B 0x0
+#define INA_SV_CONV_TIME_204us_B 0x8
+#define INA_SV_CONV_TIME_332us_B 0x10
+#define INA_SV_CONV_TIME_588us_B 0x18
+#define INA_SV_CONV_TIME_1100us_B 0x20
+#define INA_SV_CONV_TIME_2116us_B 0x28
+#define INA_SV_CONV_TIME_4156us_B 0x30
+#define INA_SV_CONV_TIME_8244us_B 0x38
+#define INA_OP_MODE_POWER_DOWN0_B 0x0
+#define INA_OP_MODE_SV_SINGLE_SHOT_B 0x1
+#define INA_OP_MODE_BV_SINGLE_SHOT_B 0x2
+#define INA_OP_MODE_SV_AND_BV_SINGLE_SHOT_B 0x3
+#define INA_OP_MODE_POWER_DOWN1_B 0x4
+#define INA_OP_MODE_SV_CONTINOUS_B 0x5
+#define INA_OP_MODE_BV_CONTINOUS_B 0x6
+#define INA_OP_MODE_SV_AND_BV_CONTINOUS_B 0x7
 
 #pragma endregion INA3221 CONFIG
 
@@ -88,7 +88,7 @@
 
 void ina3221_set_config(uint16_t config);
 int16_t ina3221_read_value(char reg);
-void ina3221_get_current(uint16_t data[], uint16_t channel);
+uint16_t ina3221_get_current(uint16_t channel);
 uint16_t ina3221_calculate_current(uint16_t channel);
 void ina3221_init();
 void ina3221_trigger_measurement();
