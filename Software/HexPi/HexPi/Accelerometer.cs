@@ -26,13 +26,14 @@ namespace HexPi
 
     class Accelerometer
     {
-        //Objects
-        
+        #region Objects
+
         /** @brief   The device. */
         I2cDevice device = null;
-        //******
 
-        //Fields
+        #endregion Objects
+
+        #region Fields
 
         /** @brief   The x coordinate. */
         private double x = 0.0;
@@ -43,18 +44,9 @@ namespace HexPi
         /** @brief   The z coordinate. */
         private double z = 0.0;
 
-        /** @brief   The x coordinate. */
-        private double offsetX = 0.0;
+        #endregion Fields
 
-        /** @brief   The y coordinate. */
-        private double offsetY = 0.0;
-
-        /** @brief   The z coordinate. */
-        private double offsetZ = 0.0;
-        //******
-
-        //Arrays
-
+        #region Arrays
         double[] xVal = new double[3];
         double[] yVal = new double[3];
         double[] zVal = new double[3];
@@ -64,21 +56,9 @@ namespace HexPi
 
         /** @brief   Buffer for read data. */
         byte[] readBuffer = new byte[6];
-        //******
+        #endregion Arrays
 
-        //Properties
-
-
-        public Accelerometer()
-        {
-            init();
-            read();
-            offsetX = x;
-            offsetY = y;
-            offsetZ = z;
-        }
-
-
+        #region Properties
         /**********************************************************************************************//**
          * @property    public double roll
          *
@@ -92,7 +72,7 @@ namespace HexPi
             get
             {
                 double xz = Math.Round((Math.Acos(x / (Math.Sqrt(x * x + z * z))) - Math.PI / 2) * 100 * Math.PI / 180, 2);
-                
+
 
                 if (double.IsNaN(xz) || double.IsInfinity(xz))
                 {
@@ -114,18 +94,24 @@ namespace HexPi
         {
             get
             {
-                double yz = Math.Round((Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2)*100 * Math.PI / 180, 2);
-                if (double.IsNaN(yz) ||double.IsInfinity(yz))
+                double yz = Math.Round((Math.Acos(y / (Math.Sqrt(y * y + z * z))) - Math.PI / 2) * 100 * Math.PI / 180, 2);
+                if (double.IsNaN(yz) || double.IsInfinity(yz))
                 {
                     return 0;
                 }
- 
+
                 return yz;
             }
         }
-        //******
+        #endregion Properties
 
-        //Functions
+        #region Functions
+
+        public Accelerometer()
+        {
+            init();
+        }
+
 
         /**********************************************************************************************//**
          * @fn  public async void init()
@@ -166,11 +152,9 @@ namespace HexPi
         {
             try
             {
-
                 if (device != null)
                 {
-                    double[] test = new double[1000];
-                    int length= 10;
+                    int length = 10;
                     bool status = false;
                     byte[] STATUS_REG = new byte[1];
                     device.Write(new byte[] { 0x10, 0x80 });
@@ -188,7 +172,7 @@ namespace HexPi
                         x += Math.Round(((Int16)(readBuffer[1] << 8 | readBuffer[0]) / 16383.0), 2);
                         y += Math.Round(((Int16)(readBuffer[3] << 8 | readBuffer[2]) / 16383.0), 2);
                         z += Math.Round(((Int16)(readBuffer[5] << 8 | readBuffer[4]) / 16383.0), 2);
-                        
+
                     }
 
                     //Binomialfilter
@@ -206,19 +190,19 @@ namespace HexPi
                     zVal[1] = zVal[0];
                     zVal[0] = Math.Round(z / length, 2);
                     z = 0.25 * zVal[0] + 0.5 * zVal[1] + 0.25 * zVal[2];
-                    //Debug.WriteLine("X= " + x + " Y= " + y + " Z= " + z);
                 }
                 else
                 {
-                    Debug.WriteLine("Error: Accelerometer no device!");
+                    Debug.WriteLine("Error: Accelerometer: No device!");
                 }
 
             }
             catch
             {
-                Debug.WriteLine("Error: Accelerometer read failed!");
+                Debug.WriteLine("Error: Accelerometer: Read failed!");
             }
         }
-        //******
+        #endregion Functions
+
     }
 }

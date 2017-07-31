@@ -23,8 +23,7 @@ namespace HexPi
 
     class Controller
     {
-        //Objects
-        
+        #region Objects
         /** @brief   The input. */
         Gamepad input = null;
 
@@ -33,10 +32,9 @@ namespace HexPi
 
         /** @brief   The input task. */
         Task inputTask = null;
-        //******
+        #endregion Objects
 
-        //Fields
-        
+        #region Fields
         /** @brief   The x-axis input. */
         double x = 0;
 
@@ -53,12 +51,13 @@ namespace HexPi
         double b = 0;
 
         /** @brief   The threshold for the input. */
-        double threshold = 0.25;
-        //******
+        const double threshold = 0.25;
 
-        byte mode = 0;
+        const byte timeframe = 25;
 
-        //Enums
+        #endregion Fields
+
+        #region Enums
 
         /**********************************************************************************************//**
          * @enum    directions
@@ -69,18 +68,15 @@ namespace HexPi
         public enum directions { CENTER, XY, ROTATE, TURN };
         //******
 
-        public enum modes {WALK,POSE,SHUTDOWN, TERRAIN, BALANCE, ADAPTIVE };
+        public enum modes { WALK, POSE, SHUTDOWN, TERRAIN, BALANCE, ADAPTIVE };
 
-        //Properties
+        #endregion Enums
 
+        #region Properties
 
-        
+        #endregion Properties
 
-        
-
-        
-
-        //Functions
+        #region Functions
 
         /**********************************************************************************************//**
          * @fn  public void init()
@@ -113,26 +109,24 @@ namespace HexPi
             DateTime newDate = DateTime.Now;
             DateTime oldDate = DateTime.Now;
             TimeSpan dif;
+            byte mode = 0;
 
             while (true)
             {
                 newDate = DateTime.Now;
-                dif = newDate-oldDate;
-                if (mode == (byte)modes.BALANCE)
+                dif = newDate - oldDate;
+
+                while (dif.Milliseconds < timeframe)
                 {
-                    while (dif.Milliseconds < 25)
-                    {
-                        newDate = DateTime.Now;
-                        dif = newDate - oldDate;
-                    }
+                    newDate = DateTime.Now;
+                    dif = newDate - oldDate;
                 }
-                
+
+
                 oldDate = DateTime.Now;
-                //Debug.WriteLine("Time: " + dif.Milliseconds);
 
                 //Task.Delay(0).Wait();
-                Task.Delay(2).Wait();
-                
+
                 if (input != null)
                 {
                     GamepadReading gamepadStatus = input.GetCurrentReading();
@@ -141,7 +135,7 @@ namespace HexPi
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
                     a = gamepadStatus.RightThumbstickX;
                     b = gamepadStatus.RightThumbstickY;
-                    
+
 
                     //Shutdown = A&B&X&Y&LThumb
                     if (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick))
@@ -173,7 +167,7 @@ namespace HexPi
                     {
                         mode = (int)modes.WALK;
                     }
-                     
+
                 }
                 else
                 {
@@ -207,7 +201,7 @@ namespace HexPi
                         break;
                 }
 
-                
+
 
             }
         }
@@ -228,7 +222,7 @@ namespace HexPi
             if (Gamepad.Gamepads.Count() > 0)
             {
                 input = Gamepad.Gamepads.First();
-                Debug.WriteLine("Gamepad connected!");
+                Debug.WriteLine("Info: Gamepad connected!");
             }
             else
             {
@@ -283,12 +277,10 @@ namespace HexPi
             }
         }
 
-        //******
-
         //Initialize shutdown
         private void shutdown()
         {
-            Debug.WriteLine("_WARNING_: SYSTEM SHUTDOWN INITIALIZED!");
+            Debug.WriteLine("WARNING: SYSTEM SHUTDOWN INITIALIZED!");
             ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
         }
 
@@ -302,26 +294,25 @@ namespace HexPi
                 //if ((Math.Abs(x) > Math.Abs(a) && Math.Abs(x) >= threshold) || (Math.Abs(y) > Math.Abs(a) && Math.Abs(y) >= threshold))
                 if (((Math.Abs(x) >= threshold) || Math.Abs(y) >= threshold) && (Math.Abs(a) < threshold))
                 {
-
-                    robot.move(x, y,0, (byte)directions.XY, mode);
+                    robot.move(x, y, 0, (byte)directions.XY, mode);
                 }
                 else if (((Math.Abs(x) >= threshold) || Math.Abs(y) >= threshold) && (Math.Abs(a) >= threshold))
                 {
 
-                    robot.move(x, y,a, (byte)directions.TURN, mode);
+                    robot.move(x, y, a, (byte)directions.TURN, mode);
                 }
                 //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
                 //else if (Math.Abs(a) > Math.Abs(x) && Math.Abs(a) > Math.Abs(y) && Math.Abs(a) >= threshold)
-                else if (Math.Abs(a) >= threshold && Math.Abs(x)<threshold && Math.Abs(y)<threshold)
+                else if (Math.Abs(a) >= threshold && Math.Abs(x) < threshold && Math.Abs(y) < threshold)
                 {
 
-                    robot.move(0, 0,a, (byte)directions.ROTATE, mode);
+                    robot.move(0, 0, a, (byte)directions.ROTATE, mode);
                 }
             }
             //do nothing if none of the values is above the threshold
             else
             {
-                robot.move(0, 0,0, (byte)directions.CENTER, mode);
+                robot.move(0, 0, 0, (byte)directions.CENTER, mode);
             }
         }
 
@@ -335,7 +326,9 @@ namespace HexPi
             double distA = 20 * a;
             double distB = 20 * b;
             //Set rotation around xyz axis and translation in ab-axis
-            robot.pose(degZ,degY,degX,distA,distB);
+            robot.pose(degZ, degY, degX, distA, distB);
         }
+
+        #endregion Functions
     }
 }

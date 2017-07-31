@@ -101,13 +101,11 @@
     </Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="Hexapod.cs" />
-    <Compile Include="ILeg.cs" />
-    <Compile Include="LeftLeg.cs" />
+    <Compile Include="Leg.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RightLeg.cs" />
     <Compile Include="ServoHat.cs" />
   </ItemGroup>
   <ItemGroup>
