@@ -313,7 +313,6 @@ void twi_slave_get_data(void){
 				servo_set_deg(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 3: //3 = Set leg position
-				led_set_color(C_GREEN,1,0.05);
 				data_byte[0] = twi_slave_get_byte(); //Servo 0 position
 				data_byte[1] = twi_slave_get_byte(); //Servo 1 position
 				data_byte[2] = twi_slave_get_byte(); //Servo 2 position
