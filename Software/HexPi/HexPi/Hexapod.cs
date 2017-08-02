@@ -115,7 +115,7 @@ namespace HexPi
                 centerLegs();
             }
 
-            if (mode == (byte)Controller.modes.BALANCE || mode == (byte)Controller.modes.ADAPTIVE)
+            if (mode == (byte)Controller.modes.BALANCE)
             {
                 accel.read();
                 balance(accel.Pitch, accel.Roll);
@@ -130,7 +130,7 @@ namespace HexPi
                     case (byte)Controller.directions.XY:
                         l.calcPositionWalk(inc_x, inc_y, mode);
 
-                        if (mode == (byte)Controller.modes.BALANCE || mode == (byte)Controller.modes.ADAPTIVE)
+                        if (mode == (byte)Controller.modes.BALANCE)
                         {
                             l.calcPose(0, pitch, -roll, 0, 0);
                         }
@@ -139,15 +139,33 @@ namespace HexPi
                         break;
                     case (byte)Controller.directions.ROTATE:
                         l.calcPositionRotate(inc_a, mode);
+
+                        if (mode == (byte)Controller.modes.BALANCE)
+                        {
+                            l.calcPose(0, pitch, -roll, 0, 0);
+                        }
+
                         lastDirection = (byte)Controller.directions.ROTATE;
                         break;
                     case (byte)Controller.directions.TURN:
-                        l.calcPositionTurn(inc_x, inc_y, inc_a);
+                        l.calcPositionTurn(inc_x, inc_y, inc_a,mode);
+
+                        if (mode == (byte)Controller.modes.BALANCE)
+                        {
+                            l.calcPose(0, pitch, -roll, 0, 0);
+                        }
+
                         lastDirection = (byte)Controller.directions.TURN;
                         break;
                     case (byte)Controller.directions.CENTER:
                         l.calcPositionCenter();
-                        l.calcPose(0, pitch, -roll, 0, 0);
+
+                        if (mode == (byte)Controller.modes.BALANCE)
+                        {
+                            l.calcPose(0, pitch, -roll, 0, 0);
+                        }
+
+                        //l.calcPose(0, pitch, -roll, 0, 0);
                         lastDirection = (byte)Controller.directions.CENTER;
                         break;
                     default:

@@ -53,7 +53,7 @@ namespace HexPi
         /** @brief   The threshold for the input. */
         const double threshold = 0.25;
 
-        const byte timeframe = 25;
+        const byte timeframe = 10;
 
         #endregion Fields
 
@@ -68,7 +68,7 @@ namespace HexPi
         public enum directions { CENTER, XY, ROTATE, TURN };
         //******
 
-        public enum modes { WALK, POSE, SHUTDOWN, TERRAIN, BALANCE, ADAPTIVE };
+        public enum modes { WALK, POSE, SHUTDOWN, TERRAIN, BALANCE };
 
         #endregion Enums
 
@@ -157,11 +157,6 @@ namespace HexPi
                     {
                         mode = (int)modes.BALANCE;
                     }
-                    //ADAPTIVE = B
-                    else if (gamepadStatus.Buttons == GamepadButtons.B)
-                    {
-                        mode = (int)modes.ADAPTIVE;
-                    }
                     //Walk = default
                     else
                     {
@@ -184,9 +179,6 @@ namespace HexPi
                         break;
                     case (byte)modes.BALANCE:
                         walk((byte)modes.BALANCE);
-                        break;
-                    case (byte)modes.ADAPTIVE:
-                        walk((byte)modes.ADAPTIVE);
                         break;
                     case (byte)modes.TERRAIN:
                         walk((byte)modes.TERRAIN);
