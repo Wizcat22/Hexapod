@@ -7,7 +7,7 @@
 
 #pragma region DEFINES
 
-#define I2C_SLAVE_ADD 0x11
+//#define I2C_SLAVE_ADD 0x11
 //#define SIDE
 
 
@@ -46,7 +46,8 @@
 
 #pragma region VARIABLES
 
-uint8_t slave_address = I2C_SLAVE_ADD; //I2C SLAVE ADDRESS
+uint8_t slave_address = 0; //I2C SLAVE ADDRESS
+uint8_t side = 0; //Left = 0 ; right = 1;
 
 int8_t servo_cal[] = {0,0,0};
 
@@ -122,7 +123,7 @@ void init_gpio(void){
 	PORTD.DIR &= ~(1<<3) | ~(1<<4) | ~(1<<5);
 	PORTD.PIN3CTRL = PORT_OPC_PULLUP_gc;
 	PORTD.PIN4CTRL = PORT_OPC_PULLUP_gc;
-	PORTD.PIN5CTRL = PORT_OPC_PULLUP_gc;	
+	PORTD.PIN5CTRL = PORT_OPC_PULLUP_gc;
 
 }
 
@@ -146,6 +147,18 @@ void init_twiE_MASTER(void){
 }
 
 void init_twiC_SLAVE(void){
+	slave_address = ((PORTD.IN & 0x18)>>3);
+
+	if (PORTD.IN & 0x20)
+	{
+		slave_address += 0x20;
+		side=1;
+	}
+	else
+	{
+		slave_address += 0x10;
+	}
+
 
 	//slave_address = ((PORTD.IN & 0x38) << 1); //Get ADDR
 	TWIC_SLAVE_ADDR = (slave_address<<1); //Set Slave ADDR
@@ -340,7 +353,7 @@ void twi_slave_get_data(void){
 
 		}
 		else if (TWIC_SLAVE_DATA == ((slave_address<<1)+1)) //If the received address is correct (should be always the case) and R/W bit is set (read)
-		{	
+		{
 			
 			
 			TWIC_SLAVE_CTRLB = 0b00000011; //Send ack
@@ -422,12 +435,12 @@ int16_t twi_master_read_data(char reg){
 
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
-	#ifdef	SIDE
-	xPos = -xPos;
-	yPos = -yPos;
-	zPos = zPos;
-
-	#endif
+	if (side == 1)
+	{
+		xPos = -xPos;
+		yPos = -yPos;
+		zPos = zPos;
+	}
 	
 	
 	lastZPos = zPos;
@@ -489,7 +502,7 @@ void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos){
 		grounded = 0;
 		leg_set_position(xPos,yPos,zPos);
 	}
-	else if (zPos <= 0)
+	else if (zPos == 0)
 	{
 		if (grounded == 0)
 		{
@@ -519,12 +532,13 @@ void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos){
 
 void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	
-	#ifdef	SIDE
-	s0 = -s0;
-	s1 = -s1;
-	s2 = s2;
+	if (side == 1)
+	{
+		s0 = -s0;
+		s1 = -s1;
+		s2 = s2;
+	}
 
-	#endif
 
 
 
