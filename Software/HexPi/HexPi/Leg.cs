@@ -339,32 +339,40 @@ namespace HexPi
         }
         //******
 
-        public void calcPositionTurn(double x, double y, double a, byte mode)
+        public void calcPositionTurn(double x, double a, byte mode)
         {
             a = -a;
-            if (Math.Abs(x) > Math.Abs(y))
-            {
-                t = ((t + a / Math.Abs(a) * x) + period) % period;
-            }
-            else
-            {
-                t = ((t + y) + period) % period;
-            }
+
+            //t = ((t + a / Math.Abs(a) * x) + period) % period;
+            t = ((t + x) + period) % period;
+
 
             //if t is equal to period*0.25 or period*0.75 +- frame
             if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
             {
                 //xyRotation = Math.Atan2(-y, -x);
-                if (Math.Abs(x) > Math.Abs(y))
-                {
+                
                     double rad = a / Math.Abs(a) * ((1000 - 500 * Math.Abs(a)) - Math.Abs(yOffset));
 
                     double w = Math.Atan2(xOffset, rad);
-                    xyRotation = 0 + w;
 
+                if (!double.IsNaN(w))
+                {
+                    xyRotation = w;
+                }
+                else
+                {
+                    xyRotation = 0;
+                }
+                    
+                if (Math.Sign(a)==-1)
+                {
+                    xyRotation -= Math.PI;
+                }
+                Debug.WriteLine("W=" + xyRotation*180/Math.PI);
 
-
-                    //-------------
+                if (!double.IsNaN(rad))
+                {
                     if (yOffset < 0)
                     {
                         if (rad > yOffset)
@@ -387,10 +395,12 @@ namespace HexPi
                             stepSizeTurn = stepSizeXY * (Math.Abs(rad) - Math.Abs(yOffset)) / (Math.Abs(rad) + Math.Abs(yOffset));
                         }
                     }
-
-                    //Debug.WriteLine("S " + id + " : " + stepSizeR2);
-
-
+                }
+                else
+                {
+                    stepSizeTurn = stepSizeXY;
+                }
+            
 
                     if (stepSizeTurn > stepSizeXY)
                     {
@@ -400,28 +410,11 @@ namespace HexPi
                     {
                         stepSizeTurn = 0;
                     }
-                    //---------
 
-                }
-                else
-                {
-                    xyRotation = 90 * Math.PI / 180;
-                }
+                
             }
 
             calcXY(stepSizeTurn,xyRotation,mode);
-
-            //if (t <= period / 2)
-            //{
-            //    xPos = -4 * ((stepSizeTurn * Math.Cos(xyRotation)) / period) * t + (stepSizeTurn * Math.Cos(xyRotation));
-            //    yPos = -4 * ((stepSizeTurn * Math.Sin(xyRotation)) / period) * t + (stepSizeTurn * Math.Sin(xyRotation));
-            //}
-            //else
-            //{
-            //    xPos = 4 * ((stepSizeTurn * Math.Cos(xyRotation)) / period) * (t - period / 2) - (stepSizeTurn * Math.Cos(xyRotation));
-            //    yPos = 4 * ((stepSizeTurn * Math.Sin(xyRotation)) / period) * (t - period / 2) - (stepSizeTurn * Math.Sin(xyRotation));
-            //}
-            //calcZ((byte)Controller.modes.WALK);
         }
 
         /**********************************************************************************************//**
@@ -714,6 +707,18 @@ namespace HexPi
             data[1] = (Byte)XPos;
             data[2] = (Byte)YPos;
             data[3] = (Byte)ZPos;
+            sendData(data);
+        }
+
+        public void setColor(ushort hue)
+        {
+            byte[] byteArray = BitConverter.GetBytes(hue);
+
+            byte[] data = new byte[3];
+            data[0] = 1;
+            data[1] = byteArray[1];
+            data[2] = byteArray[0];
+
             sendData(data);
         }
 

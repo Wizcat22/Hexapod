@@ -107,12 +107,20 @@ namespace HexPi
          * @param   dir The direction to move in.
          **************************************************************************************************/
 
-        public void move(double inc_x, double inc_y, double inc_a, byte dir, byte mode)
+       
+        public void walk(double inc_x, double inc_y, byte mode)
         {
+
             //If the direction has changed, center all legs
-            if (dir != lastDirection && lastDirection != (byte)Controller.directions.CENTER)
+            if (lastDirection != (byte)Controller.directions.XY)
             {
                 centerLegs();
+
+                foreach (Leg l in legs)
+                {
+                    l.setColor(60);
+                }
+
             }
 
             if (mode == (byte)Controller.modes.BALANCE)
@@ -121,56 +129,18 @@ namespace HexPi
                 balance(accel.Pitch, accel.Roll);
             }
 
+            foreach (Leg l in legs)
+            {
+                l.calcPositionWalk(inc_x, inc_y, mode);
 
+                if (mode == (byte)Controller.modes.BALANCE)
+                {
+                    l.calcPose(0, pitch, -roll, 0, 0);
+                }
+            }
 
             foreach (Leg l in legs)
             {
-                switch (dir)
-                {
-                    case (byte)Controller.directions.XY:
-                        l.calcPositionWalk(inc_x, inc_y, mode);
-
-                        if (mode == (byte)Controller.modes.BALANCE)
-                        {
-                            l.calcPose(0, pitch, -roll, 0, 0);
-                        }
-
-                        lastDirection = (byte)Controller.directions.XY;
-                        break;
-                    case (byte)Controller.directions.ROTATE:
-                        l.calcPositionRotate(inc_a, mode);
-
-                        if (mode == (byte)Controller.modes.BALANCE)
-                        {
-                            l.calcPose(0, pitch, -roll, 0, 0);
-                        }
-
-                        lastDirection = (byte)Controller.directions.ROTATE;
-                        break;
-                    case (byte)Controller.directions.TURN:
-                        l.calcPositionTurn(inc_x, inc_y, inc_a,mode);
-
-                        if (mode == (byte)Controller.modes.BALANCE)
-                        {
-                            l.calcPose(0, pitch, -roll, 0, 0);
-                        }
-
-                        lastDirection = (byte)Controller.directions.TURN;
-                        break;
-                    case (byte)Controller.directions.CENTER:
-                        l.calcPositionCenter();
-
-                        if (mode == (byte)Controller.modes.BALANCE)
-                        {
-                            l.calcPose(0, pitch, -roll, 0, 0);
-                        }
-
-                        //l.calcPose(0, pitch, -roll, 0, 0);
-                        lastDirection = (byte)Controller.directions.CENTER;
-                        break;
-                    default:
-                        break;
-                }
                 if (mode == (byte)Controller.modes.TERRAIN)
                 {
                     l.calcDataTerrain();
@@ -179,26 +149,130 @@ namespace HexPi
                 {
                     l.calcData();
                 }
-
             }
+
+            lastDirection = (byte)Controller.directions.XY;
 
         }
 
-        public void pose(double yaw, double pitch, double roll, double a, double b)
+        public void turn(double inc_x, double inc_r, byte mode)
         {
             //If the direction has changed, center all legs
-            if (lastDirection != (byte)Controller.directions.CENTER)
+            if (lastDirection != (byte)Controller.directions.TURN)
             {
                 centerLegs();
-                lastDirection = (byte)Controller.directions.CENTER;
+
+                foreach(Leg l in legs)
+                {
+                    l.setColor(235);
+                }
+
+            }
+
+            if (mode == (byte)Controller.modes.BALANCE)
+            {
+                accel.read();
+                balance(accel.Pitch, accel.Roll);
+            }
+
+            foreach (Leg l in legs)
+            {
+                l.calcPositionTurn(inc_x, inc_r,mode);
+
+                if (mode == (byte)Controller.modes.BALANCE)
+                {
+                    l.calcPose(0, pitch, -roll, 0, 0);
+                }
+            }
+
+            foreach (Leg l in legs)
+            {
+                if (mode == (byte)Controller.modes.TERRAIN)
+                {
+                    l.calcDataTerrain();
+                }
+                else
+                {
+                    l.calcData();
+                }
+            }
+
+            lastDirection = (byte)Controller.directions.TURN;
+
+        }
+
+        public void rotate(double inc_r, byte mode)
+        {
+            //If the direction has changed, center all legs
+            if (lastDirection != (byte)Controller.directions.ROTATE)
+            {
+                centerLegs();
+
+                foreach (Leg l in legs)
+                {
+                    l.setColor(180);
+                }
+
+            }
+
+            if (mode == (byte)Controller.modes.BALANCE)
+            {
+                accel.read();
+                balance(accel.Pitch, accel.Roll);
+            }
+
+            foreach (Leg l in legs)
+            {
+                l.calcPositionRotate(inc_r, mode);
+
+                if (mode == (byte)Controller.modes.BALANCE)
+                {
+                    l.calcPose(0, pitch, -roll, 0, 0);
+                }
+            }
+
+            foreach (Leg l in legs)
+            {
+                if (mode == (byte)Controller.modes.TERRAIN)
+                {
+                    l.calcDataTerrain();
+                }
+                else
+                {
+                    l.calcData();
+                }
+            }
+
+            lastDirection = (byte)Controller.directions.ROTATE;
+        }
+
+        public void pose(double yaw, double pitch, double roll, double a, double b, double c)
+        {
+            //If the direction has changed, center all legs
+            if (lastDirection != (byte)Controller.directions.POSE)
+            {
+                centerLegs();
+
+                foreach (Leg l in legs)
+                {
+                    l.setColor(120);
+                }
+
             }
 
             foreach (Leg leg in legs)
             {
                 leg.calcPositionCenter();
                 leg.calcPose(yaw, pitch, roll, a, b);
+                
+            }
+            foreach (Leg leg in legs)
+            {
                 leg.calcData();
             }
+            
+            lastDirection = (byte)Controller.directions.POSE;
+
         }
 
         private void balance(double newPitch, double newRoll)

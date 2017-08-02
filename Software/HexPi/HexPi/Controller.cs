@@ -65,10 +65,10 @@ namespace HexPi
          * @brief   Values that represent directions.
          **************************************************************************************************/
 
-        public enum directions { CENTER, XY, ROTATE, TURN };
+        public enum directions { POSE, XY, ROTATE, TURN };
         //******
 
-        public enum modes { WALK, POSE, SHUTDOWN, TERRAIN, BALANCE };
+        public enum modes { DEFAULT,TERRAIN, BALANCE };
 
         #endregion Enums
 
@@ -110,6 +110,7 @@ namespace HexPi
             DateTime oldDate = DateTime.Now;
             TimeSpan dif;
             byte mode = 0;
+            byte direction = 0;
 
             while (true)
             {
@@ -140,27 +141,39 @@ namespace HexPi
                     //Shutdown = A&B&X&Y&LThumb
                     if (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick))
                     {
-                        mode = (int)modes.SHUTDOWN;
+                        shutdown();
                     }
                     //Pose = RightShoulder
                     else if (gamepadStatus.Buttons == GamepadButtons.RightShoulder)
                     {
-                        mode = (int)modes.POSE;
+                        mode = (byte)modes.BALANCE;
                     }
                     //Terrain = LeftShoulder
                     else if (gamepadStatus.Buttons == GamepadButtons.LeftShoulder)
                     {
-                        mode = (int)modes.TERRAIN;
+                        mode = (byte)modes.TERRAIN;
                     }
-                    //BALANCE = A
-                    else if (gamepadStatus.Buttons == GamepadButtons.A)
-                    {
-                        mode = (int)modes.BALANCE;
-                    }
-                    //Walk = default
                     else
                     {
-                        mode = (int)modes.WALK;
+                        mode = (byte)modes.DEFAULT;
+                    }
+
+                    
+                    if (gamepadStatus.Buttons == GamepadButtons.DPadUp)
+                    {
+                        direction = (byte)directions.XY;
+                    }
+                    else if (gamepadStatus.Buttons == GamepadButtons.DPadLeft)
+                    {
+                        direction = (byte)directions.POSE;
+                    }
+                    else if (gamepadStatus.Buttons == GamepadButtons.DPadDown)
+                    {
+                        direction = (byte)directions.ROTATE;
+                    }
+                    else if (gamepadStatus.Buttons == GamepadButtons.DPadRight)
+                    {
+                        direction = (byte)directions.TURN;
                     }
 
                 }
@@ -172,22 +185,19 @@ namespace HexPi
                     }
                 }
 
-                switch (mode)
+                switch (direction)
                 {
-                    case (byte)modes.WALK:
-                        walk((byte)modes.WALK);
+                    case (byte)directions.XY:
+                        walk(mode);
                         break;
-                    case (byte)modes.BALANCE:
-                        walk((byte)modes.BALANCE);
+                    case (byte)directions.ROTATE:
+                        rotate(mode);
                         break;
-                    case (byte)modes.TERRAIN:
-                        walk((byte)modes.TERRAIN);
+                    case (byte)directions.TURN:
+                        turn(mode);
                         break;
-                    case (byte)modes.POSE:
+                    case (byte)directions.POSE:
                         pose();
-                        break;
-                    case (byte)modes.SHUTDOWN:
-                        shutdown();
                         break;
                     default:
                         break;
@@ -280,32 +290,58 @@ namespace HexPi
         private void walk(byte mode)
         {
             //check if any of the axis is above the threshold
-            if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold || Math.Abs(a) >= threshold)
+            if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold)
             {
                 //if the xy coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in xy-direction
                 //if ((Math.Abs(x) > Math.Abs(a) && Math.Abs(x) >= threshold) || (Math.Abs(y) > Math.Abs(a) && Math.Abs(y) >= threshold))
-                if (((Math.Abs(x) >= threshold) || Math.Abs(y) >= threshold) && (Math.Abs(a) < threshold))
+                if (((Math.Abs(x) >= threshold) && !(Math.Abs(y) >= threshold)) )
                 {
-                    robot.move(x, y, 0, (byte)directions.XY, mode);
+                    robot.walk(x, 0, mode);
                 }
-                else if (((Math.Abs(x) >= threshold) || Math.Abs(y) >= threshold) && (Math.Abs(a) >= threshold))
+                if (((Math.Abs(y) >= threshold) && !(Math.Abs(x) >= threshold)))
                 {
+                    robot.walk(0, y, mode);
+                }
+                else
+                {
+                    robot.walk(x, y,mode);
+                }
 
-                    robot.move(x, y, a, (byte)directions.TURN, mode);
-                }
-                //if the r coordionate is bigger then all the other coordinates and bigger then the threshold turn the robot
-                //else if (Math.Abs(a) > Math.Abs(x) && Math.Abs(a) > Math.Abs(y) && Math.Abs(a) >= threshold)
-                else if (Math.Abs(a) >= threshold && Math.Abs(x) < threshold && Math.Abs(y) < threshold)
-                {
-
-                    robot.move(0, 0, a, (byte)directions.ROTATE, mode);
-                }
             }
-            //do nothing if none of the values is above the threshold
             else
             {
-                robot.move(0, 0, 0, (byte)directions.CENTER, mode);
+                robot.walk(0, 0, mode);
             }
+        }
+
+        private void turn(byte mode)
+        {
+            if (Math.Abs(x) >= threshold && !(Math.Abs(a) >= threshold))
+            {
+                robot.turn(x, 0, mode);
+            }
+            else if (Math.Abs(x) >= threshold && (Math.Abs(a) >= threshold))
+            {
+                robot.turn(x, a, mode);
+            }
+            else
+            {
+                robot.turn(0, 0, mode);
+            }
+
+        }
+
+        private void rotate(byte mode)
+        {
+            if (Math.Abs(y) >= threshold)
+            {
+                robot.rotate(y, mode);
+            }
+            else
+            {
+                robot.rotate(0, mode);
+            }
+                
         }
 
         //Apply YawPitchRoll to body
@@ -317,8 +353,9 @@ namespace HexPi
             double degZ = 0.174533 * z;
             double distA = 20 * a;
             double distB = 20 * b;
+            double distC = 0;
             //Set rotation around xyz axis and translation in ab-axis
-            robot.pose(degZ, degY, degX, distA, distB);
+            robot.pose(degZ, degY, degX, distA, distB, distC);
         }
 
         #endregion Functions
