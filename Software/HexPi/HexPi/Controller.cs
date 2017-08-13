@@ -1,4 +1,10 @@
-﻿using System;
+﻿/**
+ * @file    controller.cs.
+ *
+ * @brief   Implements the controller class
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -12,19 +18,21 @@ using Windows.System;
 
 namespace HexPi
 {
-    /**********************************************************************************************//**
+
+
+    /**
      * @class   Controller
      *
-     * @brief   A controller class.
+     * @brief   A controller.
      *
      * @author  Alexander Miller
-     * @date    11.08.2016
-     **************************************************************************************************/
+     * @date    13.08.2017
+     */
 
     class Controller
     {
         #region Objects
-        /** @brief   The input. */
+        /** @brief   The input device (XBox360 Wireless Gamepad). */
         Gamepad input = null;
 
         /** @brief   The robot. */
@@ -53,22 +61,31 @@ namespace HexPi
         /** @brief   The threshold for the input. */
         const double threshold = 0.25;
 
+        /** @brief   The timeframe */
         const byte timeframe = 10;
 
         #endregion Fields
 
         #region Enums
 
-        /**********************************************************************************************//**
+
+
+        /**
          * @enum    directions
          *
-         * @brief   Values that represent directions.
-         **************************************************************************************************/
+         * @brief   Values that represent directions
+         */
 
         public enum directions { POSE, XY, ROTATE, TURN };
         //******
 
-        public enum modes { DEFAULT,TERRAIN, BALANCE };
+        /**
+         * @enum    modes
+         *
+         * @brief   Values that represent modes
+         */
+
+        public enum modes { DEFAULT, TERRAIN, BALANCE };
 
         #endregion Enums
 
@@ -78,14 +95,15 @@ namespace HexPi
 
         #region Functions
 
-        /**********************************************************************************************//**
+
+        /**
          * @fn  public void init()
          *
-         * @brief   Initializes this object.
+         * @brief   Initializes this object
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+         * @date    13.08.2017
+         */
 
         public void init()
         {
@@ -95,28 +113,37 @@ namespace HexPi
             inputTask = Task.Factory.StartNew(() => handleInputs());
         }
 
-        /**********************************************************************************************//**
+
+
+        /**
          * @fn  private void handleInputs()
          *
-         * @brief   Handles the inputs.
+         * @brief   Inputhandler 
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+         * @date    13.08.2017
+         */
 
         private void handleInputs()
         {
+            //Time at the end of execution 
             DateTime newDate = DateTime.Now;
+            //Time at the begining of execution
             DateTime oldDate = DateTime.Now;
+            //Differece between start and end
             TimeSpan dif;
+            //operating mode
             byte mode = 0;
+            //movement
             byte direction = 0;
+
 
             while (true)
             {
                 newDate = DateTime.Now;
                 dif = newDate - oldDate;
 
+                //wait until atleast "timeframe" seconds past -> necessary for PID-controller
                 while (dif.Milliseconds < timeframe)
                 {
                     newDate = DateTime.Now;
@@ -126,11 +153,12 @@ namespace HexPi
 
                 oldDate = DateTime.Now;
 
-                //Task.Delay(0).Wait();
-
+                //if no input device was found
                 if (input != null)
                 {
+                    //Get current Gamepadreading
                     GamepadReading gamepadStatus = input.GetCurrentReading();
+                    //Set all input axis
                     x = -gamepadStatus.LeftThumbstickY;
                     y = gamepadStatus.LeftThumbstickX;
                     z = (gamepadStatus.LeftTrigger - gamepadStatus.RightTrigger);
@@ -138,9 +166,12 @@ namespace HexPi
                     b = gamepadStatus.RightThumbstickY;
 
 
+                    //set action accodring to button combos
+
                     //Shutdown = A&B&X&Y&LThumb
                     if (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y | GamepadButtons.LeftThumbstick))
                     {
+                        //Shutdown the system
                         shutdown();
                     }
                     //Pose = RightShoulder
@@ -158,7 +189,7 @@ namespace HexPi
                         mode = (byte)modes.DEFAULT;
                     }
 
-                    
+
                     if (gamepadStatus.Buttons == GamepadButtons.DPadUp)
                     {
                         direction = (byte)directions.XY;
@@ -177,8 +208,10 @@ namespace HexPi
                     }
 
                 }
+                //if no gamepad was found
                 else
                 {
+                    //search for gamepad
                     if (Gamepad.Gamepads.Count() > 0)
                     {
                         input = Gamepad.Gamepads.First();
@@ -208,14 +241,15 @@ namespace HexPi
             }
         }
 
-        /**********************************************************************************************//**
+
+        /**
          * @fn  private void init_Gamepad()
          *
          * @brief   Initializes the gamepad for use as input device.
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+         * @date    13.08.2017
+         */
 
         private void init_Gamepad()
         {
@@ -237,17 +271,19 @@ namespace HexPi
 
         }
 
-        /**********************************************************************************************//**
+
+
+        /**
          * @fn  private void gamepadRemovedHandler(object sender, Gamepad e)
          *
-         * @brief   Handler, called when the gamepad is removed.
+         * @brief   Handler, called when the gamepad is removed
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
+         * @date    13.08.2017
          *
          * @param   sender  Source of the event.
-         * @param   e       The Gamepad to process.
-         **************************************************************************************************/
+         * @param   e       A Gamepad to process.
+         */
 
         private void gamepadRemovedHandler(object sender, Gamepad e)
         {
@@ -255,17 +291,19 @@ namespace HexPi
             Debug.WriteLine("Warning: Gamepad was removed.");
         }
 
-        /**********************************************************************************************//**
+
+
+        /**
          * @fn  private void gamepadAddedHandler(object sender, Gamepad e)
          *
          * @brief   Handler, called when the gamepad is added.
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
+         * @date    13.08.2017
          *
          * @param   sender  Source of the event.
-         * @param   e       The Gamepad to process.
-         **************************************************************************************************/
+         * @param   e       A Gamepad to process.
+         */
 
         private void gamepadAddedHandler(object sender, Gamepad e)
         {
@@ -279,72 +317,135 @@ namespace HexPi
             }
         }
 
-        //Initialize shutdown
+        
+
+        /**
+         * @fn  private void shutdown()
+         *
+         * @brief   Shuts down this system
+         *
+         * @author  Alex
+         * @date    13.08.2017
+         */
+
         private void shutdown()
         {
             Debug.WriteLine("WARNING: SYSTEM SHUTDOWN INITIALIZED!");
             ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
         }
 
-        // Walk in xy direction / turn in r direction
+        
+
+        /**
+         * @fn  private void walk(byte mode)
+         *
+         * @brief   Walks in the given mode
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   mode    The mode.
+         */
+
         private void walk(byte mode)
         {
             //check if any of the axis is above the threshold
             if (Math.Abs(x) >= threshold || Math.Abs(y) >= threshold)
             {
-                //if the xy coordionate is bigger then all the other coordinates and bigger then the threshold move the robot in xy-direction
-                //if ((Math.Abs(x) > Math.Abs(a) && Math.Abs(x) >= threshold) || (Math.Abs(y) > Math.Abs(a) && Math.Abs(y) >= threshold))
-                if (((Math.Abs(x) >= threshold) && !(Math.Abs(y) >= threshold)) )
+                //if only x is above the threshold
+                if (((Math.Abs(x) >= threshold) && !(Math.Abs(y) >= threshold)))
                 {
+                    //walk in x direction in the given mode
                     robot.walk(x, 0, mode);
                 }
+                //if only y is above threshold
                 if (((Math.Abs(y) >= threshold) && !(Math.Abs(x) >= threshold)))
                 {
+                    //walk in y direction in the given mode
                     robot.walk(0, y, mode);
                 }
                 else
                 {
-                    robot.walk(x, y,mode);
+                    //walk in xy direction in the given mode
+                    robot.walk(x, y, mode);
                 }
 
             }
             else
             {
+                //dont move
                 robot.walk(0, 0, mode);
             }
         }
 
+        /**
+         * @fn  private void turn(byte mode)
+         *
+         * @brief   Turns in the given mode
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   mode    The mode.
+         */
+
         private void turn(byte mode)
         {
+            
             if (Math.Abs(x) >= threshold && !(Math.Abs(a) >= threshold))
             {
+                //walk
                 robot.turn(x, 0, mode);
             }
             else if (Math.Abs(x) >= threshold && (Math.Abs(a) >= threshold))
             {
+                //turn 
                 robot.turn(x, a, mode);
             }
             else
             {
+                //dont move
                 robot.turn(0, 0, mode);
             }
 
         }
 
+        /**
+         * @fn  private void rotate(byte mode)
+         *
+         * @brief   Rotates in the given mode
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   mode    The mode.
+         */
+
         private void rotate(byte mode)
         {
             if (Math.Abs(y) >= threshold)
             {
+                //rotate in given direction in the given mode
                 robot.rotate(y, mode);
             }
             else
             {
+                //dont move
                 robot.rotate(0, mode);
             }
-                
+
         }
 
-        //Apply YawPitchRoll to body
+
+        /**
+         * @fn  private void pose()
+         *
+         * @brief   Poses the Hexapod
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         */
+
         private void pose()
         {
             //1° = 0,0174533 rad

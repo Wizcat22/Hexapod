@@ -13,14 +13,15 @@ using System.Threading.Tasks;
 
 namespace HexPi
 {
-    /**********************************************************************************************//**
+
+    /**
      * @class   Hexapod
      *
      * @brief   A hexapod.
      *
      * @author  Alexander Miller
-     * @date    11.08.2016
-     **************************************************************************************************/
+     * @date    13.08.2017
+     */
 
     class Hexapod
     {
@@ -33,19 +34,30 @@ namespace HexPi
         /** @brief   The last direction. */
         byte lastDirection = 100;
 
+        /** @brief   The pitch of the robot */
         double pitch = 0.0;
+        /** @brief   The roll of the robot */
         double roll = 0.0;
 
+        /** @brief   The p constant of the pid-controller */
         const double k_p = 0.0;
+        /** @brief   The i constant of the pid-controller */
         const double k_i = 0.5;
+        /** @brief   The d constant of the pid-controller */
         const double k_d = 0.0;
+        /** @brief   The repetition rate of the pid-controller in seconds */
         const double T = 0.032;
 
+        /** @brief   The first combined constant of the pid-controller */
         const double k1 = (k_p + k_i * T + k_d / T);
+        /** @brief   The second combined constant of the pid-controller */
         const double k2 = (-k_p - 2 * k_d / T);
+        /** @brief   The third combined constant of the pid-controller */
         const double k3 = (k_d / T);
 
+        /** @brief   The maximum pitch */
         const double maxPitch = 10 * 0.0174533;
+        /** @brief   The maximum roll */
         const double maxRoll = 10 * 0.0174533;
 
 
@@ -62,28 +74,36 @@ namespace HexPi
         /** @brief   The legs. */
         Leg[] legs = new Leg[6];
 
+        /** @brief   The last 3 pitch differences */
         double[] pitch_e = new double[3];
+        /** @brief   The last 3 roll differences */
         double[] roll_e = new double[3];
         #endregion Arrays
 
         #region Functions
-        /**********************************************************************************************//**
+
+
+        /**
          * @fn  public void init()
          *
-         * @brief   Initializes this device.
+         * @brief   Initializes this device
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+         * @date    13.08.2017
+         */
 
         public void init()
         {
-            //accel.init();
-            //init legs
+            /* Leg positions
+             *     ___
+             * 0 -|   |- 1
+             * 2 -|   |- 3
+             * 4 -|___|- 5
+             */ 
+
+            //giat offset,cal alpha,cal beta, cal gamma , rotation offset, i2c address, x offset, y offset;
+
             //left
-            //giat offset,cal a,cal b, cal c , deg offset, i2c address;
-
-
             legs[0] = new Leg(25, 8, -5, 2, 135, 0x11, 150, 175);
             legs[2] = new Leg(75, 3, 0, 5, 180, 0x12, 0, 175);
             legs[4] = new Leg(25, 5, -3, 2, 225, 0x13, -150, 175);
@@ -95,19 +115,21 @@ namespace HexPi
 
         }
 
-        /**********************************************************************************************//**
-         * @fn  public void move(double inc, byte dir)
+
+
+        /**
+         * @fn  public void walk(double inc_x, double inc_y, byte mode)
          *
-         * @brief   Moves the robot.
+         * @brief   Walks
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
+         * @date    13.08.2017
          *
-         * @param   inc Amount to increment by.
-         * @param   dir The direction to move in.
-         **************************************************************************************************/
+         * @param   inc_x   The increment of the x coordinate.
+         * @param   inc_y   The increment of the y coordinate.
+         * @param   mode    The mode.
+         */
 
-       
         public void walk(double inc_x, double inc_y, byte mode)
         {
 
@@ -123,17 +145,22 @@ namespace HexPi
 
             }
 
+            
             if (mode == (byte)Controller.modes.BALANCE)
-            {
+            {   
+                //get accelerometer data
                 accel.read();
+                //change pitch and roll based on accelerometer data
                 balance(accel.Pitch, accel.Roll);
             }
             else
             {
+                //reset pitch and roll
                 pitch = 0;
                 roll = 0;
             }
 
+            //calculate the tcp coordinate for each leg and adapt the pose
             foreach (Leg l in legs)
             {
                 l.calcPositionWalk(inc_x, inc_y, mode);
@@ -145,7 +172,7 @@ namespace HexPi
             }
 
             
-
+            //send the tcp coordinates to each leg
             foreach (Leg l in legs)
             {
                 if (mode == (byte)Controller.modes.TERRAIN)
@@ -159,22 +186,25 @@ namespace HexPi
             }
 
 
-
+            //adapt body heigth in terrain mode
             if (mode == (byte)Controller.modes.TERRAIN)
 
             {
-                int a = 0;
-                int sum = 0;
+                int a = 0; //number of legs
+                int sum = 0; //sum of all z-psoitions
                 foreach (Leg l in legs)
                 {
+                    //if leg is grounded
                     if (l.ZPos == 0)
                     {
                         a++;
                         sum += l.readLegHeight();
                     }
                 }
+                //get average heigth difference
                 sum = sum / a;
 
+                //adapt tcp height
                 foreach (Leg l in legs)
                 {
                     if (l.ZPos == 0)
@@ -194,6 +224,19 @@ namespace HexPi
 
         }
 
+        /**
+         * @fn  public void turn(double inc_x, double inc_r, byte mode)
+         *
+         * @brief   Turns around a given point on the y axis
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   inc_x   The increment of the movement.
+         * @param   inc_r   Faktor of the radius.
+         * @param   mode    The mode.
+         */
+
         public void turn(double inc_x, double inc_r, byte mode)
         {
             //If the direction has changed, center all legs
@@ -210,15 +253,19 @@ namespace HexPi
 
             if (mode == (byte)Controller.modes.BALANCE)
             {
+                //get accelerometer data
                 accel.read();
+                //change pitch and roll based on accelerometer data
                 balance(accel.Pitch, accel.Roll);
             }
             else
             {
+                //reset pitch and roll
                 pitch = 0;
                 roll = 0;
             }
 
+            //calculate the tcp coordinate for each leg and adapt the pose
             foreach (Leg l in legs)
             {
                 l.calcPositionTurn(inc_x, inc_r,mode);
@@ -229,6 +276,7 @@ namespace HexPi
                 }
             }
 
+            //send the tcp coordinates to each leg
             foreach (Leg l in legs)
             {
                 if (mode == (byte)Controller.modes.TERRAIN)
@@ -241,9 +289,51 @@ namespace HexPi
                 }
             }
 
+            //adapt body heigth in terrain mode
+            if (mode == (byte)Controller.modes.TERRAIN)
+
+            {
+                int a = 0; //number of legs
+                int sum = 0; //sum of all z-psoitions
+                foreach (Leg l in legs)
+                {
+                    //if leg is grounded
+                    if (l.ZPos == 0)
+                    {
+                        a++;
+                        sum += l.readLegHeight();
+                    }
+                }
+                //get average heigth difference
+                sum = sum / a;
+
+                //adapt tcp height
+                foreach (Leg l in legs)
+                {
+                    if (l.ZPos == 0)
+                    {
+                        l.ZPos = l.readLegHeight() - sum;
+                        l.calcData();
+                        l.ZPos = 0;
+                    }
+                }
+            }
+
             lastDirection = (byte)Controller.directions.TURN;
 
         }
+
+        /**
+         * @fn  public void rotate(double inc_r, byte mode)
+         *
+         * @brief   Rotates around the center of the body
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   inc_r   The increment of the movement.
+         * @param   mode    The mode.
+         */
 
         public void rotate(double inc_r, byte mode)
         {
@@ -261,15 +351,19 @@ namespace HexPi
 
             if (mode == (byte)Controller.modes.BALANCE)
             {
+                //get accelerometer data
                 accel.read();
+                //change pitch and roll based on accelerometer data
                 balance(accel.Pitch, accel.Roll);
             }
             else
             {
+                //reset pitch and roll
                 pitch = 0;
                 roll = 0;
             }
 
+            //calculate the tcp coordinate for each leg and adapt the pose
             foreach (Leg l in legs)
             {
                 l.calcPositionRotate(inc_r, mode);
@@ -280,6 +374,7 @@ namespace HexPi
                 }
             }
 
+            //send the tcp coordinates to each leg
             foreach (Leg l in legs)
             {
                 if (mode == (byte)Controller.modes.TERRAIN)
@@ -292,8 +387,55 @@ namespace HexPi
                 }
             }
 
+            //adapt body heigth in terrain mode
+            if (mode == (byte)Controller.modes.TERRAIN)
+
+            {
+                int a = 0; //number of legs
+                int sum = 0; //sum of all z-psoitions
+                foreach (Leg l in legs)
+                {
+                    //if leg is grounded
+                    if (l.ZPos == 0)
+                    {
+                        a++;
+                        sum += l.readLegHeight();
+                    }
+                }
+                //get average heigth difference
+                sum = sum / a;
+
+                //adapt tcp height
+                foreach (Leg l in legs)
+                {
+                    if (l.ZPos == 0)
+                    {
+                        l.ZPos = l.readLegHeight() - sum;
+                        l.calcData();
+                        l.ZPos = 0;
+                    }
+                }
+            }
+
+
             lastDirection = (byte)Controller.directions.ROTATE;
         }
+
+        /**
+         * @fn  public void pose(double yaw, double pitch, double roll, double a, double b, double c)
+         *
+         * @brief   Changes the pose of the robot
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   yaw     The yaw.
+         * @param   pitch   The pitch.
+         * @param   roll    The roll.
+         * @param   a       Distance to move on x axis.
+         * @param   b       Distance to move on y axis.
+         * @param   c       Distance to move on z axis.
+         */
 
         public void pose(double yaw, double pitch, double roll, double a, double b, double c)
         {
@@ -309,12 +451,15 @@ namespace HexPi
 
             }
 
+            //change pose
             foreach (Leg leg in legs)
             {
                 leg.calcPositionCenter();
                 leg.calcPose(yaw, pitch, roll, a, b, c);
                 
             }
+
+            //send tcp positions
             foreach (Leg leg in legs)
             {
                 leg.calcData();
@@ -324,37 +469,54 @@ namespace HexPi
 
         }
 
+        /**
+         * @fn  private void balance(double newPitch, double newRoll)
+         *
+         * @brief   PID-controller to balance the robot
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         *
+         * @param   newPitch    The new pitch.
+         * @param   newRoll     The new roll.
+         */
+
         private void balance(double newPitch, double newRoll)
         {
+            //calc new pitch
             pitch_e[2] = pitch_e[1];
             pitch_e[1] = pitch_e[0];
             pitch_e[0] = newPitch - pitch;
             pitch = pitch + k1 * pitch_e[0] + k2 * pitch_e[1] + k3 * pitch_e[2];
 
+            //calc new roll
             roll_e[2] = roll_e[1];
             roll_e[1] = roll_e[0];
             roll_e[0] = newRoll - roll;
             roll = roll + k1 * roll_e[0] + k2 * roll_e[1] + k3 * roll_e[2];
 
+            //check boundaries
             if (pitch > maxPitch)
             { pitch = maxPitch; }
             else if (pitch < -maxPitch)
             { pitch = -maxPitch; }
 
+            //check boundaries
             if (roll > maxRoll)
             { roll = maxRoll; }
             else if (roll < -maxRoll)
             { roll = -maxRoll; }
         }
 
-        /**********************************************************************************************//**
+        /**
          * @fn  private void centerLegs()
          *
          * @brief   Centers all legs.
          *
          * @author  Alexander Miller
-         * @date    11.08.2016
-         **************************************************************************************************/
+         * @date    13.08.2017
+         */
+
         private void centerLegs()
         {
             //time between steps
@@ -368,7 +530,7 @@ namespace HexPi
                 l.calcPose(0, pitch, roll, 0, 0, 0);
 
                 l.calcData();
-                //Task.Delay(time).Wait();
+               
             }
 
 
