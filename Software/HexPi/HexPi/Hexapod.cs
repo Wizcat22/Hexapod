@@ -37,7 +37,7 @@ namespace HexPi
         double roll = 0.0;
 
         const double k_p = 0.0;
-        const double k_i = 1;
+        const double k_i = 0.5;
         const double k_d = 0.0;
         const double T = 0.032;
 
@@ -128,6 +128,11 @@ namespace HexPi
                 accel.read();
                 balance(accel.Pitch, accel.Roll);
             }
+            else
+            {
+                pitch = 0;
+                roll = 0;
+            }
 
             foreach (Leg l in legs)
             {
@@ -135,9 +140,11 @@ namespace HexPi
 
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
-                    l.calcPose(0, pitch, -roll, 0, 0);
+                    l.calcPose(0, pitch, -roll, 0,0, 0);
                 }
             }
+
+            
 
             foreach (Leg l in legs)
             {
@@ -150,6 +157,38 @@ namespace HexPi
                     l.calcData();
                 }
             }
+
+
+
+            if (mode == (byte)Controller.modes.TERRAIN)
+
+            {
+                int a = 0;
+                int sum = 0;
+                foreach (Leg l in legs)
+                {
+                    if (l.ZPos == 0)
+                    {
+                        a++;
+                        sum += l.readLegHeight();
+                    }
+                }
+                sum = sum / a;
+
+                foreach (Leg l in legs)
+                {
+                    if (l.ZPos == 0)
+                    {
+                        l.ZPos = l.readLegHeight() - sum;
+                        l.calcData();
+                        l.ZPos = 0;
+                    }
+                }
+            }
+
+
+
+
 
             lastDirection = (byte)Controller.directions.XY;
 
@@ -174,6 +213,11 @@ namespace HexPi
                 accel.read();
                 balance(accel.Pitch, accel.Roll);
             }
+            else
+            {
+                pitch = 0;
+                roll = 0;
+            }
 
             foreach (Leg l in legs)
             {
@@ -181,7 +225,7 @@ namespace HexPi
 
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
-                    l.calcPose(0, pitch, -roll, 0, 0);
+                    l.calcPose(0, pitch, -roll, 0,0, 0);
                 }
             }
 
@@ -220,6 +264,11 @@ namespace HexPi
                 accel.read();
                 balance(accel.Pitch, accel.Roll);
             }
+            else
+            {
+                pitch = 0;
+                roll = 0;
+            }
 
             foreach (Leg l in legs)
             {
@@ -227,7 +276,7 @@ namespace HexPi
 
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
-                    l.calcPose(0, pitch, -roll, 0, 0);
+                    l.calcPose(0, pitch, -roll, 0, 0, 0);
                 }
             }
 
@@ -263,7 +312,7 @@ namespace HexPi
             foreach (Leg leg in legs)
             {
                 leg.calcPositionCenter();
-                leg.calcPose(yaw, pitch, roll, a, b);
+                leg.calcPose(yaw, pitch, roll, a, b, c);
                 
             }
             foreach (Leg leg in legs)
@@ -316,7 +365,7 @@ namespace HexPi
 
             foreach (Leg l in legs)
             {
-                l.calcPose(0, pitch, roll, 0, 0);
+                l.calcPose(0, pitch, roll, 0, 0, 0);
 
                 l.calcData();
                 //Task.Delay(time).Wait();

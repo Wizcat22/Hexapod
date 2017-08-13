@@ -86,7 +86,7 @@ namespace HexPi
         //private const double stepSizeY = 20;
 
         /** @brief   The step size for z coordinate in mm. */
-        private const double stepSizeZ = 30;
+        private const double stepSizeZ = 40;
 
         /** @brief   The step size for rotation in mm. */
         private const double stepSizeXY = 30;
@@ -432,7 +432,8 @@ namespace HexPi
         {
 
 
-
+            
+            
 
 
             if (mode == (byte)Controller.modes.TERRAIN)
@@ -443,7 +444,7 @@ namespace HexPi
             {
                 t = (t + Math.Sqrt(x * x + y * y)) % period;
             }
-
+            
 
             //if t is equal to period*0.25 or period*0.75 +- frame
             if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
@@ -764,7 +765,31 @@ namespace HexPi
             Debug.WriteLine("Writing calibration data!");
         }
 
-        public void calcPose(double yaw, double pitch, double roll, double a, double b)
+        public int readLegHeight()
+        {
+            try
+            {
+                byte[] height = new byte[1];
+                if (device != null)
+                {
+                    device.Read(height);
+                    return (sbyte)height[0];
+                }
+                else
+                {
+                    //Debug.WriteLine("Error: I2C write failed!");
+                    return 0;
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error: I2C hat read failed!" + e.Message);
+            }
+            return 0;
+        }
+
+        public void calcPose(double yaw, double pitch, double roll, double a, double b, double c)
         {
 
             double tempX = xOffset - xPos;
@@ -786,8 +811,8 @@ namespace HexPi
             double newZ = tempX * (-sB) + tempY * (cB * sC) + tempZ * (cB * cC);
 
             xPos += newX - tempX + a;
-            yPos += newY - tempY;
-            zPos += newZ - tempZ + b;
+            yPos += newY - tempY + b;
+            zPos += newZ - tempZ + c;
 
         }
 

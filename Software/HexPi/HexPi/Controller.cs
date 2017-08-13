@@ -351,8 +351,8 @@ namespace HexPi
             double degX = 0.174533 * y;
             double degY = 0.174533 * -x;
             double degZ = 0.174533 * z;
-            double distA = 20 * a;
-            double distB = 20 * b;
+            double distA = 20 * b;
+            double distB = 20 * -a;
             double distC = 0;
             //Set rotation around xyz axis and translation in ab-axis
             robot.pose(degZ, degY, degX, distA, distB, distC);
