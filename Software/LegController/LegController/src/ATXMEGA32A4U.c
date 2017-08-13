@@ -22,7 +22,7 @@
 #define C_BLUE 240
 #define C_MAGENTA 300
 
-#define HEIGHT 88
+#define HEIGHT 98
 #define A1 52
 #define A2 69
 #define A3 88

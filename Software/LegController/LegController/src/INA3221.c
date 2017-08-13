@@ -19,7 +19,7 @@
 #pragma region VARIABLES
 
 uint16_t config = 0xFFFF & (INA_CH2_EN_B | INA_AVG_MODE_1024_B | INA_SV_CONV_TIME_140us_B | INA_OP_MODE_SV_SINGLE_SHOT_B);
-uint16_t limit = 100;
+uint16_t limit = 125;
 //uint16_t config = 0b0010111000000001;
 
 #pragma endregion VARIABLES
@@ -81,6 +81,7 @@ void ina3221_trigger_measurement(){
 uint8_t ina3221_check_ground(){
 
 	uint16_t current = ina3221_get_current(INA_C2_SV_R);
+	
 	if (current >limit)
 	{
 		return 1;
