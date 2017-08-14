@@ -35,6 +35,16 @@
 
 #pragma endregion FUNCTIONS
 
+/**
+ * @fn	int main(void)
+ *
+ * @brief	Main entry-point for this application
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @return	Exit-code for the process - 0 for success, else an error code.
+ */
 
 int main(void)
 {
@@ -46,7 +56,7 @@ int main(void)
 
 
 
-	init_watchdog();
+	init_watchdog(); //Initialize Watchdog
 	init_gpio(); //Initialize GPIO
 	init_LED(); //Initialize LED
 	init_twiE_MASTER(); //Initialize MASTER TWI
@@ -57,21 +67,12 @@ int main(void)
 	
 	asm("wdr"); //Reset Watchdog
 	
-	//uint16_t hue = 0;
-	//float huehue = 0;
+
 	while (1)
 	{
 		asm("wdr"); //Reset Watchdog
 
-		twi_slave_get_data();
-		
-		//led_set_color(hue,1,0.05);
-		//hue = ((uint16_t)huehue)%360;
-		//huehue = huehue + 0.1;
-		//if (huehue > 360)
-		//{
-			//huehue = 0;
-		//}
-		
+		twi_slave_get_data(); //check for communication -> receive commands -> execute commands
+	
 	}
 }

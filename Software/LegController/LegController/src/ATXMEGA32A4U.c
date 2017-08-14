@@ -7,24 +7,147 @@
 
 #pragma region DEFINES
 
-//#define I2C_SLAVE_ADD 0x11
-//#define SIDE
-
+/**
+ * @def	LED_SATURATION
+ *
+ * @brief	A macro that defines LED saturation
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 #define LED_SATURATION 1.0f
+
+/**
+ * @def	LED_BRIGTHNESS
+ *
+ * @brief	A macro that defines LED brigthness
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define LED_BRIGTHNESS 0.005f
 
+/**
+ * @def	C_RED
+ *
+ * @brief	A macro that defines hue for red
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_RED 0
+
+/**
+ * @def	C_ORANGE
+ *
+ * @brief	A macro that defines hue for orange
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_ORANGE 30
+
+/**
+ * @def	C_YELLOW
+ *
+ * @brief	A macro that defines hue for yellow
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_YELLOW 60
+
+/**
+ * @def	C_GREEN
+ *
+ * @brief	A macro that defines hue for green
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_GREEN 120
+
+/**
+ * @def	C_CYAN
+ *
+ * @brief	A macro that defines hue for cyan
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_CYAN 180
+
+/**
+ * @def	C_BLUE
+ *
+ * @brief	A macro that defines hue for blue
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_BLUE 240
+
+/**
+ * @def	C_MAGENTA
+ *
+ * @brief	A macro that defines hue for magenta
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define C_MAGENTA 300
 
+/**
+ * @def	HEIGHT
+ *
+ * @brief	A macro that defines height of the robot
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define HEIGHT 98
+
+/**
+ * @def	A1
+ *
+ * @brief	A macro that defines distance of the first leg joint to the second
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define A1 52
+
+/**
+ * @def	A2
+ *
+ * @brief	A macro that defines the distance of the second leg joint to the third
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define A2 69
+
+/**
+ * @def	A3
+ *
+ * @brief	A macro that defines the distance of the third leg joint to the TCP
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 #define A3 88
 
 #pragma endregion DEFINES
@@ -46,21 +169,38 @@
 
 #pragma region VARIABLES
 
-uint8_t slave_address = 0; //I2C SLAVE ADDRESS
-uint8_t side = 0; //Left = 0 ; right = 1;
+/** @brief	I2C SLAVE ADDRESS */
+uint8_t slave_address = 0;
+/** @brief	Left = 0 ; right = 1; */
+uint8_t side = 0;
 
+/** @brief	The servo calibration values in degrees (s0,s1,s2) */
 int8_t servo_cal[] = {0,0,0};
 
+/** @brief	The last alpha value */
 int8_t lastAlpha = 0;
+/** @brief	The last beta value */
 int8_t lastBeta = 0;
+/** @brief	The last gamma value */
 int8_t lastGamma = 0;
 
+/** @brief	The last z position */
 int8_t lastZPos = 0;
+/** @brief	A flag for the status of the ground contact */
 int grounded = 0;
 
 #pragma endregion VARIABLES
 
 #pragma region FUNCTIONS
+
+/**
+ * @fn	void init_system_clock(void)
+ *
+ * @brief	Initializes the system clock (external crystal 16Mhz)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 void init_system_clock(void){
 	OSC.XOSCCTRL = OSC_FRQRANGE_12TO16_gc | OSC_XOSCSEL_XTAL_16KCLK_gc; //Set external oscillator frequency range and select external oscillator incl. start-up time
@@ -71,9 +211,17 @@ void init_system_clock(void){
 
 }
 
+/**
+ * @fn	void init_pll(void)
+ *
+ * @brief	Initializes the pll (2x16Mhz)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_pll(void){
 
-	//NOT WORKING??
 	OSC.PLLCTRL = OSC_PLLSRC_XOSC_gc | OSC_PLLFAC1_bm; //Set PLL clock reference (external osc) and multiplication factor (2x)
 	OSC.CTRL |= OSC_PLLEN_bm; // Enable PLL
 	while (!(OSC.STATUS & OSC_PLLRDY_bm)){}
@@ -82,6 +230,15 @@ void init_pll(void){
 
 }
 
+/**
+ * @fn	void init_watchdog(void)
+ *
+ * @brief	Initializes the watchdog (Overflow after 8 sek)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_watchdog(void){
 
 	CCP = CCP_IOREG_gc; //Disable interrupts for 4 clock cycles and protect I/O
@@ -89,6 +246,15 @@ void init_watchdog(void){
 	while(WDT.STATUS & WDT_SYNCBUSY_bm ){} //Wait for WD to synchronize with new settings
 
 }
+
+/**
+ * @fn	void init_eeprom(void)
+ *
+ * @brief	Reads the saved servo calibration data
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 void init_eeprom(void){
 
@@ -104,6 +270,15 @@ void init_eeprom(void){
 
 
 }
+
+/**
+ * @fn	void init_gpio(void)
+ *
+ * @brief	Initializes the gpio
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 void init_gpio(void){
 
@@ -127,6 +302,15 @@ void init_gpio(void){
 
 }
 
+/**
+ * @fn	void init_servo(void)
+ *
+ * @brief	Initializes the servo timer (16bit; 40000 Top = 20ms; 8 Prescaler)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_servo(void){
 	//Init timer0 (16bit)
 	TCD0.PER = 40000; //Set Timer0 top value (16Mhz & 8 prescaler = 20ms)
@@ -137,6 +321,15 @@ void init_servo(void){
 
 }
 
+/**
+ * @fn	void init_twiE_MASTER(void)
+ *
+ * @brief	Initializes the twi e as master (400kHz)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_twiE_MASTER(void){
 
 	TWIE_MASTER_BAUD = (F_CPU / (2* F_TWI_HS)) - 5; //SET TWI_E BAUD
@@ -145,6 +338,15 @@ void init_twiE_MASTER(void){
 
 
 }
+
+/**
+ * @fn	void init_twiC_SLAVE(void)
+ *
+ * @brief	Initializes the twi c as slave
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 void init_twiC_SLAVE(void){
 	slave_address = ((PORTD.IN & 0x18)>>3);
@@ -159,22 +361,21 @@ void init_twiC_SLAVE(void){
 		slave_address += 0x10;
 	}
 
-
-	//slave_address = ((PORTD.IN & 0x38) << 1); //Get ADDR
 	TWIC_SLAVE_ADDR = (slave_address<<1); //Set Slave ADDR
 	TWIC_SLAVE_CTRLA = TWI_SLAVE_ENABLE_bm; //ENABLE TWI_C SLAVE
 
 }
 
+/**
+ * @fn	void init_UART(void)
+ *
+ * @brief	Initializes the uart (19200 Baud, 8bit charsize, 1 stop, no parity)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_UART(void){
-
-	////BAUD=2000000 , CLK=32000000 , BSCALE=0 , BSEL=0 , CHARSIZE=8bit
-	//
-	//
-	//USARTC0.CTRLC = USART_CHSIZE_8BIT_gc; //SET CHARSIZE
-	//USARTC0.CTRLB = USART_TXEN_bm | USART_RXEN_bm ; //Enable TX/RX
-
-
 
 	//BAUD=19200 , CLK=16000000 , BSCALE=2 , BSEL=12 , CHARSIZE=8bit
 
@@ -185,6 +386,17 @@ void init_UART(void){
 
 }
 
+/**
+ * @fn	void uart_send(char data)
+ *
+ * @brief	Send one char via uart
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	data	The data.
+ */
+
 void uart_send(char data){
 
 	while (!(USARTC0_STATUS & USART_DREIF_bm)){} //Wait until DATA-Register is empty
@@ -192,12 +404,34 @@ void uart_send(char data){
 
 }
 
+/**
+ * @fn	void uart_send_word(uint16_t data)
+ *
+ * @brief	Send one word (uint16) via uart
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	data	The data.
+ */
+
 void uart_send_word(uint16_t data){
 
 	uart_send(data>>8); //send high-byte
 	uart_send(data); // send low-byte
 	uart_send('\n');
 }
+
+/**
+ * @fn	void uart_send_string(char s[])
+ *
+ * @brief	Send string via uart
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	s	The String to send via uart.
+ */
 
 void uart_send_string(char s[]){
 	int x =0;
@@ -209,6 +443,17 @@ void uart_send_string(char s[]){
 	//uart_send('\n');
 }
 
+/**
+ * @fn	void uart_send_number(int num)
+ *
+ * @brief	Send a number as a string
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	num	Number to send as string.
+ */
+
 void uart_send_number(int num){
 
 	char str[20];
@@ -216,6 +461,19 @@ void uart_send_number(int num){
 	uart_send_string(str);
 
 }
+
+/**
+ * @fn	void led_set_color(uint16_t H, float S, float V)
+ *
+ * @brief	Set LED color (HSV)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	H	Hue.
+ * @param	S	Saturation.
+ * @param	V	Value.
+ */
 
 void led_set_color(uint16_t H, float S, float V){
 
@@ -261,6 +519,15 @@ void led_set_color(uint16_t H, float S, float V){
 
 }
 
+/**
+ * @fn	void init_LED(void)
+ *
+ * @brief	Initializes the LED timer (timerC0 (16bit), PRESCALER=8, FREQUENCY=125Hz)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
+
 void init_LED(void){
 
 	//Init timerC0 (16bit), PRESCALER=8, FREQUENCY=125Hz
@@ -271,6 +538,15 @@ void init_LED(void){
 	led_set_color(C_GREEN,1,0.005);
 
 }
+
+/**
+ * @fn	void twi_slave_get_data(void)
+ *
+ * @brief	Handles TWI communication (receive Commands and paramenters)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ */
 
 void twi_slave_get_data(void){
 
@@ -373,6 +649,16 @@ void twi_slave_get_data(void){
 
 }
 
+/**
+ * @fn	uint8_t twi_slave_get_byte(void)
+ *
+ * @brief	Get one byte as TWI slave
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @return	The received byte.
+ */
 
 uint8_t twi_slave_get_byte(void){
 
@@ -383,6 +669,17 @@ uint8_t twi_slave_get_byte(void){
 	return data;
 
 }
+
+/**
+ * @fn	uint16_t twi_slave_get_word(void)
+ *
+ * @brief	Get word via TWI slave.
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @return	Received word.
+ */
 
 uint16_t twi_slave_get_word(void){
 
@@ -399,6 +696,18 @@ uint16_t twi_slave_get_word(void){
 
 }
 
+/**
+ * @fn	void twi_master_send_data(char reg,uint16_t data)
+ *
+ * @brief	Send data as TWI master
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	reg 	The register to write to.
+ * @param	data	The data.
+ */
+
 void twi_master_send_data(char reg,uint16_t data){
 
 	TWIE_MASTER_ADDR = (INA3221_ADD << 1) + 0 ; //Address with write-bit
@@ -411,6 +720,19 @@ void twi_master_send_data(char reg,uint16_t data){
 	while(!(TWIE_MASTER_STATUS & (TWI_MASTER_WIF_bm | TWI_MASTER_CLKHOLD_bm))){}
 	TWIE_MASTER_CTRLC |= TWI_MASTER_CMD_STOP_gc; //Issue STOP-condition
 }
+
+/**
+ * @fn	int16_t twi_master_read_data(char reg)
+ *
+ * @brief	Read data (16bit) as TWI master
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	reg	The register.
+ *
+ * @return	The received data.
+ */
 
 int16_t twi_master_read_data(char reg){
 
@@ -431,6 +753,19 @@ int16_t twi_master_read_data(char reg){
 
 	return (low + (high<<8));
 }
+
+/**
+ * @fn	void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos)
+ *
+ * @brief	Set TCP position. Calculates the angles (inverse kinematics)
+ *
+ * @author	Alexander Miller
+ * @date	14.08.2017
+ *
+ * @param	xPos	x-coordinate.
+ * @param	yPos	y-coordinate.
+ * @param	zPos	z-coordinate.
+ */
 
 void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 
@@ -478,9 +813,12 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	beta = (int8_t)(b * 180 / M_PI - 90);
 	gamma = (int8_t)(c * 180 / M_PI - 90);
 
+	//if TCP is out of reach
 	if ((gamma==0 && beta==0) && (yPos>10 || zPos <-10))
 	{
+		//signal a error
 		led_set_color(C_RED ,1,0.005);
+		//set TCP to last possible position
 		servo_set_deg(lastGamma,lastBeta,alpha);
 	}
 	else{
@@ -494,30 +832,55 @@ void leg_set_position(int8_t xPos, int8_t yPos, int8_t zPos){ // -127 - 127
 	
 }
 
+/**
+* @fn	void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos);
+*
+* @brief	Set TCP position and check ground contact
+*
+* @author	Alexander Miller
+* @date	14.08.2017
+*
+* @param	xPos	The x position.
+* @param	yPos	The y position.
+* @param	zPos	The z position.
+*/
+
 void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos){
 
+	//if leg is in should be in the air
 	if (zPos > 0)
 	{
+		//no ground contact
 		grounded = 0;
+		//set tcp position
 		leg_set_position(xPos,yPos,zPos);
 	}
+	//if leg should be grounded
 	else if (zPos == 0)
 	{
+		//if no ground contact
 		if (grounded == 0)
 		{
+			//while no ground contact
 			while (grounded == 0)
 			{
+				//reset watchdog (ground sensing needs a lot of time)
 				asm("wdr");
+				//lower leg by to mm
 				lastZPos -= 2;
+				//set tcp position
 				leg_set_position(xPos,yPos,lastZPos);
+				//check for ground contact
 				grounded = ina3221_check_ground();
-				//-----
+				//if tcp reaches maximum distance
 				if (lastZPos <= -20)
 				{
+					//set grounded
 					grounded = 1;
+					//signal a error
 					led_set_color(C_MAGENTA,1,0.05);
 				}
-				//-----
+				
 			}
 		}
 		else
@@ -529,6 +892,19 @@ void leg_sense_terrain(int8_t xPos, int8_t yPos, int8_t zPos){
 
 }
 
+/**
+* @fn	void servo_set_deg(int8_t s0, int8_t s1, int8_t s2);
+*
+* @brief	Set servo position via the angle (-90 - +90)
+*
+* @author	Alexander Miller
+* @date	14.08.2017
+*
+* @param	s0	Angle of servo 0.
+* @param	s1	Angle of servo 1.
+* @param	s2	Angle of servo 2.
+*/
+
 void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	
 	if (side == 1)
@@ -537,8 +913,6 @@ void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 		s1 = -s1;
 		s2 = s2;
 	}
-
-
 
 
 	s0=s0+servo_cal[0];
@@ -578,6 +952,17 @@ void servo_set_deg(int8_t s0, int8_t s1, int8_t s2){ // -90 - 90
 	TCD0.CCBBUF = (uint16_t)(22.22222222222 * s1 + 3000);
 	TCD0.CCCBUF = (uint16_t)(22.22222222222 * s2 + 3000);
 }
+
+/**
+* @fn	void delay(int ms);
+*
+* @brief	Delays execution for x milliseconds
+*
+* @author	Alexander Miller
+* @date	14.08.2017
+*
+* @param	ms	The time in milliseconds.
+*/
 
 void delay(int ms){
 	for (int i=0;i<ms;i++)
