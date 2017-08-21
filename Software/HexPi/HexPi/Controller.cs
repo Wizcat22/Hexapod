@@ -61,8 +61,8 @@ namespace HexPi
         /** @brief   The threshold for the input. */
         const double threshold = 0.25;
 
-        /** @brief   The timeframe */
-        const byte timeframe = 10;
+        /** @brief   The timeframe in microseconds */
+        const long timeframe = 25000;
 
         #endregion Fields
 
@@ -85,7 +85,7 @@ namespace HexPi
          * @brief   Values that represent modes
          */
 
-        public enum modes { DEFAULT, TERRAIN, BALANCE };
+        public enum modes { DEFAULT, TERRAIN, BALANCE, FAST, SUPERFAST };
 
         #endregion Enums
 
@@ -126,12 +126,8 @@ namespace HexPi
 
         private void handleInputs()
         {
-            //Time at the end of execution 
-            DateTime newDate = DateTime.Now;
-            //Time at the begining of execution
-            DateTime oldDate = DateTime.Now;
-            //Differece between start and end
-            TimeSpan dif;
+            //Stopwatch for fixed update
+            Stopwatch time = Stopwatch.StartNew();
             //operating mode
             byte mode = 0;
             //movement
@@ -140,18 +136,31 @@ namespace HexPi
 
             while (true)
             {
-                newDate = DateTime.Now;
-                dif = newDate - oldDate;
+                
 
-                //wait until atleast "timeframe" seconds past -> necessary for PID-controller
-                while (dif.Milliseconds < timeframe)
+                if (mode != (byte)modes.SUPERFAST)
                 {
-                    newDate = DateTime.Now;
-                    dif = newDate - oldDate;
+                    if (mode == (byte)modes.FAST)
+                    {
+                        while (((double)time.ElapsedTicks / Stopwatch.Frequency) * 1000000 < timeframe/3)
+                        {
+
+                        }
+                    }
+                    else
+                    {
+                        //wait until atleast "timeframe" seconds past -> necessary for PID-controller
+                        while (((double)time.ElapsedTicks / Stopwatch.Frequency) * 1000000 < timeframe)
+                        {
+
+                        }
+                    }
                 }
 
+                time = Stopwatch.StartNew();
 
-                oldDate = DateTime.Now;
+
+
 
                 //if no input device was found
                 if (input != null)
@@ -166,6 +175,7 @@ namespace HexPi
                     b = gamepadStatus.RightThumbstickY;
 
 
+
                     //set action accodring to button combos
 
                     //Shutdown = A&B&X&Y&LThumb
@@ -173,6 +183,16 @@ namespace HexPi
                     {
                         //Shutdown the system
                         shutdown();
+                    }
+                    //Super fast = Left Stick and Right Stick
+                    else if (gamepadStatus.Buttons == (GamepadButtons.LeftThumbstick | GamepadButtons.RightThumbstick))
+                    {
+                        mode = (byte)modes.SUPERFAST;
+                    }
+                    //Fast = Right Stick
+                    else if (gamepadStatus.Buttons == GamepadButtons.RightThumbstick)
+                    {
+                        mode = (byte)modes.FAST;
                     }
                     //Pose = RightShoulder
                     else if (gamepadStatus.Buttons == GamepadButtons.RightShoulder)
@@ -230,7 +250,7 @@ namespace HexPi
                         turn(mode);
                         break;
                     case (byte)directions.POSE:
-                        pose();
+                        pose(mode);
                         break;
                     default:
                         break;
@@ -317,7 +337,7 @@ namespace HexPi
             }
         }
 
-        
+
 
         /**
          * @fn  private void shutdown()
@@ -331,10 +351,13 @@ namespace HexPi
         private void shutdown()
         {
             Debug.WriteLine("WARNING: SYSTEM SHUTDOWN INITIALIZED!");
+
+            robot.shutdown();
+
             ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
         }
 
-        
+
 
         /**
          * @fn  private void walk(byte mode)
@@ -356,17 +379,20 @@ namespace HexPi
                 if (((Math.Abs(x) >= threshold) && !(Math.Abs(y) >= threshold)))
                 {
                     //walk in x direction in the given mode
+
                     robot.walk(x, 0, mode);
                 }
                 //if only y is above threshold
-                if (((Math.Abs(y) >= threshold) && !(Math.Abs(x) >= threshold)))
+                else if (((Math.Abs(y) >= threshold) && !(Math.Abs(x) >= threshold)))
                 {
                     //walk in y direction in the given mode
+
                     robot.walk(0, y, mode);
                 }
                 else
                 {
                     //walk in xy direction in the given mode
+
                     robot.walk(x, y, mode);
                 }
 
@@ -391,7 +417,7 @@ namespace HexPi
 
         private void turn(byte mode)
         {
-            
+
             if (Math.Abs(x) >= threshold && !(Math.Abs(a) >= threshold))
             {
                 //walk
@@ -446,17 +472,17 @@ namespace HexPi
          * @date    13.08.2017
          */
 
-        private void pose()
+        private void pose(byte mode)
         {
             //1° = 0,0174533 rad
             double degX = 0.174533 * y;
             double degY = 0.174533 * -x;
             double degZ = 0.174533 * z;
-            double distA = 20 * b;
-            double distB = 20 * -a;
+            double distA = 30 * b;
+            double distB = 30 * -a;
             double distC = 0;
             //Set rotation around xyz axis and translation in ab-axis
-            robot.pose(degZ, degY, degX, distA, distB, distC);
+            robot.pose(degZ, degY, degX, distA, distB, distC, mode);
         }
 
         #endregion Functions

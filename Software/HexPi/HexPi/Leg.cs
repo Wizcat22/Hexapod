@@ -337,14 +337,29 @@ namespace HexPi
             //if in terrain mode-> walk slower
             if (mode == (byte)Controller.modes.TERRAIN)
             {
-                t = ((t + increment / 3) + period) % period;
+                t = ((t + Math.Abs(increment)) + period) % period;
             }
             else
             {
-                t = ((t + increment) + period) % period;
+                t = ((t + Math.Abs(increment)) + period) % period;
             }
+
+            if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
+            {
+                if (increment >= 0)
+                {
+                    xyRotation = rRotation;
+                }
+                else
+                {
+                    xyRotation = rRotation + Math.PI;
+                }
+
+            }
+
+
             //calc tcp xy position based on rRotation 
-            calcXY(stepSizeXY, rRotation, mode);
+            calcXY(stepSizeXY, xyRotation, mode);
         }
 
         /**
@@ -364,7 +379,7 @@ namespace HexPi
         {
             a = -a;
 
-            t = ((t + x) + period) % period;
+            t = ((t + Math.Abs(x)) + period) % period;
 
 
             //if t is equal to period*0.25 or period*0.75 +- frame
@@ -389,6 +404,10 @@ namespace HexPi
 
                 //adjust the angle of the movement path (turn it by 180°)
                 if (Math.Sign(a) == -1)
+                {
+                    xyRotation -= Math.PI;
+                }
+                if (x < 0)
                 {
                     xyRotation -= Math.PI;
                 }
@@ -465,16 +484,18 @@ namespace HexPi
         public void calcPositionWalk(double x, double y, byte mode)
         {
 
+
+
             //if in terrain mode-> walk slower
             if (mode == (byte)Controller.modes.TERRAIN)
             {
-                t = (t + Math.Sqrt(x * x + y * y) / 3) % period;
+                t = (t + Math.Sqrt(x * x + y * y)) % period;
             }
             else
             {
                 t = (t + Math.Sqrt(x * x + y * y)) % period;
             }
-
+            //Debug.WriteLine(Math.Sqrt(x * x + y * y));
 
             //if t is equal to period*0.25 or period*0.75 +- frame
             if ((t >= period * 0.75 - frame) && (t <= period * 0.75 + frame) || (t >= period * 0.25 - frame) && (t <= period * 0.25 + frame))
@@ -485,7 +506,7 @@ namespace HexPi
             //calc tcp position
             calcXY(stepSizeXY, xyRotation, mode);
 
-            
+
         }
 
 
@@ -634,9 +655,25 @@ namespace HexPi
                     zPos = 0;
 
                 }
+                else if (t <= period * 0.6)
+                {
+                    zPos = -1 * (stepSizeZ * 100 / (period * period)) * (t - 0.6 * period) * (t - 0.6 * period) + stepSizeZ;
+                }
+                else if (t <= period)
+                {
+                    zPos = -1 * (stepSizeZ * 6.25 / (period * period)) * (t - 0.6 * period) * (t - 0.6 * period) + stepSizeZ;
+                }
+                //else if (t <= 3 * period / 4)
+                //{
+                //    zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ;
+                //}
+                //else if (t <= period)
+                //{
+                //    zPos = (stepSizeZ * 16 / (period * period)) * (t - period) * (t - period);
+                //}
                 else
                 {
-                    zPos = -1 * (stepSizeZ * 16 / (period * period)) * (t - 3 * period / 4) * (t - 3 * period / 4) + stepSizeZ;
+                    zPos = 0;
                 }
 
             }
@@ -671,6 +708,8 @@ namespace HexPi
 
         public void calcData()
         {
+
+
 
             byte[] data = new byte[4];
             //set tcp position command
@@ -775,7 +814,7 @@ namespace HexPi
 
         public void sendCalibrationData()
         {
-            
+
             byte[] data = new byte[4];
             //Write calibration data
             data[0] = 4;
@@ -783,6 +822,7 @@ namespace HexPi
             data[2] = (byte)betaOff;
             data[1] = (byte)gammaOff;
             Debug.WriteLine("Writing calibration data!");
+            sendData(data);
         }
 
         /**

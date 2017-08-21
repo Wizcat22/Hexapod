@@ -40,13 +40,13 @@ namespace HexPi
         double roll = 0.0;
 
         /** @brief   The p constant of the pid-controller */
-        const double k_p = 0.0;
+        const double k_p = 0.01;
         /** @brief   The i constant of the pid-controller */
-        const double k_i = 0.5;
+        const double k_i = 1;
         /** @brief   The d constant of the pid-controller */
-        const double k_d = 0.0;
+        const double k_d = 0.0000;
         /** @brief   The repetition rate of the pid-controller in seconds */
-        const double T = 0.032;
+        const double T = 0.025;
 
         /** @brief   The first combined constant of the pid-controller */
         const double k1 = (k_p + k_i * T + k_d / T);
@@ -99,19 +99,22 @@ namespace HexPi
              * 0 -|   |- 1
              * 2 -|   |- 3
              * 4 -|___|- 5
-             */ 
+             */
 
             //giat offset,cal alpha,cal beta, cal gamma , rotation offset, i2c address, x offset, y offset;
 
             //left
-            legs[0] = new Leg(25, 8, -5, 2, 135, 0x11, 150, 175);
-            legs[2] = new Leg(75, 3, 0, 5, 180, 0x12, 0, 175);
-            legs[4] = new Leg(25, 5, -3, 2, 225, 0x13, -150, 175);
+            legs[0] = new Leg(25, 10, -5, 2, 135, 0x11, 150, 175);
+            legs[2] = new Leg(75, 5, -2, 7, 180, 0x12, 0, 175);
+            legs[4] = new Leg(25, 3, -4, 3, 225, 0x13, -150, 175);
 
             //right
-            legs[1] = new Leg(75, -2, -5, 0, 45, 0x21, 150, -175);
-            legs[3] = new Leg(25, -1, -3, 0, 0, 0x22, 0, -175);
-            legs[5] = new Leg(75, -8, 5, 0, 315, 0x23, -150, -175);
+            legs[1] = new Leg(75, 0, -7, 0, 45, 0x21, 150, -175);
+            legs[3] = new Leg(25, 0, 0, -3, 0, 0x22, 0, -175);
+            legs[5] = new Leg(75, -7, 6, 3, 315, 0x23, -150, -175);
+
+
+
 
         }
 
@@ -145,9 +148,9 @@ namespace HexPi
 
             }
 
-            
+
             if (mode == (byte)Controller.modes.BALANCE)
-            {   
+            {
                 //get accelerometer data
                 accel.read();
                 //change pitch and roll based on accelerometer data
@@ -164,14 +167,14 @@ namespace HexPi
             foreach (Leg l in legs)
             {
                 l.calcPositionWalk(inc_x, inc_y, mode);
-
+                
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
-                    l.calcPose(0, pitch, -roll, 0,0, 0);
+                    l.calcPose(0, pitch, -roll, 0, 0, 0);
                 }
             }
 
-            
+
             //send the tcp coordinates to each leg
             foreach (Leg l in legs)
             {
@@ -244,7 +247,7 @@ namespace HexPi
             {
                 centerLegs();
 
-                foreach(Leg l in legs)
+                foreach (Leg l in legs)
                 {
                     l.setColor(235);
                 }
@@ -268,11 +271,11 @@ namespace HexPi
             //calculate the tcp coordinate for each leg and adapt the pose
             foreach (Leg l in legs)
             {
-                l.calcPositionTurn(inc_x, inc_r,mode);
+                l.calcPositionTurn(inc_x, inc_r, mode);
 
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
-                    l.calcPose(0, pitch, -roll, 0,0, 0);
+                    l.calcPose(0, pitch, -roll, 0, 0, 0);
                 }
             }
 
@@ -437,7 +440,7 @@ namespace HexPi
          * @param   c       Distance to move on z axis.
          */
 
-        public void pose(double yaw, double pitch, double roll, double a, double b, double c)
+        public void pose(double yaw, double pitch, double roll, double a, double b, double c, byte mode)
         {
             //If the direction has changed, center all legs
             if (lastDirection != (byte)Controller.directions.POSE)
@@ -451,20 +454,43 @@ namespace HexPi
 
             }
 
-            //change pose
-            foreach (Leg leg in legs)
+            if (mode == (byte)Controller.modes.BALANCE)
             {
-                leg.calcPositionCenter();
-                leg.calcPose(yaw, pitch, roll, a, b, c);
-                
+
+                //get accelerometer data
+                accel.read();
+                //change pitch and roll based on accelerometer data
+                balance(accel.Pitch, accel.Roll);
+
+                //change pose
+                foreach (Leg leg in legs)
+                {
+                    leg.calcPositionCenter();
+                    leg.calcPose(0, this.pitch, -this.roll, 0, 0, 0);
+
+                }
             }
+            else
+            {
+                this.pitch = 0;
+                this.roll = 0;
+                //change pose
+                foreach (Leg leg in legs)
+                {
+                    leg.calcPositionCenter();
+                    leg.calcPose(yaw, pitch, roll, a, b, c);
+
+                }
+
+            }
+            
 
             //send tcp positions
             foreach (Leg leg in legs)
             {
                 leg.calcData();
             }
-            
+
             lastDirection = (byte)Controller.directions.POSE;
 
         }
@@ -486,13 +512,13 @@ namespace HexPi
             //calc new pitch
             pitch_e[2] = pitch_e[1];
             pitch_e[1] = pitch_e[0];
-            pitch_e[0] = newPitch - pitch;
+            pitch_e[0] = newPitch;
             pitch = pitch + k1 * pitch_e[0] + k2 * pitch_e[1] + k3 * pitch_e[2];
 
             //calc new roll
             roll_e[2] = roll_e[1];
             roll_e[1] = roll_e[0];
-            roll_e[0] = newRoll - roll;
+            roll_e[0] = newRoll;
             roll = roll + k1 * roll_e[0] + k2 * roll_e[1] + k3 * roll_e[2];
 
             //check boundaries
@@ -520,7 +546,7 @@ namespace HexPi
         private void centerLegs()
         {
             //time between steps
-            int time = 50;
+            int time = 100;
 
             pitch = 0;
             roll = 0;
@@ -530,7 +556,7 @@ namespace HexPi
                 l.calcPose(0, pitch, roll, 0, 0, 0);
 
                 l.calcData();
-               
+
             }
 
 
@@ -540,36 +566,119 @@ namespace HexPi
                 l.ZPos = 0;
 
                 l.calcData();
-                Task.Delay(time).Wait();
+                
             }
+            Task.Delay(time).Wait();
+
+
+            legs[1].calcData();
+            legs[2].calcData();
+            legs[5].calcData();
+            Task.Delay(time).Wait();
+
+            legs[1].ZPos = (int)legs[1].StepSizeZ;
+            legs[1].calcData();
+            legs[2].ZPos = (int)legs[2].StepSizeZ;
+            legs[2].calcData();
+            legs[5].ZPos = (int)legs[5].StepSizeZ;
+            legs[5].calcData();
+            Task.Delay(time).Wait();
+
+            legs[1].calcPositionCenter();
+            legs[1].ZPos = (int)legs[1].StepSizeZ;
+            legs[1].calcData();
+            legs[2].calcPositionCenter();
+            legs[2].ZPos = (int)legs[2].StepSizeZ;
+            legs[2].calcData();
+            legs[5].calcPositionCenter();
+            legs[5].ZPos = (int)legs[5].StepSizeZ;
+            legs[5].calcData();
+            Task.Delay(time).Wait();
+
+            legs[1].calcPositionCenter();
+            legs[1].calcData();
+            legs[2].calcPositionCenter();
+            legs[2].calcData();
+            legs[5].calcPositionCenter();
+            legs[5].calcData();
+            Task.Delay(time).Wait();
+
+            //
+
+            legs[0].calcData();
+            legs[3].calcData();
+            legs[4].calcData();
+            Task.Delay(time).Wait();
+
+            legs[0].ZPos = (int)legs[0].StepSizeZ;
+            legs[0].calcData();
+            legs[3].ZPos = (int)legs[3].StepSizeZ;
+            legs[3].calcData();
+            legs[4].ZPos = (int)legs[4].StepSizeZ;
+            legs[4].calcData();
+            Task.Delay(time).Wait();
+
+            legs[0].calcPositionCenter();
+            legs[0].ZPos = (int)legs[0].StepSizeZ;
+            legs[0].calcData();
+            legs[3].calcPositionCenter();
+            legs[3].ZPos = (int)legs[3].StepSizeZ;
+            legs[3].calcData();
+            legs[4].calcPositionCenter();
+            legs[4].ZPos = (int)legs[4].StepSizeZ;
+            legs[4].calcData();
+            Task.Delay(time).Wait();
+
+            legs[0].calcPositionCenter();
+            legs[0].calcData();
+            legs[3].calcPositionCenter();
+            legs[3].calcData();
+            legs[4].calcPositionCenter();
+            legs[4].calcData();
+            Task.Delay(time).Wait();
+
+            //
 
 
 
-            //center each leg
-            foreach (Leg l in legs)
+
+
+
+
+            ////center each leg
+            //foreach (Leg l in legs)
+            //{
+            //    l.calcData();
+            //    Task.Delay(time).Wait();
+            //    //Up
+            //    l.ZPos = (int)l.StepSizeZ;
+
+            //    l.calcData();
+            //    Task.Delay(time).Wait();
+
+            //    //Center
+            //    l.calcPositionCenter();
+            //    l.ZPos = (int)l.StepSizeZ;
+            //    l.calcData();
+            //    Task.Delay(time).Wait();
+
+            //    //Down
+            //    l.calcPositionCenter();
+
+            //    l.calcData();
+            //    Task.Delay(time).Wait();
+
+            //}
+        }
+
+        public void shutdown()
+        {
+            foreach (Leg item in legs)
             {
-                l.calcData();
-                Task.Delay(time).Wait();
-                //Up
-                l.ZPos = (int)l.StepSizeZ;
-
-                l.calcData();
-                Task.Delay(time).Wait();
-
-                //Center
-                l.calcPositionCenter();
-                l.ZPos = (int)l.StepSizeZ;
-                l.calcData();
-                Task.Delay(time).Wait();
-
-                //Down
-                l.calcPositionCenter();
-
-                l.calcData();
-                Task.Delay(time).Wait();
-
+                item.setColor(300);
             }
         }
+
         #endregion Functions
     }
 }
