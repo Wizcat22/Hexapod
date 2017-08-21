@@ -101,6 +101,7 @@ uint16_t ina3221_get_current(uint16_t channel){
 	
 	//return average current
 	return (current1+current2)/2;
+	
 }
 
 /**

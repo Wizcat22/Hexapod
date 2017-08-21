@@ -27,7 +27,7 @@
  * @date	14.08.2017
  */
 
-#define LED_BRIGTHNESS 0.005f
+#define LED_BRIGTHNESS 0.05f
 
 /**
  * @def	C_RED
@@ -115,7 +115,7 @@
  * @date	14.08.2017
  */
 
-#define HEIGHT 98
+#define HEIGHT 88
 
 /**
  * @def	A1
@@ -260,7 +260,7 @@ void init_eeprom(void){
 
 	for (uint8_t p=0;p<3;p++)
 	{
-		uint8_t temp = eeprom_read_byte((uint8_t *) p);
+		int8_t temp = eeprom_read_byte((int8_t *) p);
 		if (temp != 0xFF)
 		{
 			servo_cal[p] = temp ;
@@ -535,7 +535,7 @@ void init_LED(void){
 	TCC0.CTRLA = TC0_CLKSEL2_bm;; //PRESCALER=8
 	TCC0.CTRLB = TC0_WGMODE0_bm | TC0_WGMODE1_bm | TC0_CCAEN_bm | TC0_CCBEN_bm | TC0_CCCEN_bm; //SINGLESLOPE AND CHANNELS A,B and C ENABLED
 
-	led_set_color(C_GREEN,1,0.005);
+	led_set_color(C_GREEN,LED_SATURATION,LED_BRIGTHNESS);
 
 }
 
@@ -596,7 +596,7 @@ void twi_slave_get_data(void){
 				leg_set_position(data_byte[0],data_byte[1],data_byte[2]);
 				break;
 				case 4: //4 = Set servo calibration value and save in eeprom
-				for (char i=0; i<3;i++)
+				for (uint8_t i=0; i<3;i++)
 				{
 					data_byte[i] = twi_slave_get_byte(); //Servo calibration value
 					eeprom_write_byte((uint8_t *) i,data_byte[i]); //Save servo calibration value to eeprom

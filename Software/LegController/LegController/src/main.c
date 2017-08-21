@@ -71,7 +71,6 @@ int main(void)
 	while (1)
 	{
 		asm("wdr"); //Reset Watchdog
-
 		twi_slave_get_data(); //check for communication -> receive commands -> execute commands
 	
 	}
