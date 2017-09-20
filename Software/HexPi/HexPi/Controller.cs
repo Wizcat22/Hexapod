@@ -76,7 +76,7 @@ namespace HexPi
          * @brief   Values that represent directions
          */
 
-        public enum directions { POSE, XY, ROTATE, TURN };
+        public enum directions { POSE, XY, ROTATE, TURN, DANCE };
         //******
 
         /**
@@ -226,6 +226,11 @@ namespace HexPi
                     {
                         direction = (byte)directions.TURN;
                     }
+                    else if (gamepadStatus.Buttons == (GamepadButtons.A | GamepadButtons.B | GamepadButtons.X | GamepadButtons.Y))
+                    {
+                        direction = (byte)directions.DANCE;
+                    }
+                   
 
                 }
                 //if no gamepad was found
@@ -251,6 +256,9 @@ namespace HexPi
                         break;
                     case (byte)directions.POSE:
                         pose(mode);
+                        break;
+                    case (byte)directions.DANCE:
+                        dance();
                         break;
                     default:
                         break;
@@ -483,6 +491,21 @@ namespace HexPi
             double distC = 0;
             //Set rotation around xyz axis and translation in ab-axis
             robot.pose(degZ, degY, degX, distA, distB, distC, mode);
+        }
+
+        /**
+         * @fn  private void dance()
+         *
+         * @brief   Hexapod dance!
+         *
+         * @author  Alexander Miller
+         * @date    13.08.2017
+         */
+
+        private void dance()
+        {
+            //Set rotation around xyz axis and translation in ab-axis
+            robot.dance(a);
         }
 
         #endregion Functions

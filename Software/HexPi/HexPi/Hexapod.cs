@@ -167,7 +167,7 @@ namespace HexPi
             foreach (Leg l in legs)
             {
                 l.calcPositionWalk(inc_x, inc_y, mode);
-                
+
                 if (mode == (byte)Controller.modes.BALANCE)
                 {
                     l.calcPose(0, pitch, -roll, 0, 0, 0);
@@ -424,6 +424,167 @@ namespace HexPi
             lastDirection = (byte)Controller.directions.ROTATE;
         }
 
+
+
+        double t = 0;
+        double move = 0;
+
+
+        public void dance(double inc)
+        {
+
+            double yaw = 0.0;
+            double pitch = 0.0;
+            double roll = 0.0;
+            double a = 0.0;
+            double b = 0.0;
+            double c = 0.0;
+
+
+            //If the direction has changed, center all legs
+            if (lastDirection != (byte)Controller.directions.DANCE)
+            {
+                centerLegs();
+
+                foreach (Leg l in legs)
+                {
+                    l.setColor(0);
+                }
+                lastDirection = (byte)Controller.directions.DANCE;
+                move = 0;
+                t = 0;
+
+            }
+
+            t += Math.Abs(inc);
+
+            switch (move)
+            {
+                case 0:
+                    //DANCE!
+                    roll = 0.174533 * Math.Sin(t);
+                    //
+                    if (t>2*Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 1:
+                    //DANCE!
+                    pitch = 0.174533 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 2:
+                    //DANCE!
+                    yaw = 0.174533 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 3:
+                    //DANCE!
+                    roll = 0.174533 * Math.Sin(t);
+                    pitch = 0.174533 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 4:
+                    //DANCE!
+                    roll = 0.174533 * Math.Sin(t);
+                    yaw = 0.174533 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 5:
+                    //DANCE!
+                    yaw = 0.174533 * Math.Sin(t);
+                    pitch = 0.174533 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 6:
+                    //DANCE!
+                    a = 30 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 7:
+                    //DANCE!
+                    b = 30 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 8:
+                    //DANCE!
+                    c = 30 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                case 9:
+                    //DANCE!
+                    roll = 0.174533 * Math.Sin(t);
+                    b = 30 * Math.Sin(t);
+                    c = 30 * Math.Sin(t);
+                    //
+                    if (t > 2 * Math.PI)
+                    {
+                        t = 0.0;
+                        move++;
+                    }
+                    break;
+                default:
+                    move = 0;
+                    break;
+            }
+
+            foreach (Leg leg in legs)
+            {
+                leg.calcPositionCenter();
+                leg.calcPose(yaw, pitch, roll, a, b, c);
+
+            }
+
+            //send tcp positions
+            foreach (Leg leg in legs)
+            {
+                leg.calcData();
+            }
+
+        }
+
         /**
          * @fn  public void pose(double yaw, double pitch, double roll, double a, double b, double c)
          *
@@ -483,7 +644,7 @@ namespace HexPi
                 }
 
             }
-            
+
 
             //send tcp positions
             foreach (Leg leg in legs)
@@ -494,6 +655,7 @@ namespace HexPi
             lastDirection = (byte)Controller.directions.POSE;
 
         }
+
 
         /**
          * @fn  private void balance(double newPitch, double newRoll)
@@ -566,7 +728,7 @@ namespace HexPi
                 l.ZPos = 0;
 
                 l.calcData();
-                
+
             }
             Task.Delay(time).Wait();
 
@@ -637,38 +799,6 @@ namespace HexPi
             legs[4].calcData();
             Task.Delay(time).Wait();
 
-            //
-
-
-
-
-
-
-
-            ////center each leg
-            //foreach (Leg l in legs)
-            //{
-            //    l.calcData();
-            //    Task.Delay(time).Wait();
-            //    //Up
-            //    l.ZPos = (int)l.StepSizeZ;
-
-            //    l.calcData();
-            //    Task.Delay(time).Wait();
-
-            //    //Center
-            //    l.calcPositionCenter();
-            //    l.ZPos = (int)l.StepSizeZ;
-            //    l.calcData();
-            //    Task.Delay(time).Wait();
-
-            //    //Down
-            //    l.calcPositionCenter();
-
-            //    l.calcData();
-            //    Task.Delay(time).Wait();
-
-            //}
         }
 
         public void shutdown()
